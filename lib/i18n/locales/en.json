@@ -1,0 +1,73 @@
+{
+  "common": {
+    "appName": "Nadlan Score",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "continue": "Continue",
+    "comingSoon": "Coming soon",
+    "disclaimer": "Estimate for information only — not an appraisal or investment advice.",
+    "notFound": {
+      "title": "Page not found",
+      "body": "This screen doesn't exist.",
+      "action": "Back to the map"
+    },
+    "languages": {
+      "he": "עברית",
+      "en": "English"
+    },
+    "restart": {
+      "title": "Restart required",
+      "body": "The app will restart to apply the language.",
+      "action": "Restart"
+    }
+  },
+  "tabs": {
+    "explore": "Explore",
+    "saved": "Saved",
+    "mortgage": "Mortgage",
+    "learn": "Learn",
+    "profile": "Profile"
+  },
+  "explore": {
+    "title": "Find your next home",
+    "subtitle": "Browse listings on the map and see each property's Potential Score.",
+    "searchPlaceholder": "City, neighborhood or street",
+    "emptyTitle": "The map is on its way",
+    "emptyBody": "Map discovery and listings arrive in the next milestone.",
+    "filters": "Filters"
+  },
+  "saved": {
+    "title": "Saved",
+    "emptyTitle": "No saved homes yet",
+    "emptyBody": "Tap the heart on a listing to keep it here."
+  },
+  "mortgage": {
+    "title": "Mortgage",
+    "subtitle": "Personal mortgage plans built from your profile.",
+    "monthlyPayment": "Est. monthly payment",
+    "maxPrice": "Max property price",
+    "emptyTitle": "Your plans will appear here",
+    "emptyBody": "Complete your buyer profile to get three suggested plans."
+  },
+  "learn": {
+    "title": "Learn",
+    "subtitle": "Israeli real estate, explained simply.",
+    "guides": "Guides",
+    "glossary": "Glossary",
+    "emptyTitle": "Guides are being written",
+    "emptyBody": "Step-by-step guides and a full glossary are coming soon."
+  },
+  "profile": {
+    "title": "Profile",
+    "language": "Language",
+    "theme": "Appearance",
+    "themes": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "buyerProfile": "Buyer profile",
+    "buyerProfileBody": "Tell us about your household and finances to unlock mortgage plans.",
+    "version": "Version {{version}}"
+  }
+}

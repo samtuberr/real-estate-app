@@ -1,6 +1,7 @@
 # Spec — Israeli Real Estate App (working name: **"Nadlan Score"**)
 
-> Status: Draft v0.1 · 2026-10-04 · Owner: Sam Tuber
+> Status: Draft v0.2 · 2026-10-04 · Owner: Sam Tuber
+> v0.2: moved to Expo SDK 57 (latest stable), native tabs + native headers, `@expo/ui`, Liquid Glass, and the "Orbit" design system.
 > This file is the source of truth for product scope, stack rules, and architecture. Read it before writing code.
 
 ---
@@ -39,48 +40,67 @@ A bilingual (Hebrew / English) mobile app for people buying a home in Israel. It
 
 ## 2. Tech Stack (MUST follow exactly)
 
+**Platform targets:** iOS 26 (Liquid Glass) with graceful fallback to older supported iOS versions, and Android 16 (Material 3 Expressive) with edge-to-edge. One codebase. Built with the current Xcode / Android SDK that the App Store and Google Play require.
+
 | Layer | Tool | Why |
 |---|---|---|
-| Framework | **Expo (managed) + EAS** | Development builds, OTA updates |
-| Navigation | **Expo Router v4** | File-based routing. **Never React Navigation directly.** |
-| Styling | **NativeWind v4** (Tailwind for RN) | Fastest learning curve, RTL variants |
-| Components | **react-native-reusables** in `/components/ui/` | shadcn ownership model: components live in the repo |
-| Complex UI patterns | **Gluestack UI v3** | Modals, sheets, dropdowns. Accessible, pairs with NativeWind. Added through its copy-into-repo CLI, never as a runtime library dependency |
-| Lists | **FlashList** (Shopify) | Any list with more than 20 items (property lists, glossary, deals) |
-| Images | **expo-image** | Caching, blurhash placeholders |
-| Maps | **react-native-maps** | Standard, works with Expo (needs a dev build) |
-| Charts | **Victory Native XL** | GPU-accelerated price, yield, and amortization charts |
-| Global state | **Zustand** | Profile, filters, saved listings, locale |
+| Framework | **Expo SDK 57** (React Native 0.86, React 19.2, New Architecture, Hermes V1) + **EAS** | Latest stable SDK. Development builds, OTA updates, store-compliant native toolchains |
+| Compiler | **React Compiler** (`experiments.reactCompiler`) | Automatic memoization. No hand-written `useMemo` / `useCallback` for performance |
+| Navigation | **Expo Router 57** | File-based routing. Import navigation APIs from `expo-router` (incl. `expo-router/react-navigation`), **never `@react-navigation/*` directly** |
+| Tab bar | **Native tabs** (`expo-router/unstable-native-tabs`) | Real system tab bar: Liquid Glass + minimize-on-scroll on iOS 26, Material 3 navigation bar on Android |
+| Headers | **Native Stack** inside each tab | Large collapsing titles, glass scroll-edge effect, back-swipe. Configured, never hand-built |
+| Styling | **NativeWind v4.2** (Tailwind v3) | `className` styling with RTL variants. Re-evaluate NativeWind v5 / Tailwind v4 when it leaves RC |
+| Components | **react-native-reusables** pattern in `/components/ui/` | shadcn ownership model: components live in the repo |
+| Native controls | **`@expo/ui`** (SwiftUI on iOS, Jetpack Compose on Android) | Bottom sheets, pickers, sliders, switches, menus, grouped forms. Check `@expo/ui` first before building or installing any control |
+| Glass & materials | **`expo-glass-effect`** (iOS 26 Liquid Glass) + **`expo-blur`** fallback | Floating map controls, search bar, sheets. Wrapped in `<Glass>` (see §7) |
+| Icons | **`expo-symbols`** | SF Symbols on iOS, Material Symbols on Android/web. One registry in `constants/icons.ts`. No icon fonts, no emoji icons |
+| Motion | **Reanimated 4** (+ `react-native-worklets`) + **Gesture Handler** | CSS-style transitions/animations and gesture-driven UI on the UI thread |
+| Haptics | **`expo-haptics`** | Light impact on primary actions, selection ticks on chips/pickers, success on booking |
+| Graphics | **`@shopify/react-native-skia`** (added in M3/M4) | Glowing score ring, animated gradients, chart rendering |
+| Charts | **Victory Native XL** (Skia-based) | GPU-accelerated price, yield, and amortization charts |
+| Gradients | RN `experimental_backgroundImage` (CSS `linear-gradient` / `radial-gradient`) | No `expo-linear-gradient` |
+| Lists | **FlashList v2** (Shopify) | Any list with more than 20 items (property lists, glossary, deals) |
+| Images | **expo-image** | Caching, blurhash placeholders, shared-element-friendly transitions |
+| Maps | **react-native-maps** | Apple Maps on iOS (3D, native look), Google Maps on Android; `supercluster` for clustering. Needs a dev build |
+| Global state | **Zustand** | Profile, filters, saved listings, locale, theme |
+| Server state | **TanStack Query v5** | Listings, scores, content. Caching and loading states |
 | Local state | `useState` | Component-level UI state |
 | i18n | `i18next` + `react-i18next` + `expo-localization` | HE/EN strings, number and currency formatting |
 | Forms | `react-hook-form` + `zod` | Onboarding and booking forms with validation |
 | Secure storage | `expo-secure-store` | Auth tokens and sensitive profile fields |
-| Persistence | Zustand `persist` + MMKV (or AsyncStorage) | Offline cache of profile, saved listings |
+| Persistence | Zustand `persist` + **`expo-sqlite/localStorage`** | Offline cache of profile, saved listings. Replaces AsyncStorage (deprecated) |
 | Updates | **EAS Update** for JS-only changes · **EAS Build** for native changes | |
 
-> **Version pin:** Expo Router v4 ships with **Expo SDK 52**. Pin the project to SDK 52 unless this rule is updated. (See Open Questions §15.)
+> **Version policy:** Track the latest stable Expo SDK. Upgrade within one cycle of each new SDK release using `npx expo install expo@latest && npx expo install --fix`, then `npx expo-doctor`. Never pin to an old SDK: store toolchain requirements (Xcode / Android target API) move every year. Do not use SDK 56 or `expo@57.0.8` and below (Hermes V1 memory regression with Reanimated).
 
 ### 2.1 Stack Rules
 
 **Must**
-- Navigation: Expo Router v4 ONLY.
-- Styling: NativeWind v4 `className` ONLY. Never `StyleSheet.create()`.
+- Navigation: Expo Router only. Tabs use `NativeTabs`; every tab nests a native `Stack` for its header.
+- Styling: NativeWind `className` first. Inline `style` is allowed only for values `className` can't express: Reanimated animated styles, `boxShadow` glows, `experimental_backgroundImage` gradients, `borderCurve`, and dynamic values (safe-area insets). Never `StyleSheet.create()`.
+- Colors: tokens only (`bg-card`, `text-muted-foreground`, …). Native props that need hex use `usePalette()` / `constants/theme.ts`. Never hard-coded `#fff` / `#000`.
+- Icons: `<Icon name="…" />` from `components/ui/icon.tsx`, names registered in `constants/icons.ts` with both an SF Symbol and a Material Symbol.
+- Controls: check `@expo/ui` first for sheets, pickers, sliders, switches, menus and grouped settings lists.
 - Lists: FlashList for any list with more than 20 items. Never `FlatList`.
 - Images: `expo-image`. Never React Native `Image`.
-- Components: react-native-reusables, copy-pasted into `/components/ui/`. Never install a component library as a dependency.
-- State: Zustand for global state, `useState` for local state.
+- Pressables: `Pressable` only. Never `TouchableOpacity` / `TouchableHighlight`.
+- Components: react-native-reusables, copy-pasted into `/components/ui/`. Never install a JS component library (Gluestack, Tamagui, Paper…) as a dependency.
+- State: Zustand for global state, `useState` for local state, TanStack Query for server state.
+- Packages: install with `npx expo install <pkg>` so versions match the SDK.
 - Updates: EAS Update for JS-only changes. EAS Build for native changes.
 
 **Prohibited**
-- Never mix Expo Router and React Navigation.
+- Never import from `@react-navigation/*`. Never build a custom tab bar or hand-rolled header (`headerShown: false` + a `<Text>` title). The only exception is the full-screen map, which floats glass controls instead of a header.
 - Never use NativeWind v2 syntax. v4 needs the Babel preset, the Metro `withNativeWind` wrapper, `global.css`, and `nativewind-env.d.ts`.
+- Never use deprecated packages: `expo-av`, `@react-native-async-storage/async-storage`, `expo-linear-gradient`, `@expo/vector-icons`, `lucide-react-native`.
 - Never call `requestPermissionsAsync()` on mount. Ask for permission only after a user action, e.g. tapping "Near me" on the map.
 - Never propose a full rebuild for a JS-only change (copy, translations, styling, logic). Ship it with EAS Update.
+- Never animate the opacity of a `GlassView` or its ancestors, and never clip it with `overflow-hidden`.
 
 **RTL-specific conventions**
 - Use logical spacing classes only: `ms-*`, `me-*`, `ps-*`, `pe-*`, `start-*`, `end-*`. Do not use `ml-*`, `mr-*`, `left-*`, or `right-*` for layout.
-- Use the `rtl:` and `ltr:` NativeWind variants for direction-specific tweaks, such as flipping chevron icons.
-- Numbers, prices, and phone numbers stay LTR inside RTL text. Wrap them with a `<Num>` helper that applies `writingDirection: 'ltr'`.
+- Use the `rtl:` and `ltr:` NativeWind variants for direction-specific tweaks.
+- Numbers, prices, and phone numbers stay LTR inside RTL text. Wrap them with `<Num>` / `<Money>` (LTR + tabular figures).
 
 ---
 
@@ -88,7 +108,7 @@ A bilingual (Hebrew / English) mobile app for people buying a home in Israel. It
 
 ```
 app/
-├── _layout.tsx                    # Root: providers (i18n, theme, query), fonts, RTL bootstrap
+├── _layout.tsx                    # Root Stack: providers (i18n, nav theme, query), fonts, RTL bootstrap
 ├── +not-found.tsx
 ├── index.tsx                      # Redirect → (onboarding) or (tabs) based on profile state
 │
@@ -103,12 +123,13 @@ app/
 │   └── summary.tsx                # Review + consent → creates profile
 │
 ├── (tabs)/
-│   ├── _layout.tsx                # Floating bottom tab bar
-│   ├── explore.tsx                # MAP (default tab) + bottom sheet listing list
-│   ├── saved.tsx                  # Saved properties (FlashList)
-│   ├── mortgage.tsx               # Mortgage plans dashboard
-│   ├── learn.tsx                  # Learn hub: guides + glossary
-│   └── profile.tsx                # Profile, language, settings
+│   ├── _layout.tsx                # NativeTabs (Liquid Glass on iOS 26, Material 3 on Android)
+│   ├── explore/                   # each tab = folder with _layout.tsx (<TabStack>) + index.tsx
+│   │   └── index.tsx              # MAP (default tab) + glass controls + bottom sheet listing list
+│   ├── saved/index.tsx            # Saved properties (FlashList)
+│   ├── mortgage/index.tsx         # Mortgage plans dashboard
+│   ├── learn/index.tsx            # Learn hub: guides + glossary
+│   └── profile/index.tsx          # Profile, language, appearance
 │
 ├── property/
 │   ├── [id].tsx                   # Full listing page
@@ -126,21 +147,22 @@ app/
 │   └── glossary/[term].tsx        # Glossary term
 │
 ├── consult/
-│   ├── book.tsx                   # Modal: book consultation (presentation: 'modal')
+│   ├── book.tsx                   # Native form sheet: book consultation (presentation: 'formSheet', detents)
 │   └── confirmed.tsx
 │
-└── filters.tsx                    # Modal: map filters
+└── filters.tsx                    # Native form sheet: map filters (`@expo/ui` controls)
 ```
 
 Supporting folders:
 ```
 components/
-├── ui/                # react-native-reusables + Gluestack copies (Button, Card, Badge, Sheet, Select...)
+├── ui/                # react-native-reusables copies + Glass, Icon (Button, Card, Badge, Chip, Input...)
+├── navigation/        # TabStack (native stack + header config per tab)
 ├── map/               # PropertyMarker, ClusterMarker, MapFilterBar
 ├── property/          # PropertyCard, ScoreRing, ScoreBreakdown, AmenityList, DealsChart
 ├── mortgage/          # TrackRow, PlanCard, AmortizationChart, AffordabilityMeter
 ├── learn/             # ArticleCard, GlossaryRow
-└── common/            # Num, Money, SectionHeader, EmptyState, Disclaimer
+└── common/            # Num, Money, Screen, NebulaGlow, SectionHeader, EmptyState, Disclaimer
 lib/
 ├── i18n/              # i18next setup, he.json, en.json
 ├── score/             # Potential Score engine (pure TS, unit-tested)
@@ -149,7 +171,7 @@ lib/
 ├── api/               # API client, query hooks
 └── utils/
 stores/                # Zustand stores
-constants/             # theme tokens, regulation config
+constants/             # theme tokens, icon registry, regulation config
 global.css             # Tailwind directives
 ```
 
@@ -180,9 +202,9 @@ Multi-step form with a progress indicator, one topic per screen. Each step is sa
 
 ### 4.2 Explore — Map
 
-- Full-screen `react-native-maps` with **clustered** property markers. Each marker is a price pill colored by Potential Score band (green / amber / red).
-- **Top bar:** search (city / neighborhood / street), filter button → `filters.tsx` modal.
-- **Bottom sheet** (Gluestack sheet) with 3 snap points: peek (count + sort), half (FlashList of `PropertyCard`), full.
+- Full-screen `react-native-maps` (Apple Maps on iOS, Google Maps on Android) with **clustered** property markers (`supercluster`). Each marker is a glowing price pill colored by Potential Score band. Dark map style in dark mode.
+- **Top bar:** floating `<Glass>` search pill (city / neighborhood / street) + glass filter button → `filters.tsx` form sheet.
+- **Bottom sheet** (`@expo/ui` BottomSheet, native on both platforms) with 3 detents: peek (count + sort), half (FlashList of `PropertyCard`), full. Validate FlashList-inside-sheet in M2; fall back to `@gorhom/bottom-sheet` v5 only if the native sheet can't host it.
 - Tapping a marker shows a mini card above the sheet. Tapping the card opens `property/[id]`.
 - **"Near me" button:** location permission is requested **only when tapped**, never on mount.
 - **Map layers toggle** (v1.1): city plans polygons, light rail / metro lines, traffic heat, commercial zones.
@@ -200,7 +222,7 @@ Shows **all** information about the house, in this order:
 5. **City plans nearby (תוכניות בניין עיר).** List of relevant approved and pending plans within the radius: name, status, distance, impact (e.g. "Urban renewal — Pinui Binui, approved 2025"). Tap → `plans.tsx` with map polygons.
 6. **Commercial & amenities.** Grouped counts within walking distance: supermarkets, shops, cafés, schools, kindergartens, parks, health clinics, synagogues, plus the nearest of each with distance.
 7. **Traffic & transportation.** Congestion level at peak hours, nearest bus, train, and light rail stops, highway access, noise indicator.
-8. **Nearby houses & market.** Recent comparable deals (from government deals data), price per sqm trend chart (Victory Native XL), and how this listing compares to the neighborhood average.
+8. **Nearby houses & market.** Recent comparable deals (from government deals data), price per sqm trend chart (Victory Native XL, ion → plasma gradient line), and how this listing compares to the neighborhood average.
 9. **Property details.** Building year, elevator, parking, safe room (ממ"ד), storage, balcony, condition, arnona estimate, vaad bayit.
 10. **Your mortgage for this home.** Uses the profile to show the estimated monthly payment, required equity, and an affordability meter, plus a "See full plan" link to the mortgage screen pre-filled with this price. If there is no profile, shows a CTA to complete it.
 11. **Sticky CTA bar:** **"Talk to an expert before you buy"** → `consult/book` (pre-filled with this property).
@@ -347,46 +369,55 @@ type PotentialScore = {
 - `i18next` namespaces: `common`, `onboarding`, `explore`, `property`, `mortgage`, `learn`, `consult`, `glossary`.
 - **RTL switching:** use `I18nManager.allowRTL(true)` and `I18nManager.forceRTL(isHebrew)`. The change needs an app reload, so after a language change call `Updates.reloadAsync()` (expo-updates). Show a confirmation ("The app will restart to apply the language").
 - Formatting: `Intl.NumberFormat(locale, { style: 'currency', currency: 'ILS' })` → `₪1,850,000`. Dates use `Intl.DateTimeFormat`.
-- Fonts with full Hebrew + Latin coverage: **Rubik** (primary, rounded and friendly, fits the design reference) or **Heebo**. Loaded via `expo-font`.
-- Directional icons (chevrons, back arrows) flip with `rtl:` classes / `rtl:-scale-x-100`.
+- Fonts with full Hebrew + Latin coverage: **Rubik** (primary, one family per weight: `font-sans`, `font-sans-medium|semibold|bold`). Loaded via `@expo-google-fonts/rubik` + `expo-font`. Native headers and tab labels use the same faces.
+- Directional icons (chevrons, back arrows) mirror automatically (SF Symbols / Material Symbols are direction-aware); use `rtl:-scale-x-100` only for custom artwork.
 - Translation copy changes ship through **EAS Update**, never a full build.
 - All user-facing strings go through `t()`. No hard-coded text in components (lint rule).
 
 ---
 
-## 7. Design System
+## 7. Design System — "Orbit"
 
-**Visual reference:** [Insurance Mobile App UI Design (Dribbble)](https://dribbble.com/shots/26673273-Insurance-Mobile-App-UI-Design). The direction is a clean, friendly fintech/insurance look adapted to real estate.
-
-> The tokens below are a **proposed starting point** in that style. Validate the exact colors and spacing against the Dribbble shot before building the UI.
+**Direction:** a premium, futuristic "spaceship cockpit" feel that still behaves 100% like a native app on each platform. Deep-space dark surfaces, light that comes from *within* the UI (ion-blue glows, translucent glass), precise typography, and physical, haptic motion. Think Apple Vision Pro / iOS 26 Liquid Glass meets a mission-control dashboard, not a sci-fi costume.
 
 **Principles**
-- Light, airy background with **large rounded cards** (radius 24–28) and soft, low shadows.
-- **One strong primary color** plus **pastel accent cards** to group information (score, mortgage, amenities).
-- **Big bold numbers** for key figures (price, score, monthly payment) with small muted labels.
-- Pill-shaped chips and buttons. Generous whitespace. Friendly icons or 3D-style illustrations on onboarding and empty states.
-- **Floating bottom tab bar** (rounded, elevated, active tab highlighted with a filled pill).
+1. **Native first, then futuristic.** System tab bar (`NativeTabs`), native stack headers with large titles, native sheets (`@expo/ui` / `formSheet`) and native controls. The futuristic layer is color, light, glass, type and motion on top, never replacing platform behavior. (Avoid the "native slop" tells: floating pill tab bars, hand-rolled headers, web-style modals, emoji icons, cards-in-cards, heavy drop shadows, grey 1px borders everywhere.)
+2. **Dark is the default ("deep space").** Light mode ("daylight") is fully supported and selectable in Profile → Appearance.
+3. **Glass for what floats.** Anything layered over content (map search bar, map controls, mini property card, sticky CTA, sheets) uses `<Glass>`: Liquid Glass on iOS 26+, blurred material on older iOS/web, translucent tonal surface on Android, solid surface when Reduce Transparency is on.
+4. **Light, not shadow.** Hierarchy comes from surface contrast and type. Elevation uses soft **colored glows** (`glows.primary`, `glows.plasma`) on a few hero elements only: primary CTA, score ring, selected map marker, empty-state icon.
+5. **Big, precise numbers.** Prices, scores and payments are the heroes: bold, tabular figures (`<Num>`), small muted labels.
+6. **Motion with purpose.** Spring physics via Reanimated 4, all on the UI thread. Score ring counts up and its glow pulses once on first view; map markers spring in; sheets follow the finger. Entrance animations only on first-time moments, never on every visit. Respect Reduce Motion.
+7. **Feel it.** Haptics on primary actions (light impact), selections (selection tick), and success moments (booking confirmed).
 
-**Proposed tokens** (defined in `tailwind.config.js` + CSS variables in `global.css` for light/dark):
-| Token | Value (proposal) | Use |
-|---|---|---|
-| `primary` | `#3D5AFE`-ish deep blue/indigo | CTAs, active tab, links |
-| `primary-foreground` | `#FFFFFF` | |
-| `background` | `#F5F6FA` | App background |
-| `card` | `#FFFFFF` | Cards |
-| `accent-mint` | `#DFF5EC` | Score / positive cards |
-| `accent-peach` | `#FFE9DD` | Mortgage cards |
-| `accent-lavender` | `#ECE8FF` | Learn cards |
-| `accent-sky` | `#E3F1FF` | Amenities / map info |
-| `score-high` / `score-mid` / `score-low` | green / amber / red | Score rings, markers |
-| `foreground` / `muted-foreground` | `#111827` / `#6B7280` | Text |
-| Radius | `xl: 16`, `2xl: 24`, `3xl: 28`, `full` | |
-| Spacing | 4-pt scale (Tailwind default) | |
-| Type scale | Display 32/bold · H1 24/semibold · H2 20 · Body 16 · Caption 13 | Rubik |
+**Signature moments**
+- **Score ring:** Skia-rendered ion → plasma gradient arc with a soft glow, number counting up 0 → score.
+- **Map:** dark map style at night / in dark mode, glowing price-pill markers colored by score band, 3D buildings tilt when zooming into a property (Apple Maps on iOS).
+- **Hero gradient:** `gradients.ion` (`#6E7BFF → #3EE6FF`) reserved for the score ring, the primary CTA glow and onboarding hero. Never as a full-screen background.
+- **Nebula backdrop:** a faint radial ion-blue glow behind the top of each screen (`<NebulaGlow>`).
 
-**Key components:** `ScoreRing`, `PropertyCard` (image top, price, chips, score badge), `StatTile`, `PlanCard`, `TrackRow`, `AffordabilityMeter`, `SectionHeader`, `StickyCTA`, `FloatingTabBar`, `Chip`, `Sheet`.
+**Tokens** (CSS variables in `global.css`, mirrored in `constants/theme.ts`):
+| Token | Dark ("deep space") | Light ("daylight") | Use |
+|---|---|---|---|
+| `background` | `#05060B` | `#F6F7FB` | App background |
+| `card` | `#0E101A` | `#FFFFFF` | Elevated surfaces |
+| `secondary` / `muted` | `#161926` | `#ECEEF8` | Inputs, chips, subtle fills |
+| `border` | `#222638` | `#DEE1EE` | Hairlines only |
+| `foreground` / `muted-foreground` | `#F0F3FF` / `#8B93B0` | `#0A0C18` / `#626A84` | Text |
+| `primary` ("ion") | `#6E7BFF` | `#4F5BFF` | CTAs, active tab, links, focus |
+| `plasma` | `#3EE6FF` | `#00A8D6` | Secondary accent, gradients, live data |
+| `tone-aurora` | `#0A2622` | `#DCF7EE` | Score / positive groups |
+| `tone-solar` | `#2C1C0E` | `#FFEEE0` | Mortgage groups |
+| `tone-nebula` | `#1C163C` | `#ECE9FF` | Learn / saved groups |
+| `tone-ion` | `#0A1C34` | `#E2F0FF` | Map / amenities groups |
+| `score-high` / `score-mid` / `score-low` | `#2EE6A6` / `#FFC24B` / `#FF5C7A` | `#05AA78` / `#D68C00` / `#E11D48` | Score rings, markers |
+| `destructive` | `#FF5C7A` | `#E11D48` | Errors, destructive actions |
+| Radius | `xl: 16`, `2xl: 24`, `3xl: 28`, `full` (+ `borderCurve: 'continuous'`) | | |
+| Spacing | 4-pt scale; row gap < group gap < section gap | | |
+| Type scale | Hero 44/bold · Display 32/bold · H1 24/semibold · H2 20/semibold · Body 16 · Caption 13 | | Rubik (Hebrew + Latin), tabular figures for numbers |
 
-**Accessibility:** minimum 44×44 touch targets, WCAG AA contrast, `accessibilityLabel` on all icon buttons, Dynamic Type supported, screen-reader order correct in RTL.
+**Key components:** `Glass`, `Icon`, `NebulaGlow`, `ScoreRing`, `PropertyCard` (image top, price, chips, score badge), `StatTile`, `PlanCard`, `TrackRow`, `AffordabilityMeter`, `SectionHeader`, `StickyCTA` (glass), `Chip`, `TabStack`.
+
+**Accessibility:** minimum 44×44 touch targets, WCAG AA contrast in both themes (verify glow/glass text contrast), `accessibilityLabel` on all icon buttons, Dynamic Type supported, Reduce Motion and Reduce Transparency respected, screen-reader order correct in RTL.
 
 ---
 
@@ -533,7 +564,8 @@ Each request is preceded by an in-app explanation screen. If the user denies, th
 
 ## 13. Builds, Updates & Environments
 
-- **Development builds** (`expo-dev-client`) are required because of `react-native-maps` config (Google Maps API key on Android) and native modules.
+- **Development builds** (`expo-dev-client`) are required because of `react-native-maps` config (Google Maps API key on Android) and native modules (`expo-glass-effect`, `@expo/ui`, Skia).
+- Toolchain: always build with the Xcode and Android target API level the App Store / Google Play currently require. EAS Build images for the current SDK handle this. That is one reason the SDK must stay current (§2).
 - EAS profiles: `development`, `preview` (internal testing), `production`.
 - EAS Update channels: `preview`, `production`.
 - **JS-only changes** (UI, copy, translations, score display logic, content) → `eas update`.
@@ -546,7 +578,7 @@ Each request is preceded by an in-app explanation screen. If the user denies, th
 
 | Phase | Scope |
 |---|---|
-| **M0: Foundation** | Expo SDK 52 + Expo Router v4 + NativeWind v4 setup, i18n + RTL bootstrap, design tokens, `/components/ui` base components, floating tab bar, EAS project |
+| **M0: Foundation** ✅ | Expo SDK 57 + Expo Router + NativeWind v4.2, React Compiler, i18n + RTL bootstrap, "Orbit" design tokens, `/components/ui` base components (incl. `Glass`, `Icon`), native tabs + per-tab native stacks, EAS project |
 | **M1: Onboarding & Profile** | Landing page, multi-step profile form, Zustand persistence, derived affordability |
 | **M2: Map & Listings** | Map with clusters, bottom sheet FlashList, filters, listing page (with mock data) |
 | **M3: Potential Score** | Score engine (server + `lib/score`), score card + deep-dive, plans / amenities / traffic sections |
@@ -559,11 +591,11 @@ Each request is preceded by an in-app explanation screen. If the user denies, th
 
 ## 15. Open Questions
 
-1. **Expo SDK version:** Rules pin Expo Router **v4** (SDK 52). Newer SDKs ship newer Router versions. Keep the pin, or update the rule to the latest SDK?
+1. ~~**Expo SDK version**~~ **Resolved (v0.2):** track the latest stable SDK (currently 57). See §2 version policy.
 2. **Listing source:** Which brokers or partners will supply listings in v1? Or launch with a curated dataset in one city first (e.g. Tel Aviv / Ramat Gan / Haifa)?
 3. **Backend:** Is Supabase + PostGIS approved, or is there a preferred backend?
 4. **Consultants:** In-house team or partner network? How are leads routed and monetized (fixed fee, referral, success fee)?
 5. **Authentication:** Phone OTP (common in Israel), Google/Apple sign-in, or both? Can users browse anonymously?
 6. **Credit score:** Self-reported only, or integrate with a licensed credit bureau later?
 7. **Additional languages:** Russian / French / Arabic in a later phase?
-8. **Design:** Confirm the exact palette and typography from the Dribbble reference, or produce a Figma file first?
+8. **Design:** "Orbit" direction adopted (§7). Produce a Figma file for the signature moments (score ring, map markers, property page) before M2–M3?
