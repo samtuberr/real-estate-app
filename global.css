@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * "Orbit" design tokens (spec §7). Dark ("deep space") is the default theme; light
+ * ("daylight") mirrors it. Values are RGB channels so Tailwind opacity modifiers work.
+ * Keep constants/theme.ts in sync.
+ */
+@layer base {
+  :root {
+    --background: 246 247 251;
+    --foreground: 10 12 24;
+    --card: 255 255 255;
+    --card-foreground: 10 12 24;
+    --primary: 79 91 255;
+    --primary-foreground: 255 255 255;
+    --plasma: 0 168 214;
+    --secondary: 236 238 248;
+    --secondary-foreground: 10 12 24;
+    --muted: 236 238 245;
+    --muted-foreground: 98 106 132;
+    --border: 222 225 238;
+    --input: 222 225 238;
+    --ring: 79 91 255;
+    --destructive: 225 29 72;
+    --destructive-foreground: 255 255 255;
+
+    --tone-aurora: 220 247 238;
+    --tone-solar: 255 238 224;
+    --tone-nebula: 236 233 255;
+    --tone-ion: 226 240 255;
+
+    --score-high: 5 170 120;
+    --score-mid: 214 140 0;
+    --score-low: 225 29 72;
+  }
+
+  .dark:root {
+    --background: 5 6 11;
+    --foreground: 240 243 255;
+    --card: 14 16 26;
+    --card-foreground: 240 243 255;
+    --primary: 110 123 255;
+    --primary-foreground: 255 255 255;
+    --plasma: 62 230 255;
+    --secondary: 22 25 38;
+    --secondary-foreground: 240 243 255;
+    --muted: 22 25 38;
+    --muted-foreground: 139 147 176;
+    --border: 34 38 56;
+    --input: 34 38 56;
+    --ring: 110 123 255;
+    --destructive: 255 92 122;
+    --destructive-foreground: 5 6 11;
+
+    --tone-aurora: 10 38 34;
+    --tone-solar: 44 28 14;
+    --tone-nebula: 28 22 60;
+    --tone-ion: 10 28 52;
+
+    --score-high: 46 230 166;
+    --score-mid: 255 194 75;
+    --score-low: 255 92 122;
+  }
+}
