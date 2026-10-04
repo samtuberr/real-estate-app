@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>אפיון — אפליקציית נדל"ן ישראלית (Nadlan Score)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #3D5AFE;
+    --bg: #F5F6FA;
+    --card: #FFFFFF;
+    --fg: #111827;
+    --muted: #6B7280;
+    --border: #E5E7EB;
+    --mint: #DFF5EC;
+    --peach: #FFE9DD;
+    --lavender: #ECE8FF;
+    --sky: #E3F1FF;
+    --radius: 24px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: 'Rubik', 'Heebo', 'Segoe UI', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+  .layout { display: flex; gap: 32px; max-width: 1280px; margin: 0 auto; padding: 32px 24px; align-items: flex-start; }
+  nav.toc {
+    position: sticky; top: 24px; flex: 0 0 260px;
+    background: var(--card); border-radius: var(--radius); padding: 24px;
+    box-shadow: 0 4px 20px rgba(17,24,39,.05);
+    max-height: calc(100vh - 48px); overflow-y: auto;
+  }
+  nav.toc h2 { font-size: 15px; margin: 0 0 12px; color: var(--muted); font-weight: 600; }
+  nav.toc ol { list-style: none; padding: 0; margin: 0; }
+  nav.toc a { display: block; padding: 6px 12px; border-radius: 999px; color: var(--fg); text-decoration: none; font-size: 14px; }
+  nav.toc a:hover { background: var(--lavender); color: var(--primary); }
+  main { flex: 1; min-width: 0; }
+  header.hero {
+    background: linear-gradient(135deg, var(--primary), #6C7BFF);
+    color: #fff; border-radius: 28px; padding: 40px; margin-bottom: 24px;
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 32px; font-weight: 700; }
+  header.hero p { margin: 0; opacity: .9; }
+  .pill { display: inline-block; background: rgba(255,255,255,.18); padding: 4px 14px; border-radius: 999px; font-size: 13px; margin-top: 16px; margin-inline-end: 8px; }
+  section {
+    background: var(--card); border-radius: var(--radius); padding: 32px;
+    margin-bottom: 24px; box-shadow: 0 4px 20px rgba(17,24,39,.05);
+  }
+  h2 { font-size: 24px; margin: 0 0 16px; font-weight: 600; }
+  h2 .num { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 12px; background: var(--lavender); color: var(--primary); font-size: 16px; margin-inline-end: 10px; }
+  h3 { font-size: 19px; margin: 28px 0 10px; font-weight: 600; }
+  h4 { font-size: 16px; margin: 20px 0 8px; font-weight: 600; }
+  p { margin: 8px 0; }
+  ul, ol { padding-inline-start: 22px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 12px 0 16px; font-size: 14.5px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  th, td { text-align: start; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: #F9FAFB; font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  code { font-family: 'JetBrains Mono', Consolas, monospace; background: #F3F4F6; padding: 1px 6px; border-radius: 6px; font-size: 13.5px; direction: ltr; unicode-bidi: isolate; }
+  pre { direction: ltr; text-align: left; background: #0F172A; color: #E2E8F0; padding: 20px; border-radius: 16px; overflow-x: auto; font-size: 13px; line-height: 1.6; }
+  pre code { background: none; padding: 0; color: inherit; }
+  .callout { border-radius: 16px; padding: 14px 18px; margin: 14px 0; }
+  .callout.info { background: var(--sky); }
+  .callout.warn { background: var(--peach); }
+  .callout.ok { background: var(--mint); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .card-mini { border-radius: 16px; padding: 16px 20px; }
+  .card-mini h4 { margin-top: 0; }
+  .must { background: var(--mint); }
+  .never { background: var(--peach); }
+  .swatch { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: middle; margin-inline-end: 6px; border: 1px solid rgba(0,0,0,.08); }
+  .ltr { direction: ltr; unicode-bidi: isolate; }
+  a { color: var(--primary); }
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 16px; }
+  @media (max-width: 900px) {
+    .layout { flex-direction: column; padding: 16px; }
+    nav.toc { position: static; width: 100%; max-height: none; }
+    .grid2 { grid-template-columns: 1fr; }
+    section { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="toc">
+  <h2>תוכן עניינים</h2>
+  <ol>
+    <li><a href="#s1">1. סקירת המוצר</a></li>
+    <li><a href="#s2">2. סטאק טכנולוגי</a></li>
+    <li><a href="#s3">3. ארכיטקטורת מידע ונתיבים</a></li>
+    <li><a href="#s4">4. פיצ'רים</a></li>
+    <li><a href="#s5">5. ציון פוטנציאל — אלגוריתם</a></li>
+    <li><a href="#s6">6. בינאום ו-RTL</a></li>
+    <li><a href="#s7">7. מערכת עיצוב</a></li>
+    <li><a href="#s8">8. מקורות מידע</a></li>
+    <li><a href="#s9">9. בקאנד ומודל נתונים</a></li>
+    <li><a href="#s10">10. ניהול State</a></li>
+    <li><a href="#s11">11. הרשאות</a></li>
+    <li><a href="#s12">12. פרטיות, אבטחה ומשפט</a></li>
+    <li><a href="#s13">13. בילדים, עדכונים וסביבות</a></li>
+    <li><a href="#s14">14. אבני דרך</a></li>
+    <li><a href="#s15">15. שאלות פתוחות</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="hero">
+  <h1>אפיון — אפליקציית נדל"ן ישראלית</h1>
+  <p>שם עבודה: <strong class="ltr">Nadlan Score</strong></p>
+  <span class="pill">סטטוס: טיוטה v0.1</span>
+  <span class="pill">04.10.2026</span>
+  <span class="pill">בעלים: Sam Tuber</span>
+  <p style="margin-top:16px">מסמך זה הוא מקור האמת להיקף המוצר, כללי הסטאק והארכיטקטורה. יש לקרוא אותו לפני כתיבת קוד.</p>
+</header>
+
+<!-- 1 -->
+<section id="s1">
+  <h2><span class="num">1</span>סקירת המוצר</h2>
+  <p>אפליקציה דו-לשונית (עברית / אנגלית) לרוכשי דירות בישראל. היא מרכזת במקום אחד מידע שרוכשים בדרך כלל צריכים לחפש בהרבה מקומות שונים:</p>
+  <ol>
+    <li><strong>גילוי נכסים על גבי מפה.</strong> גלישה בנכסים על המפה ופתיחת כל בית כדי לראות את כל המידע עליו.</li>
+    <li><strong>ציון פוטנציאל.</strong> ציון 0–100 לכל נכס, המבוסס על תוכניות עירוניות, אזורי מסחר וחנויות בסביבה, תנועה ושוק הדיור הסובב.</li>
+    <li><strong>עמוד נכס עשיר.</strong> כל מודעה מציגה את כל הנתונים הללו, מפורקים ומוסברים.</li>
+    <li><strong>מרכז למידה.</strong> מאמרים קצרים ומילון מונחים המסבירים מונחים ותהליכים בנדל"ן הישראלי.</li>
+    <li><strong>תוכניות משכנתא.</strong> תוכניות משכנתא מותאמות אישית, הנבנות מהפרופיל הפיננסי של המשתמש.</li>
+    <li><strong>פרופיל רוכש (אונבורדינג).</strong> המשתמש מזין את מצבו: יחיד או זוג, הון עצמי התחלתי, האם יש בבעלותו דירה, הבנק שלו, דירוג האשראי וכו'.</li>
+    <li><strong>הזמנת ייעוץ.</strong> לפני הרכישה, האפליקציה מציעה שיחה עם יועץ משכנתאות או איש מקצוע בנדל"ן כדי לעזור לסגור את העסקה מהר.</li>
+  </ol>
+
+  <h3>1.1 מטרות</h3>
+  <ul>
+    <li>לעזור לרוכש ראשון או חוזר להבין <strong>האם נכס הוא קנייה טובה</strong> ו<strong>האם הוא יכול לעמוד בה</strong>, במקום אחד.</li>
+    <li>להפוך משתמשים מעורבים ל<strong>לידים לייעוץ</strong>. זה המודל העסקי.</li>
+    <li>לעבוד באופן מלא ב<strong>עברית (RTL)</strong> וב<strong>אנגלית (LTR)</strong>.</li>
+  </ul>
+
+  <h3>1.2 מחוץ להיקף (v1)</h3>
+  <ul>
+    <li>לא מרקטפלייס שבו מוכרים מפרסמים ישירות. המודעות מגיעות ממקורות מידע או משותפים (ראו §8).</li>
+    <li>ללא עסקאות, חתימות או תשלומים בתוך האפליקציה.</li>
+    <li>לא ייעוץ פיננסי מורשה. כל הציונים והתוכניות הם <strong>הערכות לצורכי מידע בלבד</strong> ומסומנים כך.</li>
+  </ul>
+
+  <h3>1.3 קהל יעד</h3>
+  <table>
+    <tr><th>פרסונה</th><th>תיאור</th><th>צורך מרכזי</th></tr>
+    <tr><td>זוג רוכשי דירה ראשונה</td><td>זוג צעיר עם הון עצמי מחסכונות או מההורים</td><td>"מה אנחנו יכולים להרשות לעצמנו, ואיפה?"</td></tr>
+    <tr><td>משפר דיור</td><td>בעל דירה שרוצה למכור ולשדרג</td><td>תזמון, הלוואת גישור, כללי מיסוי</td></tr>
+    <tr><td>משקיע</td><td>כבר בעל נכס, רוכש נכס נוסף</td><td>תשואה, פוטנציאל השבחה, מס רכישה</td></tr>
+    <tr><td>עולים / דוברי אנגלית</td><td>עולים חדשים שאינם מכירים את המונחים הישראליים</td><td>מילון מונחים, ממשק באנגלית, תהליך מודרך</td></tr>
+  </table>
+</section>
+
+<!-- 2 -->
+<section id="s2">
+  <h2><span class="num">2</span>סטאק טכנולוגי (חובה לעקוב במדויק)</h2>
+  <table>
+    <tr><th>שכבה</th><th>כלי</th><th>למה</th></tr>
+    <tr><td>פריימוורק</td><td><strong>Expo (managed) + EAS</strong></td><td>Development builds, עדכוני OTA</td></tr>
+    <tr><td>ניווט</td><td><strong>Expo Router v4</strong></td><td>ניתוב מבוסס קבצים. <strong>לעולם לא React Navigation ישירות.</strong></td></tr>
+    <tr><td>עיצוב</td><td><strong>NativeWind v4</strong> (Tailwind ל-RN)</td><td>עקומת למידה מהירה, וריאנטים ל-RTL</td></tr>
+    <tr><td>קומפוננטות</td><td><strong>react-native-reusables</strong> בתיקייה <code>/components/ui/</code></td><td>מודל הבעלות של shadcn: הקומפוננטות חיות בתוך הריפו</td></tr>
+    <tr><td>תבניות UI מורכבות</td><td><strong>Gluestack UI v3</strong></td><td>מודאלים, Sheets, תפריטים נפתחים. נגיש, משתלב עם NativeWind. מתווסף דרך ה-CLI שמעתיק קוד לריפו, לעולם לא כתלות ספרייה בזמן ריצה</td></tr>
+    <tr><td>רשימות</td><td><strong>FlashList</strong> (Shopify)</td><td>כל רשימה עם יותר מ-20 פריטים (רשימות נכסים, מילון, עסקאות)</td></tr>
+    <tr><td>תמונות</td><td><strong>expo-image</strong></td><td>קאשינג, placeholders של blurhash</td></tr>
+    <tr><td>מפות</td><td><strong>react-native-maps</strong></td><td>סטנדרטי, עובד עם Expo (דורש dev build)</td></tr>
+    <tr><td>גרפים</td><td><strong>Victory Native XL</strong></td><td>גרפי מחיר, תשואה ולוח סילוקין מואצי GPU</td></tr>
+    <tr><td>State גלובלי</td><td><strong>Zustand</strong></td><td>פרופיל, פילטרים, נכסים שמורים, שפה</td></tr>
+    <tr><td>State מקומי</td><td><code>useState</code></td><td>State של UI ברמת הקומפוננטה</td></tr>
+    <tr><td>בינאום</td><td><code>i18next</code> + <code>react-i18next</code> + <code>expo-localization</code></td><td>מחרוזות עברית/אנגלית, עיצוב מספרים ומטבע</td></tr>
+    <tr><td>טפסים</td><td><code>react-hook-form</code> + <code>zod</code></td><td>טפסי אונבורדינג והזמנה עם ולידציה</td></tr>
+    <tr><td>אחסון מאובטח</td><td><code>expo-secure-store</code></td><td>טוקנים ושדות פרופיל רגישים</td></tr>
+    <tr><td>שמירה מקומית</td><td>Zustand <code>persist</code> + MMKV (או AsyncStorage)</td><td>קאש אופליין של פרופיל ונכסים שמורים</td></tr>
+    <tr><td>עדכונים</td><td><strong>EAS Update</strong> לשינויי JS בלבד · <strong>EAS Build</strong> לשינויים נייטיב</td><td></td></tr>
+  </table>
+  <div class="callout info"><strong>נעילת גרסה:</strong> Expo Router v4 מגיע עם <strong>Expo SDK 52</strong>. יש לנעול את הפרויקט על SDK 52 אלא אם הכלל הזה יעודכן. (ראו שאלות פתוחות §15.)</div>
+
+  <h3>2.1 כללי הסטאק</h3>
+  <div class="grid2">
+    <div class="card-mini must">
+      <h4>✅ חובה</h4>
+      <ul>
+        <li>ניווט: Expo Router v4 בלבד.</li>
+        <li>עיצוב: <code>className</code> של NativeWind v4 בלבד. לעולם לא <code>StyleSheet.create()</code>.</li>
+        <li>רשימות: FlashList לכל רשימה מעל 20 פריטים. לעולם לא <code>FlatList</code>.</li>
+        <li>תמונות: <code>expo-image</code>. לעולם לא <code>Image</code> של React Native.</li>
+        <li>קומפוננטות: react-native-reusables, מועתקות לתוך <code>/components/ui/</code>. לעולם לא להתקין ספריית קומפוננטות כתלות.</li>
+        <li>State: Zustand ל-state גלובלי, <code>useState</code> ל-state מקומי.</li>
+        <li>עדכונים: EAS Update לשינויי JS בלבד. EAS Build לשינויים נייטיב.</li>
+      </ul>
+    </div>
+    <div class="card-mini never">
+      <h4>⛔ אסור</h4>
+      <ul>
+        <li>לעולם לא לערבב Expo Router ו-React Navigation.</li>
+        <li>לעולם לא להשתמש בתחביר NativeWind v2. גרסה 4 דורשת את ה-Babel preset, את עטיפת ה-Metro <code>withNativeWind</code>, קובץ <code>global.css</code> וקובץ <code>nativewind-env.d.ts</code>.</li>
+        <li>לעולם לא לקרוא ל-<code>requestPermissionsAsync()</code> בזמן טעינת מסך. מבקשים הרשאה רק אחרי פעולת משתמש, למשל לחיצה על "קרוב אליי" במפה.</li>
+        <li>לעולם לא להציע בילד מלא עבור שינוי JS בלבד (טקסטים, תרגומים, עיצוב, לוגיקה). משחררים עם EAS Update.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h4>מוסכמות ייעודיות ל-RTL</h4>
+  <ul>
+    <li>להשתמש רק במחלקות ריווח לוגיות: <code>ms-*</code>, <code>me-*</code>, <code>ps-*</code>, <code>pe-*</code>, <code>start-*</code>, <code>end-*</code>. לא להשתמש ב-<code>ml-*</code>, <code>mr-*</code>, <code>left-*</code> או <code>right-*</code> לפריסה.</li>
+    <li>להשתמש בווריאנטים <code>rtl:</code> ו-<code>ltr:</code> של NativeWind להתאמות תלויות כיוון, כמו היפוך אייקוני חץ.</li>
+    <li>מספרים, מחירים ומספרי טלפון נשארים LTR גם בתוך טקסט RTL. עוטפים אותם בקומפוננטת עזר <code>&lt;Num&gt;</code> שמחילה <code>writingDirection: 'ltr'</code>.</li>
+  </ul>
+</section>
+
+<!-- 3 -->
+<section id="s3">
+  <h2><span class="num">3</span>ארכיטקטורת מידע ונתיבים (Expo Router)</h2>
+<pre><code>app/
+├── _layout.tsx                    # שורש: providers (i18n, theme, query), פונטים, אתחול RTL
+├── +not-found.tsx
+├── index.tsx                      # הפניה ל-(onboarding) או ל-(tabs) לפי מצב הפרופיל
+│
+├── (onboarding)/
+│   ├── _layout.tsx                # Stack, כותרת עם פס התקדמות
+│   ├── welcome.tsx                # דף נחיתה + בחירת שפה (עברית / English)
+│   ├── household.tsx              # יחיד / זוג, שמות, גילאים, ילדים
+│   ├── finances.tsx               # הכנסה, הון עצמי, התחייבויות, סוג תעסוקה
+│   ├── ownership.tsx              # יש דירה? מוכרים אותה? דירה ראשונה?
+│   ├── banking.tsx                # בנק, טווח דירוג אשראי
+│   ├── search-goals.tsx           # שלב, ערים, תקציב, חדרים, סוג נכס
+│   └── summary.tsx                # סקירה + הסכמה ← יוצר פרופיל
+│
+├── (tabs)/
+│   ├── _layout.tsx                # טאב בר תחתון צף
+│   ├── explore.tsx                # מפה (טאב ברירת מחדל) + bottom sheet עם רשימת נכסים
+│   ├── saved.tsx                  # נכסים שמורים (FlashList)
+│   ├── mortgage.tsx               # דשבורד תוכניות משכנתא
+│   ├── learn.tsx                  # מרכז למידה: מדריכים + מילון
+│   └── profile.tsx                # פרופיל, שפה, הגדרות
+│
+├── property/
+│   ├── [id].tsx                   # עמוד נכס מלא
+│   └── [id]/
+│       ├── score.tsx              # צלילה לעומק בציון הפוטנציאל
+│       ├── plans.tsx              # תוכניות עירוניות ליד הנכס
+│       └── gallery.tsx            # גלריית תמונות במסך מלא
+│
+├── mortgage/
+│   ├── [planId].tsx               # פירוט תוכנית: מסלולים, גרף סילוקין
+│   └── calculator.tsx             # מחשבון חופשי
+│
+├── learn/
+│   ├── [slug].tsx                 # מאמר
+│   └── glossary/[term].tsx        # מונח במילון
+│
+├── consult/
+│   ├── book.tsx                   # מודאל: הזמנת ייעוץ (presentation: 'modal')
+│   └── confirmed.tsx
+│
+└── filters.tsx                    # מודאל: פילטרים למפה</code></pre>
+
+  <h4>תיקיות תומכות</h4>
+<pre><code>components/
+├── ui/                # עותקים של react-native-reusables + Gluestack (Button, Card, Badge, Sheet, Select...)
+├── map/               # PropertyMarker, ClusterMarker, MapFilterBar
+├── property/          # PropertyCard, ScoreRing, ScoreBreakdown, AmenityList, DealsChart
+├── mortgage/          # TrackRow, PlanCard, AmortizationChart, AffordabilityMeter
+├── learn/             # ArticleCard, GlossaryRow
+└── common/            # Num, Money, SectionHeader, EmptyState, Disclaimer
+lib/
+├── i18n/              # הגדרת i18next, he.json, en.json
+├── score/             # מנוע ציון הפוטנציאל (TS טהור, עם בדיקות יחידה)
+├── mortgage/          # חישובי משכנתא + קונפיג רגולציה ישראלית (TS טהור, עם בדיקות יחידה)
+├── tax/               # מדרגות מס רכישה לפי שנה
+├── api/               # API client, query hooks
+└── utils/
+stores/                # Zustand stores
+constants/             # טוקני עיצוב, קונפיג רגולציה
+global.css             # Tailwind directives</code></pre>
+</section>
+
+<!-- 4 -->
+<section id="s4">
+  <h2><span class="num">4</span>פיצ'רים</h2>
+
+  <h3>4.1 דף נחיתה ופרופיל רוכש (אונבורדינג)</h3>
+  <p><strong>מסך פתיחה / נחיתה:</strong> איור hero, הצעת הערך, מתג שפה (עברית / English), וכפתורי "בואו נתחיל" ו"כבר יש לי חשבון". המשתמש יכול לבחור <strong>"דלג — רק לגלוש במפה"</strong>. אפשר להשלים את הפרופיל מאוחר יותר. תוכניות המשכנתא והזמנת הייעוץ יבקשו להשלים אותו.</p>
+  <p>טופס רב-שלבי עם מחוון התקדמות, נושא אחד בכל מסך. כל שלב נשמר ב-Zustand store תוך כדי, כך שאפשר לצאת ולחזור.</p>
+  <table>
+    <tr><th>שלב</th><th>שדות</th><th>הערות</th></tr>
+    <tr><td>משק בית</td><td>רוכשים כ: <strong>יחיד / זוג</strong> · שמות · גילאים · מספר ילדים (אופציונלי)</td><td>זוג ← אוספים את שתי ההכנסות</td></tr>
+    <tr><td>פיננסים</td><td>הכנסה חודשית נטו (לכל בן/בת זוג) · סוג תעסוקה (שכיר / עצמאי / שניהם) · התחייבויות חודשיות קבועות (הלוואות, ליסינג) · <strong>הון עצמי התחלתי</strong> · עזרה נוספת צפויה (הורים, תוכניות חיסכון)</td><td>מניע את חישוב יכולת ההחזר</td></tr>
+    <tr><td>בעלות</td><td><strong>יש בבעלותך דירה?</strong> (לא / כן, אמכור / כן, אשאיר) · דירה ראשונה? · זכאי למחיר למשתכן / דירה בהנחה? (מותר "לא בטוח")</td><td>קובע את סוג הרוכש ← LTV ומס רכישה</td></tr>
+    <tr><td>בנקאות</td><td><strong>הבנק הנוכחי</strong> (הפועלים, לאומי, דיסקונט, מזרחי-טפחות, הבינלאומי, ירושלים, אחר) · <strong>דירוג אשראי</strong> (טווח בדיווח עצמי: מצוין / טוב / סביר / חלש / לא יודע) · צ'קים חוזרים / הגבלות בעבר (כן/לא)</td><td>דירוג האשראי בדיווח עצמי ב-v1, עם הסבר איך לבדוק אותו במאגר נתוני האשראי של ישראל</td></tr>
+    <tr><td>מטרות חיפוש</td><td><strong>שלב</strong>: רק בודק / מחפש באופן פעיל / מצאתי נכס / חתמתי או בסגירה · ערים/שכונות יעד · טווח תקציב · חדרים · סוג נכס (דירה, דירת גן, פנטהאוז, בית פרטי, חדש מקבלן) · מטרה (מגורים / השקעה)</td><td></td></tr>
+    <tr><td>סיכום</td><td>סקירת כל התשובות · תיבות הסכמה (פרטיות, יצירת קשר לייעוץ)</td><td>יוצר פרופיל</td></tr>
+  </table>
+  <p><strong>ערכים נגזרים</strong> (מחושבים ב-<code>lib/mortgage</code>, מוצגים בסיכום ובדשבורד):</p>
+  <ul>
+    <li><code>buyerType</code>: <code>first_home</code> (דירה ראשונה) | <code>upgrader</code> (משפר דיור) | <code>investor</code> (משקיע)</li>
+    <li><code>maxLtv</code>: מגבלות בנק ישראל, מתוך הקונפיג (§4.5)</li>
+    <li><code>maxPropertyPrice</code>: הערכה לפי הון עצמי, LTV ויחס החזר להכנסה</li>
+    <li>טווח <code>estimatedMonthlyPayment</code> (החזר חודשי משוער)</li>
+  </ul>
+
+  <h3>4.2 גילוי — מפה</h3>
+  <ul>
+    <li><code>react-native-maps</code> במסך מלא עם סמני נכסים <strong>מקובצים (clusters)</strong>. כל סמן הוא "גלולת" מחיר שצבעה לפי טווח ציון הפוטנציאל (ירוק / כתום / אדום).</li>
+    <li><strong>פס עליון:</strong> חיפוש (עיר / שכונה / רחוב), כפתור פילטרים ← מודאל <code>filters.tsx</code>.</li>
+    <li><strong>Bottom sheet</strong> (sheet של Gluestack) עם 3 נקודות עצירה: הצצה (כמות + מיון), חצי (FlashList של <code>PropertyCard</code>), מלא.</li>
+    <li>לחיצה על סמן מציגה כרטיס מיני מעל ה-sheet. לחיצה על הכרטיס פותחת את <code>property/[id]</code>.</li>
+    <li><strong>כפתור "קרוב אליי":</strong> הרשאת מיקום מתבקשת <strong>רק בלחיצה</strong>, לעולם לא בטעינת המסך.</li>
+    <li><strong>מתג שכבות מפה</strong> (v1.1): פוליגונים של תוכניות עירוניות, קווי רכבת קלה / מטרו, מפת חום של תנועה, אזורי מסחר.</li>
+    <li>פילטרים: מחיר, חדרים, גודל (מ"ר), סוג נכס, ציון פוטנציאל מינימלי, מאפיינים (חניה, מעלית, ממ"ד, מרפסת), "בתוך התקציב שלי" (מהפרופיל).</li>
+    <li>אזור המפה והפילטרים נשמרים ב-store של Zustand בשם <code>useMapStore</code> ונשמרים במעבר בין טאבים.</li>
+  </ul>
+
+  <h3>4.3 עמוד נכס (<code>property/[id]</code>)</h3>
+  <p>מציג את <strong>כל</strong> המידע על הבית, בסדר הבא:</p>
+  <ol>
+    <li><strong>גלריית תמונות.</strong> קרוסלה אופקית של <code>expo-image</code> עם placeholders של blurhash. לחיצה פותחת גלריה במסך מלא.</li>
+    <li><strong>כותרת.</strong> מחיר (₪), כתובת, חדרים · מ"ר · קומה, מחיר למ"ר, כפתור שמירה, כפתור שיתוף.</li>
+    <li><strong>כרטיס ציון פוטנציאל.</strong> טבעת ציון גדולה (0–100) + תווית דירוג + סיכום בשורה אחת ("פוטנציאל חזק — תחנת מטרו מתוכננת במרחק 400 מ'"). לחיצה ← <code>score.tsx</code>.</li>
+    <li><strong>פירוט הציון.</strong> 5 פסים של תת-ציונים (ראו §5) עם הסברים קצרים.</li>
+    <li><strong>תוכניות בניין עיר בסביבה.</strong> רשימת תוכניות רלוונטיות מאושרות ובהליך בתוך הרדיוס: שם, סטטוס, מרחק, השפעה (למשל "התחדשות עירונית — פינוי בינוי, אושר 2025"). לחיצה ← <code>plans.tsx</code> עם פוליגונים על המפה.</li>
+    <li><strong>מסחר ושירותים.</strong> ספירה מקובצת במרחק הליכה: סופרמרקטים, חנויות, בתי קפה, בתי ספר, גנים, פארקים, קופות חולים, בתי כנסת, ובנוסף הקרוב ביותר מכל סוג והמרחק אליו.</li>
+    <li><strong>תנועה ותחבורה.</strong> רמת עומס בשעות השיא, תחנות אוטובוס, רכבת ורכבת קלה הקרובות, גישה לכבישים מהירים, מדד רעש.</li>
+    <li><strong>בתים בסביבה ושוק.</strong> עסקאות השוואה אחרונות (מנתוני העסקאות הממשלתיים), גרף מגמת מחיר למ"ר (Victory Native XL), והשוואה של הנכס לממוצע השכונתי.</li>
+    <li><strong>פרטי הנכס.</strong> שנת בנייה, מעלית, חניה, ממ"ד, מחסן, מרפסת, מצב, הערכת ארנונה, ועד בית.</li>
+    <li><strong>המשכנתא שלך לבית הזה.</strong> משתמש בפרופיל כדי להציג החזר חודשי משוער, הון עצמי נדרש ומד יכולת החזר, וקישור "לתוכנית המלאה" למסך המשכנתא כשהמחיר כבר ממולא. אם אין פרופיל, מוצג CTA להשלמתו.</li>
+    <li><strong>פס CTA דביק:</strong> <strong>"דברו עם מומחה לפני שאתם קונים"</strong> ← <code>consult/book</code> (ממולא מראש עם הנכס הזה).</li>
+    <li>הצהרה משפטית בתחתית.</li>
+  </ol>
+
+  <h3>4.4 מרכז למידה</h3>
+  <p>תוכן מידעי המסביר את הנדל"ן הישראלי. התוכן נשמר כ-JSON/MDX מובנה לכל שפה, וניתן לעדכן אותו דרך <strong>EAS Update</strong> או למשוך אותו מה-CMS. שינויי טקסט אף פעם לא דורשים בילד מחדש.</p>
+  <h4>אזורים</h4>
+  <ul>
+    <li><strong>מדריכים</strong> (מאמרים צעד-אחר-צעד): "תהליך רכישת דירה בישראל", "איך עובדת משכנתא בישראל", "קנייה מקבלן מול יד שנייה", "התחדשות עירונית: תמ"א 38 מול פינוי בינוי", "העלויות הנסתרות של קניית דירה", "צ'קליסט לפני חתימה".</li>
+    <li><strong>מילון מונחים</strong> (FlashList, עם חיפוש, א–ת / A–Z). כל מונח מציג את השם העברי, תעתיק, הסבר באנגלית ומונחים קשורים.</li>
+  </ul>
+  <h4>מונחי מילון ראשוניים</h4>
+  <table>
+    <tr><th>עברית</th><th>תעתיק</th><th>אנגלית / הסבר</th></tr>
+    <tr><td>נסח טאבו</td><td class="ltr">Nesach Tabu</td><td>Land registry extract — נסח רישום מקרקעין</td></tr>
+    <tr><td>מס רכישה</td><td class="ltr">Mas Rechisha</td><td>Purchase tax</td></tr>
+    <tr><td>מס שבח</td><td class="ltr">Mas Shevach</td><td>Capital gains (betterment) tax</td></tr>
+    <tr><td>היטל השבחה</td><td class="ltr">Hetel Hashbacha</td><td>Betterment levy — היטל על עליית ערך בעקבות תוכנית</td></tr>
+    <tr><td>תב"ע</td><td class="ltr">Taba</td><td>Urban building plan — תוכנית בניין עיר</td></tr>
+    <tr><td>תמ"א 38</td><td class="ltr">TAMA 38</td><td>תוכנית מתאר ארצית לחיזוק מבנים מפני רעידות אדמה והרחבתם</td></tr>
+    <tr><td>פינוי בינוי</td><td class="ltr">Pinui Binui</td><td>התחדשות עירונית של הריסה ובנייה מחדש</td></tr>
+    <tr><td>הון עצמי</td><td class="ltr">Hon Atzmi</td><td>Down payment / equity</td></tr>
+    <tr><td>משכנתא</td><td class="ltr">Mashkanta</td><td>Mortgage</td></tr>
+    <tr><td>מסלול פריים</td><td class="ltr">Prime track</td><td>ריבית משתנה הצמודה לפריים</td></tr>
+    <tr><td>קבועה לא צמודה (קל"צ)</td><td class="ltr">Kalatz</td><td>מסלול ריבית קבועה, לא צמוד למדד</td></tr>
+    <tr><td>קבועה צמודה (ק"צ)</td><td class="ltr">Katz</td><td>מסלול ריבית קבועה, צמוד למדד</td></tr>
+    <tr><td>משתנה כל 5 שנים</td><td class="ltr">Variable every 5</td><td>הריבית מתעדכנת כל 5 שנים</td></tr>
+    <tr><td>צמוד מדד</td><td class="ltr">Tzamud Madad</td><td>צמוד למדד המחירים לצרכן</td></tr>
+    <tr><td>שמאי</td><td class="ltr">Shamai</td><td>Property appraiser</td></tr>
+    <tr><td>עורך דין מקרקעין</td><td class="ltr">Real-estate lawyer</td><td></td></tr>
+    <tr><td>יועץ משכנתאות</td><td class="ltr">Mortgage advisor</td><td></td></tr>
+    <tr><td>ארנונה</td><td class="ltr">Arnona</td><td>Municipal property tax — מס עירוני</td></tr>
+    <tr><td>ועד בית</td><td class="ltr">Vaad Bayit</td><td>Building maintenance committee</td></tr>
+    <tr><td>ממ"ד</td><td class="ltr">Mamad</td><td>מרחב מוגן דירתי</td></tr>
+    <tr><td>זכויות בנייה</td><td class="ltr">Zchuyot Bniya</td><td>Building rights</td></tr>
+    <tr><td>היתר בנייה</td><td class="ltr">Heter Bniya</td><td>Building permit</td></tr>
+    <tr><td>מחיר למשתכן / דירה בהנחה</td><td class="ltr">Mechir Lamishtaken / Dira BeHanacha</td><td>הגרלת דיור מסובסד ממשלתית</td></tr>
+    <tr><td>אישור עקרוני</td><td class="ltr">Ishur Ekroni</td><td>Mortgage pre-approval</td></tr>
+    <tr><td>זיכרון דברים</td><td class="ltr">Zichron Dvarim</td><td>מסמך הסכמות מקדמי</td></tr>
+    <tr><td>הערת אזהרה</td><td class="ltr">He'arat Azhara</td><td>הערה הנרשמת בטאבו לטובת הרוכש</td></tr>
+  </table>
+  <ul><li>כל מאמר מסתיים ב"יש לכם שאלות? <strong>דברו עם מומחה</strong>" ← CTA לייעוץ.</li></ul>
+
+  <h3>4.5 תוכניות משכנתא</h3>
+  <h4>דשבורד (<code>(tabs)/mortgage</code>)</h4>
+  <ul>
+    <li>סיכום יכולת: מחיר נכס מקסימלי, הון עצמי נדרש, הלוואה מקסימלית, החזר חודשי משוער, ומד יחס החזר להכנסה.</li>
+    <li><strong>3 תוכניות מוצעות</strong> הנוצרות מהפרופיל:
+      <ul>
+        <li><strong>יציבה.</strong> יותר מסלולים קבועים ולא צמודים. החזר גבוה יותר, צפוי.</li>
+        <li><strong>מאוזנת.</strong> תמהיל טיפוסי.</li>
+        <li><strong>גמישה / החזר התחלתי נמוך.</strong> יותר פריים/משתנה. החזר התחלתי נמוך יותר, יותר סיכון.</li>
+      </ul>
+    </li>
+    <li>כל <code>PlanCard</code> מציג החזר חודשי, סך ההחזר, סך הריבית ותמהיל המסלולים כגרף דונאט.</li>
+    <li>תצוגת "השוואת תוכניות" (זו לצד זו).</li>
+  </ul>
+  <h4>פירוט תוכנית (<code>mortgage/[planId]</code>)</h4>
+  <ul>
+    <li>טבלת מסלולים: סוג מסלול, אחוז, סכום, ריבית, תקופה, הצמדה, החזר חודשי.</li>
+    <li>גרף סילוקין לאורך זמן (Victory Native XL): קרן מול ריבית, ובנוסף מתג תרחיש מדד למסלולים צמודים.</li>
+    <li>סליידרים לעריכה: סכום הלוואה, תקופה (4–30 שנים), תמהיל מסלולים.</li>
+    <li>פירוט <strong>העלות הכוללת של הרכישה</strong>: מחיר + מס רכישה + עורך דין + מתווך + שמאי + יועץ משכנתאות + כרית למעבר ושיפוץ.</li>
+    <li>CTA: <strong>"קבלו הצעה אמיתית — דברו עם יועץ משכנתאות"</strong> ← ייעוץ.</li>
+  </ul>
+  <h4>כללי חישוב (ב-<code>lib/mortgage</code>, TS טהור, עם בדיקות יחידה)</h4>
+  <ul>
+    <li>ההחזר החודשי מחושב בנוסחת שפיצר (אנונה) הסטנדרטית לכל מסלול. קרן שווה היא מתג אופציונלי.</li>
+    <li>מסלולים צמודי מדד משתמשים בהנחת מדד צפוי הניתנת להגדרה.</li>
+    <li>ערכי הרגולציה נמצאים ב<strong>קונפיג עם גרסאות</strong> (<code>constants/regulation.ts</code>), לעולם לא מקודדים בתוך קומפוננטות. הערכים הראשוניים <strong>חייבים להיבדק מול הוראות בנק ישראל העדכניות לפני ההשקה</strong>:
+      <ul>
+        <li>LTV מקסימלי: דירה ראשונה ~75%, משפר דיור ~70%, משקיע ~50%</li>
+        <li>יחס החזר להכנסה מקסימלי: 50% (האפליקציה ממליצה על ~33% לכל היותר)</li>
+        <li>מגבלות תמהיל מסלולים (למשל אחוז מינימלי בריבית קבועה, אחוז מקסימלי בפריים)</li>
+        <li>תקופה מקסימלית: 30 שנה</li>
+      </ul>
+    </li>
+    <li>מדרגות מס רכישה נשמרות לפי שנה ב-<code>lib/tax/brackets.ts</code> ותלויות ב-<code>buyerType</code>.</li>
+    <li>הריביות נמשכות מהבקאנד (ממוצעי שוק שמנוהלים על ידי אדמין), עם ערך ברירת מחדל לגיבוי.</li>
+  </ul>
+
+  <h3>4.6 הזמנת ייעוץ</h3>
+  <div class="callout ok">שלב ההמרה המרכזי: <strong>לפני שהמשתמש קונה, מציעים לו ייעוץ כדי שיוכל לסגור מהר ובבטחה.</strong></div>
+  <p><strong>נקודות כניסה:</strong> ה-CTA הדביק בעמוד הנכס, CTA בתוכנית המשכנתא, מאמרי הלמידה, באנר "מוכנים לקנות?" בפרופיל, והצעה אוטומטית כשהשלב של המשתמש משתנה ל"מצאתי נכס".</p>
+  <h4>תהליך (<code>consult/book</code>, מודאל)</h4>
+  <ol>
+    <li><strong>בחירת מומחה:</strong> יועץ משכנתאות · מתווך נדל"ן · עורך דין מקרקעין · שמאי · "חבילת סגירה מלאה" (הכול-כלול, מומלץ).</li>
+    <li><strong>הקשר</strong> (ממולא מראש): הנכס שנבחר (אם יש), סיכום הפרופיל, הערת שלב ("אני רוצה לסגור תוך X שבועות").</li>
+    <li><strong>פרטי קשר וזמן:</strong> שם, טלפון (ולידציה לפורמט ישראלי), שפה מועדפת (עברית/אנגלית/רוסית/צרפתית...), אמצעי קשר מועדף (טלפון / וואטסאפ / וידאו), ו-2–3 חלונות זמן מועדפים.</li>
+    <li><strong>הסכמה:</strong> אישור לשיתוף נתוני הפרופיל עם המומחה.</li>
+    <li><strong>אישור</strong> (<code>consult/confirmed</code>): סיכום, זמן חזרה צפוי, הוספה ליומן, וצ'קליסט "מה להכין" (תלושי שכר, דפי חשבון בנק, תעודת זהות, נסח טאבו).</li>
+  </ol>
+  <p><strong>בקאנד:</strong> יוצר רשומת <code>Lead</code>, מודיע לשותף/CRM (webhook / מייל / WhatsApp Business), ועוקב אחר הסטטוס (<code class="ltr">new → contacted → in_progress → closed_won / closed_lost</code>). המשתמשים רואים את סטטוס הבקשה שלהם בפרופיל.</p>
+
+  <h3>4.7 פרופיל והגדרות</h3>
+  <ul>
+    <li>עריכת פרופיל הרוכש (מריץ מחדש את החישובים הנגזרים).</li>
+    <li>שפה: עברית / English (ראו §6 למעבר RTL).</li>
+    <li>חיפושים שמורים והתראות (v1.1: התראות על נכסים חדשים שתואמים לפילטרים / ציון מעל X).</li>
+    <li>בקשות ייעוץ והסטטוס שלהן.</li>
+    <li>פרטיות: ייצוא נתונים, מחיקת חשבון.</li>
+    <li>משפטי: תנאי שימוש, מדיניות פרטיות, הצהרות.</li>
+  </ul>
+</section>
+
+<!-- 5 -->
+<section id="s5">
+  <h2><span class="num">5</span>ציון פוטנציאל — אפיון האלגוריתם</h2>
+  <p>ציון 0–100 המעריך את <strong>פוטנציאל הערך העתידי</strong> של נכס. הוא מחושב <strong>בצד השרת</strong> (עקבי, ניתן לקאש, ניתן לכוונון בלי לשחרר גרסת אפליקציה). אותו מנוע נמצא גם ב-<code>lib/score</code> לתצוגות מקדימות ובדיקות.</p>
+
+  <h3>5.1 תת-ציונים</h3>
+  <table>
+    <tr><th>#</th><th>תת-ציון</th><th>משקל</th><th>קלטים</th><th>הציון גבוה יותר כאשר…</th></tr>
+    <tr><td>1</td><td><strong>תוכניות עירוניות ופיתוח</strong></td><td>30%</td><td>תוכניות בניין עיר (תב"ע) מאושרות ובהליך בטווח ~1 ק"מ, זכאות הבניין להתחדשות עירונית (תמ"א 38 / פינוי בינוי), תחבורה מתוכננת (רכבת קלה / מטרו / תחנת רכבת) בטווח 800 מ', מבני ציבור ופארקים חדשים</td><td>יש תוכניות מאושרות ותחבורה בסביבה, הבניין זכאי להתחדשות</td></tr>
+    <tr><td>2</td><td><strong>מסחר ושירותים</strong></td><td>20%</td><td>כמות ומרחק של חנויות, סופרמרקטים, בתי קפה, בתי ספר, גנים, פארקים, קופות חולים; מרכזי מסחר מתוכננים</td><td>שירותים רבים במרחק הליכה של 5–10 דקות</td></tr>
+    <tr><td>3</td><td><strong>תנועה ונגישות</strong></td><td>15%</td><td>עומס בשעות השיא בכבישים הסמוכים (שלילי), נגישות לתחבורה ציבורית (חיובי), גישה לכבישים מהירים (חיובי), רעש מכבישים ראשיים (שלילי)</td><td>נגישות טובה בלי עומס או רעש כבדים ליד הבית</td></tr>
+    <tr><td>4</td><td><strong>שוק שכונתי</strong></td><td>25%</td><td>עסקאות השוואה אחרונות, מגמת מחיר למ"ר ב-3–5 שנים, מחיר המודעה מול חציון השכונה, היצע בנייה חדשה, אותות ביקוש</td><td>מגמה עולה, מחיר המודעה בחציון או מתחתיו</td></tr>
+    <tr><td>5</td><td><strong>מאפייני הנכס</strong></td><td>10%</td><td>גיל הבניין, קומה, מעלית, חניה, ממ"ד, גודל, מצב</td><td>מאפיינים ששומרים על ערך. בניין ישן עם זכאות להתחדשות נחשב כפוטנציאל</td></tr>
+  </table>
+  <p class="ltr" style="text-align:center"><code>score = round(Σ weight_i × subScore_i)</code></p>
+  <p>כאשר כל <code>subScore_i</code> נמצא בטווח 0–100.</p>
+
+  <h3>5.2 פלט</h3>
+<pre><code>type PotentialScore = {
+  total: number;                 // 0–100
+  grade: 'excellent' | 'good' | 'fair' | 'low';   // ≥80, 65–79, 50–64, &lt;50
+  confidence: 'high' | 'medium' | 'low';          // לפי כיסוי הנתונים
+  subScores: Array&lt;{
+    key: 'plans' | 'amenities' | 'traffic' | 'market' | 'property';
+    value: number;
+    weight: number;
+    highlights: LocalizedText[];  // לדוגמה: "תחנת רכבת קלה מתוכננת במרחק 350 מ'"
+  }&gt;;
+  algorithmVersion: string;       // לדוגמה "1.0.0"
+  computedAt: string;
+};</code></pre>
+
+  <h3>5.3 כללים</h3>
+  <ul>
+    <li>כל מספר שמוצג למשתמש מגיע עם <strong>הסבר בשפה פשוטה</strong> (highlights).</li>
+    <li>אם חסרים נתונים לתת-ציון מסוים, המשקל שלו מחולק מחדש ו-<code>confidence</code> יורד. הממשק מציג "נתונים מוגבלים".</li>
+    <li>המשקלים והספים נמצאים בקונפיג בשרת ומנוהלים בגרסאות. שינוי שלהם לעולם לא דורש בילד של האפליקציה.</li>
+    <li>תמיד מוצג עם ההצהרה: <em>"הערכה לצורכי מידע בלבד — אינה שמאות או ייעוץ השקעות."</em></li>
+  </ul>
+</section>
+
+<!-- 6 -->
+<section id="s6">
+  <h2><span class="num">6</span>בינאום ו-RTL</h2>
+  <ul>
+    <li>שפות: <strong>עברית (ברירת מחדל כשהמכשיר בשפה <code>he-*</code>)</strong> ו<strong>אנגלית (ברירת מחדל בכל מקרה אחר)</strong>.</li>
+    <li>Namespaces של i18next: <code>common</code>, <code>onboarding</code>, <code>explore</code>, <code>property</code>, <code>mortgage</code>, <code>learn</code>, <code>consult</code>, <code>glossary</code>.</li>
+    <li><strong>מעבר RTL:</strong> משתמשים ב-<code>I18nManager.allowRTL(true)</code> וב-<code>I18nManager.forceRTL(isHebrew)</code>. השינוי דורש טעינה מחדש של האפליקציה, ולכן אחרי החלפת שפה קוראים ל-<code>Updates.reloadAsync()</code> (expo-updates). מציגים אישור ("האפליקציה תופעל מחדש כדי להחיל את השפה").</li>
+    <li>עיצוב: <code>Intl.NumberFormat(locale, { style: 'currency', currency: 'ILS' })</code> ← <span class="ltr">₪1,850,000</span>. תאריכים באמצעות <code>Intl.DateTimeFormat</code>.</li>
+    <li>פונטים עם כיסוי מלא לעברית ולטינית: <strong>Rubik</strong> (ראשי, מעוגל וידידותי, מתאים לרפרנס העיצובי) או <strong>Heebo</strong>. נטענים דרך <code>expo-font</code>.</li>
+    <li>אייקונים כיווניים (חיצים, חזרה) מתהפכים עם מחלקות <code>rtl:</code> / <code>rtl:-scale-x-100</code>.</li>
+    <li>שינויי טקסט בתרגומים משוחררים דרך <strong>EAS Update</strong>, לעולם לא בבילד מלא.</li>
+    <li>כל המחרוזות שמוצגות למשתמש עוברות דרך <code>t()</code>. אין טקסט מקודד בקומפוננטות (כלל lint).</li>
+  </ul>
+</section>
+
+<!-- 7 -->
+<section id="s7">
+  <h2><span class="num">7</span>מערכת עיצוב</h2>
+  <p><strong>רפרנס ויזואלי:</strong> <a href="https://dribbble.com/shots/26673273-Insurance-Mobile-App-UI-Design" target="_blank" rel="noopener">Insurance Mobile App UI Design (Dribbble)</a>. הכיוון הוא מראה נקי וידידותי של פינטק/ביטוח, מותאם לנדל"ן.</p>
+  <div class="callout warn">הטוקנים שלהלן הם <strong>נקודת פתיחה מוצעת</strong> בסגנון הזה. יש לאמת את הצבעים והריווחים המדויקים מול השוט ב-Dribbble לפני בניית הממשק.</div>
+
+  <h4>עקרונות</h4>
+  <ul>
+    <li>רקע בהיר ואוורירי עם <strong>כרטיסים גדולים ומעוגלים</strong> (רדיוס 24–28) וצללים רכים ונמוכים.</li>
+    <li><strong>צבע ראשי חזק אחד</strong> ועוד <strong>כרטיסי פסטל</strong> לקיבוץ מידע (ציון, משכנתא, שירותים).</li>
+    <li><strong>מספרים גדולים ומודגשים</strong> לנתונים מרכזיים (מחיר, ציון, החזר חודשי) עם תוויות קטנות ומעומעמות.</li>
+    <li>צ'יפים וכפתורים בצורת גלולה. הרבה מרווח לבן. אייקונים ידידותיים או איורים בסגנון תלת-ממד באונבורדינג ובמצבים ריקים.</li>
+    <li><strong>טאב בר תחתון צף</strong> (מעוגל, מוגבה, הטאב הפעיל מודגש בגלולה מלאה).</li>
+  </ul>
+
+  <h4>טוקנים מוצעים</h4>
+  <p>מוגדרים ב-<code>tailwind.config.js</code> + משתני CSS ב-<code>global.css</code> למצב בהיר/כהה.</p>
+  <table>
+    <tr><th>טוקן</th><th>ערך (הצעה)</th><th>שימוש</th></tr>
+    <tr><td><code>primary</code></td><td><span class="swatch" style="background:#3D5AFE"></span><span class="ltr">#3D5AFE</span> בערך — כחול/אינדיגו עמוק</td><td>CTA, טאב פעיל, קישורים</td></tr>
+    <tr><td><code>primary-foreground</code></td><td><span class="swatch" style="background:#FFFFFF"></span><span class="ltr">#FFFFFF</span></td><td></td></tr>
+    <tr><td><code>background</code></td><td><span class="swatch" style="background:#F5F6FA"></span><span class="ltr">#F5F6FA</span></td><td>רקע האפליקציה</td></tr>
+    <tr><td><code>card</code></td><td><span class="swatch" style="background:#FFFFFF"></span><span class="ltr">#FFFFFF</span></td><td>כרטיסים</td></tr>
+    <tr><td><code>accent-mint</code></td><td><span class="swatch" style="background:#DFF5EC"></span><span class="ltr">#DFF5EC</span></td><td>כרטיסי ציון / חיובי</td></tr>
+    <tr><td><code>accent-peach</code></td><td><span class="swatch" style="background:#FFE9DD"></span><span class="ltr">#FFE9DD</span></td><td>כרטיסי משכנתא</td></tr>
+    <tr><td><code>accent-lavender</code></td><td><span class="swatch" style="background:#ECE8FF"></span><span class="ltr">#ECE8FF</span></td><td>כרטיסי למידה</td></tr>
+    <tr><td><code>accent-sky</code></td><td><span class="swatch" style="background:#E3F1FF"></span><span class="ltr">#E3F1FF</span></td><td>שירותים / מידע במפה</td></tr>
+    <tr><td><code>score-high</code> / <code>score-mid</code> / <code>score-low</code></td><td><span class="swatch" style="background:#22C55E"></span>ירוק / <span class="swatch" style="background:#F59E0B"></span>כתום / <span class="swatch" style="background:#EF4444"></span>אדום</td><td>טבעות ציון, סמנים</td></tr>
+    <tr><td><code>foreground</code> / <code>muted-foreground</code></td><td><span class="swatch" style="background:#111827"></span><span class="ltr">#111827</span> / <span class="swatch" style="background:#6B7280"></span><span class="ltr">#6B7280</span></td><td>טקסט</td></tr>
+    <tr><td>רדיוס</td><td class="ltr"><code>xl: 16</code>, <code>2xl: 24</code>, <code>3xl: 28</code>, <code>full</code></td><td></td></tr>
+    <tr><td>ריווח</td><td>סקאלה של 4 נקודות (ברירת המחדל של Tailwind)</td><td></td></tr>
+    <tr><td>טיפוגרפיה</td><td>Display 32/bold · H1 24/semibold · H2 20 · Body 16 · Caption 13</td><td>Rubik</td></tr>
+  </table>
+  <p><strong>קומפוננטות מרכזיות:</strong> <code>ScoreRing</code>, <code>PropertyCard</code> (תמונה למעלה, מחיר, צ'יפים, תג ציון), <code>StatTile</code>, <code>PlanCard</code>, <code>TrackRow</code>, <code>AffordabilityMeter</code>, <code>SectionHeader</code>, <code>StickyCTA</code>, <code>FloatingTabBar</code>, <code>Chip</code>, <code>Sheet</code>.</p>
+  <p><strong>נגישות:</strong> אזורי מגע של 44×44 לפחות, ניגודיות WCAG AA, <code>accessibilityLabel</code> לכל כפתורי האייקון, תמיכה ב-Dynamic Type, סדר קריאה נכון לקורא מסך ב-RTL.</p>
+</section>
+
+<!-- 8 -->
+<section id="s8">
+  <h2><span class="num">8</span>מקורות מידע (לאימות רישוי וזמינות)</h2>
+  <table>
+    <tr><th>נתונים</th><th>מקור מועמד</th><th>הערות</th></tr>
+    <tr><td>מודעות</td><td>פיד של סוכנויות / מתווכים שותפים, העלאות אדמין עצמיות</td><td>סקרייפינג מיד2/מדלן <strong>אסור</strong>. נדרשות שותפויות</td></tr>
+    <tr><td>עסקאות עבר / מחירים</td><td>נתוני עסקאות הנדל"ן של רשות המסים (nadlan.gov.il)</td><td>עסקאות השוואה, מגמות מחיר</td></tr>
+    <tr><td>תוכניות עירוניות</td><td>מנהל התכנון (iplan), GIS עירוני</td><td>פוליגונים של תוכניות, סטטוס</td></tr>
+    <tr><td>מפות / שכבות GIS</td><td>GovMap, data.gov.il</td><td>חלקות (גוש/חלקה), ייעודי קרקע</td></tr>
+    <tr><td>תחבורה</td><td>GTFS של משרד התחבורה, נת"ע (תוכניות רכבת קלה / מטרו)</td><td>תחנות, קווים מתוכננים</td></tr>
+    <tr><td>שירותים / נקודות עניין</td><td>Google Places API או OpenStreetMap (Overpass)</td><td>חנויות, בתי ספר, פארקים</td></tr>
+    <tr><td>תנועה</td><td>Google Routes / Distance Matrix (מודע תנועה), Waze for Cities</td><td>עומס בשעות השיא</td></tr>
+    <tr><td>דמוגרפיה</td><td>הלשכה המרכזית לסטטיסטיקה (הלמ"ס)</td><td>אשכול חברתי-כלכלי</td></tr>
+    <tr><td>ריביות משכנתא</td><td>ריביות ממוצעות שמפרסם בנק ישראל</td><td>מנוהל על ידי אדמין בבקאנד</td></tr>
+  </table>
+  <p>קליטת הנתונים מתבצעת כ<strong>ג'ובים מתוזמנים בבקאנד</strong>, לא באפליקציה. האפליקציה פונה רק ל-API של הבקאנד.</p>
+</section>
+
+<!-- 9 -->
+<section id="s9">
+  <h2><span class="num">9</span>בקאנד ומודל נתונים (הצעה)</h2>
+  <p><strong>בקאנד מוצע:</strong> Supabase (Postgres + <strong>PostGIS</strong> לשאילתות גיאוגרפיות + Auth + Edge Functions + Storage). חלופה: API מותאם ב-Node. ראו שאלות פתוחות.</p>
+  <h4>ישויות מרכזיות</h4>
+<pre><code>type Property = {
+  id: string;
+  source: string;
+  status: 'active' | 'sold' | 'off_market';
+  price: number;                   // ILS
+  location: { lat: number; lng: number };
+  address: { city: string; neighborhood?: string; street: string; number?: string };
+  gushHelka?: { gush: number; helka: number };
+  rooms: number;
+  sizeSqm: number;
+  floor?: number;
+  totalFloors?: number;
+  propertyType: 'apartment' | 'garden' | 'penthouse' | 'house' | 'duplex' | 'new_project';
+  features: { elevator: boolean; parking: number; mamad: boolean; balcony: boolean; storage: boolean };
+  buildingYear?: number;
+  images: { url: string; blurhash?: string }[];
+  description: LocalizedText;
+  score?: PotentialScore;
+};
+
+type CityPlan = {
+  id: string; planNumber: string; name: LocalizedText;
+  status: 'proposed' | 'deposited' | 'approved' | 'in_execution';
+  type: 'residential' | 'commercial' | 'transit' | 'urban_renewal' | 'public' | 'mixed';
+  geometry: GeoJSON.Polygon; approvedAt?: string;
+};
+
+type BuyerProfile = {
+  householdType: 'single' | 'couple';
+  members: { name: string; age?: number; netMonthlyIncome: number; employment: 'salaried' | 'self_employed' }[];
+  children?: number;
+  monthlyObligations: number;
+  initialEquity: number;
+  additionalHelp?: number;
+  ownership: 'none' | 'own_will_sell' | 'own_keep';
+  firstApartment: boolean;
+  subsidizedEligible?: 'yes' | 'no' | 'unsure';
+  bank: BankId;
+  creditScoreRange: 'excellent' | 'good' | 'fair' | 'poor' | 'unknown';
+  stage: 'exploring' | 'looking' | 'found_property' | 'closing';
+  targetCities: string[];
+  budget: { min?: number; max?: number };
+  rooms?: { min?: number; max?: number };
+  purpose: 'live' | 'invest';
+  locale: 'he' | 'en';
+  consents: { privacy: boolean; contactForConsultation: boolean; at: string };
+};
+
+type MortgagePlan = {
+  id: string; name: 'stable' | 'balanced' | 'flexible' | 'custom';
+  loanAmount: number; tracks: MortgageTrack[];
+  monthlyPayment: number; totalRepayment: number; totalInterest: number;
+};
+
+type MortgageTrack = {
+  type: 'prime' | 'fixed_unlinked' | 'fixed_linked' | 'variable5_unlinked' | 'variable5_linked';
+  share: number; amount: number; rate: number; termYears: number;
+};
+
+type Lead = {
+  id: string; userId: string; expertType: 'mortgage' | 'agent' | 'lawyer' | 'appraiser' | 'package';
+  propertyId?: string; phone: string; preferredLanguage: string;
+  contactMethod: 'phone' | 'whatsapp' | 'video'; timeSlots: string[];
+  status: 'new' | 'contacted' | 'in_progress' | 'closed_won' | 'closed_lost';
+  createdAt: string;
+};
+
+type LocalizedText = { he: string; en: string };</code></pre>
+
+  <h4>נקודות קצה מרכזיות ב-API</h4>
+  <ul>
+    <li><code>GET /properties?bbox=&amp;filters=</code> — מחזיר נכסים מקובצים או בעמודים עבור אזור המפה הנראה</li>
+    <li><code>GET /properties/:id</code> — מחזיר את המודעה המלאה, ציון, תוכניות, שירותים, תנועה ועסקאות השוואה</li>
+    <li><code>GET /plans?bbox=</code> — מחזיר פוליגונים של תוכניות עירוניות</li>
+    <li><code>GET /content/learn?locale=</code> · <code>GET /content/glossary?locale=</code></li>
+    <li><code>GET /mortgage/rates</code></li>
+    <li><code>POST /profile</code> · <code>PATCH /profile</code></li>
+    <li><code>POST /leads</code> · <code>GET /leads/mine</code></li>
+  </ul>
+</section>
+
+<!-- 10 -->
+<section id="s10">
+  <h2><span class="num">10</span>ניהול State (Zustand)</h2>
+  <table>
+    <tr><th>Store</th><th>תוכן</th><th>נשמר מקומית</th></tr>
+    <tr><td><code>useProfileStore</code></td><td><code>BuyerProfile</code>, התקדמות באונבורדינג, יכולת החזר נגזרת</td><td>כן (שדות רגישים ב-secure store)</td></tr>
+    <tr><td><code>useMapStore</code></td><td>אזור מפה, פילטרים, מזהה נכס נבחר, מתגי שכבות</td><td>אזור + פילטרים</td></tr>
+    <tr><td><code>useSavedStore</code></td><td>מזהי נכסים שמורים, חיפושים שמורים</td><td>כן</td></tr>
+    <tr><td><code>useMortgageStore</code></td><td>תוכניות שנוצרו, עריכות של תוכנית מותאמת</td><td>כן</td></tr>
+    <tr><td><code>useSettingsStore</code></td><td>שפה, ערכת נושא, העדפות התראות</td><td>כן</td></tr>
+  </table>
+  <p>נתוני שרת (מודעות, ציונים, תוכן) נמשכים עם <strong>TanStack Query</strong> לקאשינג ומצבי טעינה. Zustand מחזיק רק state של הלקוח.</p>
+</section>
+
+<!-- 11 -->
+<section id="s11">
+  <h2><span class="num">11</span>הרשאות</h2>
+  <table>
+    <tr><th>הרשאה</th><th>מתי מבקשים</th><th>לעולם לא</th></tr>
+    <tr><td>מיקום (foreground)</td><td>המשתמש לוחץ על <strong>"קרוב אליי"</strong> במפה</td><td>בפתיחת האפליקציה או בטעינת מסך</td></tr>
+    <tr><td>התראות</td><td>המשתמש מפעיל התראות בחיפושים שמורים או אחרי הזמנה ("עדכנו אותי כשמומחה מגיב")</td><td>בפתיחה הראשונה</td></tr>
+    <tr><td>יומן (אופציונלי)</td><td>המשתמש לוחץ "הוסף ליומן" במסך האישור</td><td>בכל מקרה אחר</td></tr>
+  </table>
+  <p>לפני כל בקשה מוצג מסך הסבר בתוך האפליקציה. אם המשתמש מסרב, האפליקציה ממשיכה לעבוד בצורה מוגבלת (למשל חיפוש עיר ידני).</p>
+</section>
+
+<!-- 12 -->
+<section id="s12">
+  <h2><span class="num">12</span>פרטיות, אבטחה ומשפט</h2>
+  <ul>
+    <li>נתונים פיננסיים ונתוני אשראי הם <strong>מידע אישי רגיש</strong> לפי חוק הגנת הפרטיות הישראלי (כולל תיקון 13). דרישות: הסכמה מפורשת, בדיקת צמצום מידע, הצפנה בתעבורה (TLS) ובמנוחה, בדיקה מתועדת של חובת רישום מאגר, וזכות לעיון ולמחיקת מידע.</li>
+    <li>טוקנים ושדות רגישים נשמרים עם <code>expo-secure-store</code>. פרטי אשראי גולמיים לעולם לא נרשמים בלוגים.</li>
+    <li>נתוני הפרופיל משותפים עם יועצים <strong>רק אחרי הסכמה מפורשת</strong> בתהליך ההזמנה.</li>
+    <li>הצהרות על ציון הפוטנציאל, תוכניות המשכנתא ותוכן הלמידה: לצורכי מידע בלבד, לא ייעוץ פיננסי / משפטי / שמאי.</li>
+    <li>יועצים שותפים צריכים להיות מורשים (למשל מתווכי נדל"ן בעלי רישיון). תהליך האימות טרם נקבע.</li>
+  </ul>
+</section>
+
+<!-- 13 -->
+<section id="s13">
+  <h2><span class="num">13</span>בילדים, עדכונים וסביבות</h2>
+  <ul>
+    <li><strong>Development builds</strong> (<code>expo-dev-client</code>) נדרשים בגלל הקונפיג של <code>react-native-maps</code> (מפתח Google Maps API באנדרואיד) ומודולים נייטיב.</li>
+    <li>פרופילי EAS: <code>development</code>, <code>preview</code> (בדיקות פנימיות), <code>production</code>.</li>
+    <li>ערוצי EAS Update: <code>preview</code>, <code>production</code>.</li>
+    <li><strong>שינויי JS בלבד</strong> (ממשק, טקסטים, תרגומים, לוגיקת תצוגת הציון, תוכן) ← <code>eas update</code>.</li>
+    <li><strong>שינויים נייטיב</strong> (מודול נייטיב חדש, הרשאות, קונפיג אפליקציה, שדרוג SDK, מפתחות מפה) ← <code>eas build</code>.</li>
+    <li>סודות (מפתח Google Maps, מפתחות Supabase) נשמרים במשתני סביבה של EAS. לעולם לא נכנסים לקומיט.</li>
+  </ul>
+</section>
+
+<!-- 14 -->
+<section id="s14">
+  <h2><span class="num">14</span>אבני דרך</h2>
+  <table>
+    <tr><th>שלב</th><th>היקף</th></tr>
+    <tr><td><strong>M0: תשתית</strong></td><td>הקמת Expo SDK 52 + Expo Router v4 + NativeWind v4, אתחול i18n ו-RTL, טוקני עיצוב, קומפוננטות בסיס ב-<code>/components/ui</code>, טאב בר צף, פרויקט EAS</td></tr>
+    <tr><td><strong>M1: אונבורדינג ופרופיל</strong></td><td>דף נחיתה, טופס פרופיל רב-שלבי, שמירה ב-Zustand, יכולת החזר נגזרת</td></tr>
+    <tr><td><strong>M2: מפה ונכסים</strong></td><td>מפה עם קלאסטרים, FlashList ב-bottom sheet, פילטרים, עמוד נכס (עם נתוני דמה)</td></tr>
+    <tr><td><strong>M3: ציון פוטנציאל</strong></td><td>מנוע הציון (שרת + <code>lib/score</code>), כרטיס ציון + צלילה לעומק, אזורי תוכניות / שירותים / תנועה</td></tr>
+    <tr><td><strong>M4: משכנתא</strong></td><td>ספריית חישובי משכנתא + בדיקות, 3 תוכניות, פירוט תוכנית עם גרפים, עלות רכישה כוללת</td></tr>
+    <tr><td><strong>M5: מרכז למידה</strong></td><td>מדריכים + מילון (עברית/אנגלית), חיפוש</td></tr>
+    <tr><td><strong>M6: ייעוץ</strong></td><td>תהליך הזמנה, בקאנד לידים, מעקב סטטוס, CTA בכל האפליקציה</td></tr>
+    <tr><td><strong>M7: נתונים אמיתיים והשקה</strong></td><td>אינטגרציות למקורות מידע, בדיקת פרטיות, הגשה לחנויות</td></tr>
+  </table>
+</section>
+
+<!-- 15 -->
+<section id="s15">
+  <h2><span class="num">15</span>שאלות פתוחות</h2>
+  <ol>
+    <li><strong>גרסת Expo SDK:</strong> הכללים נועלים את Expo Router על <strong>v4</strong> (SDK 52). גרסאות SDK חדשות יותר מגיעות עם גרסאות Router חדשות יותר. להשאיר את הנעילה, או לעדכן את הכלל ל-SDK העדכני?</li>
+    <li><strong>מקור המודעות:</strong> אילו מתווכים או שותפים יספקו מודעות ב-v1? או להשיק עם מאגר נתונים אצור בעיר אחת קודם (למשל תל אביב / רמת גן / חיפה)?</li>
+    <li><strong>בקאנד:</strong> האם Supabase + PostGIS מאושר, או שיש בקאנד מועדף?</li>
+    <li><strong>יועצים:</strong> צוות פנימי או רשת שותפים? איך הלידים מנותבים ומניבים הכנסה (תשלום קבוע, עמלת הפניה, עמלת הצלחה)?</li>
+    <li><strong>אימות משתמשים:</strong> OTP בטלפון (נפוץ בישראל), כניסה עם Google/Apple, או שניהם? האם אפשר לגלוש באופן אנונימי?</li>
+    <li><strong>דירוג אשראי:</strong> דיווח עצמי בלבד, או אינטגרציה עם לשכת אשראי מורשית בהמשך?</li>
+    <li><strong>שפות נוספות:</strong> רוסית / צרפתית / ערבית בשלב מאוחר יותר?</li>
+    <li><strong>עיצוב:</strong> לאשר את הפלטה והטיפוגרפיה המדויקות מהרפרנס ב-Dribbble, או להכין קובץ Figma קודם?</li>
+  </ol>
+</section>
+
+<footer>אפיון v0.1 · 04.10.2026 · נוצר מתוך <span class="ltr">spec.md</span></footer>
+
+</main>
+</div>
+</body>
+</html>
