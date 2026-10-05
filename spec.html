@@ -324,7 +324,7 @@ global.css             # Tailwind directives</code></pre>
   <h2><span class="num">4</span>פיצ'רים</h2>
 
   <h3>4.1 דף נחיתה ופרופיל רוכש (אונבורדינג)</h3>
-  <p><strong>מסך פתיחה / נחיתה:</strong> איור hero, הצעת הערך, מתג שפה (עברית / English), וכפתורי "בואו נתחיל" ו"כבר יש לי חשבון". המשתמש יכול לבחור <strong>"דלג — רק לגלוש במפה"</strong>. אפשר להשלים את הפרופיל מאוחר יותר. תוכניות המשכנתא והזמנת הייעוץ יבקשו להשלים אותו.</p>
+  <p><strong>מסך פתיחה / נחיתה:</strong> איור hero, הצעת הערך, מתג שפה (עברית / English), וכפתורי "בואו נתחיל" ו"כבר יש לי חשבון". <strong>חשבון חובה לפני כל דבר, כולל המפה</strong> (OTP בטלפון, ראו <code>backend-spec.md</code> §5). מסך הפתיחה מסביר מה החשבון נותן (התאמה אישית, יכולת מימון, התראות) לפני שמבקשים טלפון. אחרי הכניסה המשתמש יכול לבחור <strong>"דלג על הפרופיל — רק לגלוש במפה"</strong>. אפשר להשלים את הפרופיל מאוחר יותר. תוכניות המשכנתא, ההתראות והזמנת הייעוץ יבקשו להשלים אותו.</p>
   <p>טופס רב-שלבי עם מחוון התקדמות, נושא אחד בכל מסך. כל שלב נשמר ב-Zustand store תוך כדי, כך שאפשר לצאת ולחזור.</p>
   <table>
     <tr><th>שלב</th><th>שדות</th><th>הערות</th></tr>
@@ -466,7 +466,7 @@ global.css             # Tailwind directives</code></pre>
   <ul>
     <li>עריכת פרופיל הרוכש (מריץ מחדש את החישובים הנגזרים).</li>
     <li>שפה: עברית / English (ראו §6 למעבר RTL).</li>
-    <li>חיפושים שמורים והתראות (v1.1: התראות על נכסים חדשים שתואמים לפילטרים / ציון מעל X).</li>
+    <li>התראות: הודעה אישית כשנכס חדש מתאים לפרופיל של המשתמש (הכנסה, הון עצמי, סוג קונה, מס רכישה), וירידות מחיר בנכסים שמורים. המשתמש בוחר ערוצים (אפליקציה, פוש, מייל, SMS, WhatsApp), תדירות ושעות שקט. ראו <code>backend-spec.md</code> §9.</li>
     <li>בקשות ייעוץ והסטטוס שלהן.</li>
     <li>פרטיות: ייצוא נתונים, מחיקת חשבון.</li>
     <li>משפטי: תנאי שימוש, מדיניות פרטיות, הצהרות.</li>
@@ -591,15 +591,15 @@ global.css             # Tailwind directives</code></pre>
     <tr><td>שירותים / נקודות עניין</td><td>Google Places API או OpenStreetMap (Overpass)</td><td>חנויות, בתי ספר, פארקים</td></tr>
     <tr><td>תנועה</td><td>Google Routes / Distance Matrix (מודע תנועה), Waze for Cities</td><td>עומס בשעות השיא</td></tr>
     <tr><td>דמוגרפיה</td><td>הלשכה המרכזית לסטטיסטיקה (הלמ"ס)</td><td>אשכול חברתי-כלכלי</td></tr>
-    <tr><td>ריביות משכנתא</td><td>ריביות ממוצעות שמפרסם בנק ישראל</td><td>מנוהל על ידי אדמין בבקאנד</td></tr>
+    <tr><td>ריביות משכנתא</td><td>ריביות ממוצעות שמפרסם בנק ישראל (אין ריבית לפי בנק ב־v1)</td><td>נמשך ע״י n8n (<code>backend-spec.md</code> §6)</td></tr>
   </table>
   <p>קליטת הנתונים מתבצעת כ<strong>ג'ובים מתוזמנים בבקאנד</strong>, לא באפליקציה. האפליקציה פונה רק ל-API של הבקאנד.</p>
 </section>
 
 <!-- 9 -->
 <section id="s9">
-  <h2><span class="num">9</span>בקאנד ומודל נתונים (הצעה)</h2>
-  <p><strong>בקאנד מוצע:</strong> Supabase (Postgres + <strong>PostGIS</strong> לשאילתות גיאוגרפיות + Auth + Edge Functions + Storage). חלופה: API מותאם ב-Node. ראו שאלות פתוחות.</p>
+  <h2><span class="num">9</span>בקאנד ומודל נתונים</h2>
+  <p><strong>בקאנד:</strong> Supabase (Postgres + <strong>PostGIS</strong> + Auth + Edge Functions + Storage + Queues), ו־<strong>n8n self-hosted</strong> לקליטת דאטה. האפיון המלא נמצא ב־<strong><code>backend-spec.md</code></strong> (בעברית: <code>backend-spec.html</code>). הישויות כאן הן הצורות שהאפליקציה רואה.</p>
   <h4>ישויות מרכזיות</h4>
 <pre><code>type Property = {
   id: string;
@@ -746,6 +746,7 @@ type LocalizedText = { he: string; en: string };</code></pre>
     <tr><td><strong>M4: משכנתא</strong></td><td>ספריית חישובי משכנתא + בדיקות, 3 תוכניות, פירוט תוכנית עם גרפים, עלות רכישה כוללת</td></tr>
     <tr><td><strong>M5: מרכז למידה</strong></td><td>מדריכים + מילון (עברית/אנגלית), חיפוש</td></tr>
     <tr><td><strong>M6: ייעוץ</strong></td><td>תהליך הזמנה, בקאנד לידים, מעקב סטטוס, CTA בכל האפליקציה</td></tr>
+    <tr><td><strong>M6.5: התראות</strong></td><td>חשבון וסנכרון פרופיל, העדפות התראה וערוצים, תיבת התראות, פוש, ואחר כך מייל, SMS ו־WhatsApp, כרטיס "למה זה מתאים לך" (בקאנד: <code>backend-spec.md</code> §16, B5)</td></tr>
     <tr><td><strong>M7: נתונים אמיתיים והשקה</strong></td><td>אינטגרציות למקורות מידע, בדיקת פרטיות, הגשה לחנויות</td></tr>
   </table>
 </section>
@@ -756,9 +757,9 @@ type LocalizedText = { he: string; en: string };</code></pre>
   <ol>
     <li><s><strong>גרסת Expo SDK</strong></s> <strong>נפתר (v0.2):</strong> עוקבים אחרי ה-SDK היציב העדכני (כרגע 57). ראו מדיניות הגרסאות ב-§2.</li>
     <li><strong>מקור המודעות:</strong> אילו מתווכים או שותפים יספקו מודעות ב-v1? או להשיק עם מאגר נתונים אצור בעיר אחת קודם (למשל תל אביב / רמת גן / חיפה)?</li>
-    <li><strong>בקאנד:</strong> האם Supabase + PostGIS מאושר, או שיש בקאנד מועדף?</li>
+    <li><s><strong>בקאנד</strong></s> <strong>נפתר:</strong> Supabase + PostGIS + n8n self-hosted. ראו <code>backend-spec.md</code>.</li>
     <li><strong>יועצים:</strong> צוות פנימי או רשת שותפים? איך הלידים מנותבים ומניבים הכנסה (תשלום קבוע, עמלת הפניה, עמלת הצלחה)?</li>
-    <li><strong>אימות משתמשים:</strong> OTP בטלפון (נפוץ בישראל), כניסה עם Google/Apple, או שניהם? האם אפשר לגלוש באופן אנונימי?</li>
+    <li><s><strong>אימות משתמשים</strong></s> <strong>נפתר:</strong> חשבון חובה לכל דבר, כולל המפה. כניסה עם OTP בטלפון (Twilio Verify), בלי גלישה אנונימית. הסיכון מול הנחיה 5.1.1 של App Store מקובל, והדרך להקטין אותו מתוארת ב־<code>backend-spec.md</code> §5.</li>
     <li><strong>דירוג אשראי:</strong> דיווח עצמי בלבד, או אינטגרציה עם לשכת אשראי מורשית בהמשך?</li>
     <li><strong>שפות נוספות:</strong> רוסית / צרפתית / ערבית בשלב מאוחר יותר?</li>
     <li><strong>עיצוב:</strong> כיוון "Orbit" אומץ (§7). להכין קובץ Figma לרגעי החתימה (טבעת ציון, סמני מפה, עמוד נכס) לפני M2–M3?</li>

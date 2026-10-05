@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>אפיון בקאנד — Nadlan Score (Supabase + n8n)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Same "Orbit" palette as spec.html. */
+  :root {
+    --primary: #6E7BFF; --plasma: #3EE6FF; --bg: #05060B; --card: #0E101A; --surface: #161926;
+    --fg: #F0F3FF; --muted: #8B93B0; --border: #222638;
+    --aurora: #0A2622; --solar: #2C1C0E; --nebula: #1C163C; --ion: #0A1C34;
+    --good: #34D399; --warn: #FBBF24; --bad: #F87171;
+    --radius: 24px; --glow: 0 0 32px rgba(110, 123, 255, .25);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; font-family: 'Rubik', 'Heebo', 'Segoe UI', Arial, sans-serif;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(110,123,255,.22), transparent 70%),
+      radial-gradient(ellipse 50% 40% at 100% 0%, rgba(62,230,255,.08), transparent 70%),
+      var(--bg);
+    background-attachment: fixed; color: var(--fg); line-height: 1.7; font-size: 16px;
+  }
+  .layout { display: flex; gap: 32px; max-width: 1280px; margin: 0 auto; padding: 32px 24px; align-items: flex-start; }
+  nav.toc {
+    position: sticky; top: 24px; flex: 0 0 250px;
+    background: rgba(14,16,26,.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(240,243,255,.08); border-radius: var(--radius); padding: 24px;
+    max-height: calc(100vh - 48px); overflow-y: auto;
+  }
+  nav.toc h2 { font-size: 15px; margin: 0 0 12px; color: var(--muted); font-weight: 600; }
+  nav.toc ol { list-style: none; padding: 0; margin: 0; }
+  nav.toc a { display: block; padding: 6px 12px; border-radius: 999px; color: var(--fg); text-decoration: none; font-size: 14px; transition: background .2s, color .2s; }
+  nav.toc a:hover { background: var(--nebula); color: var(--plasma); }
+  main { flex: 1; min-width: 0; }
+  header.hero {
+    background: linear-gradient(135deg, rgba(110,123,255,.9), rgba(62,230,255,.75));
+    color: #fff; border-radius: 28px; padding: 40px; margin-bottom: 24px; box-shadow: 0 0 60px rgba(110,123,255,.35);
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 34px; font-weight: 700; }
+  header.hero p { margin: 0; opacity: .92; }
+  .pill { display: inline-block; background: rgba(5,6,11,.25); padding: 4px 14px; border-radius: 999px; font-size: 13px; margin-top: 16px; margin-inline-end: 8px; }
+  section { background: var(--card); border: 1px solid rgba(240,243,255,.06); border-radius: var(--radius); padding: 32px; margin-bottom: 24px; }
+  h2 { font-size: 24px; margin: 0 0 16px; font-weight: 600; }
+  h2 .num { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 12px; background: var(--bg); border: 1px solid rgba(110,123,255,.5); box-shadow: var(--glow); color: var(--plasma); font-size: 16px; margin-inline-end: 10px; }
+  h3 { font-size: 19px; margin: 28px 0 10px; font-weight: 600; }
+  p { margin: 8px 0; }
+  ul, ol { padding-inline-start: 22px; }
+  li { margin: 4px 0; }
+  li::marker { color: var(--primary); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 12px 0 16px; font-size: 14.5px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  th, td { text-align: start; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: var(--surface); font-weight: 600; color: var(--muted); }
+  tr:last-child td { border-bottom: none; }
+  code { font-family: 'JetBrains Mono', Consolas, monospace; background: var(--surface); color: #C9D0FF; padding: 1px 6px; border-radius: 6px; font-size: 13.5px; direction: ltr; unicode-bidi: isolate; }
+  pre { direction: ltr; text-align: left; background: #020308; color: #E2E8F0; padding: 20px; border-radius: 16px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); }
+  pre code { background: none; padding: 0; color: inherit; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin: 16px 0; }
+  .option { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+  .option h3 { margin-top: 0; }
+  .option.best { border-color: rgba(52,211,153,.6); box-shadow: 0 0 32px rgba(52,211,153,.18); }
+  .tag { display: inline-block; font-size: 12px; padding: 2px 10px; border-radius: 999px; margin-inline-end: 6px; font-weight: 600; }
+  .tag.good { background: rgba(52,211,153,.15); color: var(--good); }
+  .tag.warn { background: rgba(251,191,36,.15); color: var(--warn); }
+  .tag.bad { background: rgba(248,113,113,.15); color: var(--bad); }
+  .pro { color: var(--good); } .con { color: var(--bad); }
+  .callout { border-radius: 18px; padding: 18px 22px; margin: 16px 0; border: 1px solid; }
+  .callout.rec { background: var(--aurora); border-color: rgba(52,211,153,.4); }
+  .callout.warn { background: var(--solar); border-color: rgba(251,191,36,.4); }
+  .callout.info { background: var(--ion); border-color: rgba(62,230,255,.35); }
+  .callout strong:first-child { display: block; margin-bottom: 4px; }
+  .flow { display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; margin: 16px 0; }
+  .flow .box { flex: 1 1 160px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px; font-size: 14px; }
+  .flow .box b { display: block; color: var(--plasma); margin-bottom: 4px; }
+  .flow .arrow { align-self: center; color: var(--primary); font-size: 22px; }
+  @media (max-width: 900px) { .layout { flex-direction: column; } nav.toc { position: static; width: 100%; flex: none; max-height: none; } }
+  .flow.v { flex-direction: column; }
+  .flow.v .arrow { transform: rotate(-90deg); }
+  .changed { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 999px; background: rgba(62,230,255,.15); color: var(--plasma); margin-inline-start: 6px; vertical-align: middle; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="toc">
+  <h2>תוכן עניינים</h2>
+  <ol>
+    <li><a href="#s1">1. החלטות</a></li>
+    <li><a href="#s2">2. מבט על</a></li>
+    <li><a href="#s3">3. סביבות ומבנה ריפו</a></li>
+    <li><a href="#s4">4. סכמות וטבלאות</a></li>
+    <li><a href="#s5">5. הזדהות</a></li>
+    <li><a href="#s6">6. החוזים מול n8n</a></li>
+    <li><a href="#s7">7. מנוע דומיין משותף</a></li>
+    <li><a href="#s8">8. צנרת אירועים</a></li>
+    <li><a href="#s9">9. התראות</a></li>
+    <li><a href="#s10">10. API לאפליקציה</a></li>
+    <li><a href="#s11">11. הרשאות (RLS)</a></li>
+    <li><a href="#s12">12. אבטחה ופרטיות</a></li>
+    <li><a href="#s13">13. תפעול n8n</a></li>
+    <li><a href="#s14">14. ניטור</a></li>
+    <li><a href="#s15">15. עלויות</a></li>
+    <li><a href="#s16">16. אבני דרך</a></li>
+    <li><a href="#s17">17. שאלות פתוחות</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="hero">
+  <h1>אפיון בקאנד: Supabase + n8n (self-hosted)</h1>
+  <p>מקור האמת לבקאנד. יש לקרוא לפני כל migration, Edge Function או workflow. הגרסה האנגלית (<code>backend-spec.md</code>) היא זו שקוד נכתב מולה.</p>
+  <span class="pill">Nadlan Score</span>
+  <span class="pill">טיוטה v1.1 · 2026-10-05</span>
+  <span class="pill">משלים את spec.md ואת data-architecture.html</span>
+</header>
+
+<section id="s1">
+  <h2><span class="num">1</span>החלטות (סגורות)</h2>
+  <table>
+    <tr><th>#</th><th>נושא</th><th>החלטה</th></tr>
+    <tr><td>1</td><td>פלטפורמת בקאנד</td><td><b>Supabase Cloud</b>: Postgres + PostGIS, Auth, Storage, Edge Functions, Queues (pgmq), pg_cron, pg_net</td></tr>
+    <tr><td>2</td><td>תפקיד n8n</td><td><b>n8n self-hosted</b> (Docker על VPS) עם שני תפקידים: (א) <b>קליטת</b> דאטה חיצוני, (ב) <b>שליחת SMS ו־WhatsApp דרך Twilio</b>. n8n לא קורא פרופילים ולא מחליט למי, מתי ומה שולחים</td></tr>
+    <tr><td>3</td><td>לוגיקה עסקית</td><td>בשרת, ב<b>חבילת דומיין אחת ב־TS טהור</b> (<code>lib/domain</code>) שמשמשת את האפליקציה, את ה־Edge Functions ואת הטסטים</td></tr>
+    <tr><td>4</td><td>חשבונות</td><td><b>חשבון חובה לכל דבר, כולל גלישה במפה.</b> אין גישה אנונימית</td></tr>
+    <tr><td>5</td><td>ריביות משכנתא</td><td>ממוצעים ציבוריים בלבד (בנק ישראל). אין ריבית לפי בנק ב־v1</td></tr>
+    <tr><td>6</td><td>ערוצי התראה</td><td><b>באפליקציה, פוש ומייל</b> נשלחים מהשרת. <b>SMS ו־WhatsApp</b> נשלחים ע״י n8n דרך <b>Twilio</b>. כל משתמש בוחר לכל ערוץ</td></tr>
+    <tr><td>7</td><td>משפטי</td><td>פרטיות (תיקון 13) וחוק הספאם (חוק התקשורת, סעיף 30א) נבדקים מול עורך הדין לפני השקת ההתראות</td></tr>
+  </table>
+  <div class="callout rec"><strong>עיקרון מרכזי</strong>n8n מכניס דאטה ומוציא הודעות. השרת מחליט מה הדאטה אומר, מי שומע עליו ומה בדיוק נאמר לו.</div>
+</section>
+
+<section id="s2">
+  <h2><span class="num">2</span>מבט על</h2>
+  <div class="flow">
+    <div class="box"><b>מקורות חיצוניים</b>פידים של שותפים · nadlan.gov.il · iplan · GTFS · OSM · בנק ישראל · הלמ״ס</div>
+    <div class="arrow">←</div>
+    <div class="box"><b>n8n (VPS)</b>Cron, HTTP, נרמול. תפקיד DB: <code>n8n_ingest</code></div>
+    <div class="arrow">←</div>
+    <div class="box"><b>פונקציות <code>ingest.*</code></b>ולידציה, hash, upsert, פליטת אירועים</div>
+    <div class="arrow">←</div>
+    <div class="box"><b>תורים + Workers</b>pg_cron כל דקה → Edge Functions: score · match · digest · dispatch</div>
+    <div class="arrow">←</div>
+    <div class="box"><b>יציאה</b>שרת: האפליקציה (PostgREST + RLS), Expo Push, מייל · n8n: SMS ו־WhatsApp דרך Twilio (פונקציות <code>delivery.*</code>)</div>
+  </div>
+  <table>
+    <tr><th>רכיב</th><th>איפה</th><th>אחריות</th></tr>
+    <tr><td>Postgres</td><td>Supabase Cloud (Pro)</td><td>כל הדאטה, PostGIS, RLS, triggers, תורים, cron</td></tr>
+    <tr><td>Auth</td><td>Supabase</td><td>כניסה עם OTP בטלפון, sessions, JWT ל־RLS</td></tr>
+    <tr><td>Storage</td><td>Supabase</td><td>תמונות נכסים, קבצי GTFS, ייצוא נתוני משתמש</td></tr>
+    <tr><td>Edge Functions (Deno)</td><td>Supabase</td><td>Workers, API לעמוד נכס, מחיקת חשבון, webhooks של ספק המייל</td></tr>
+    <tr><td>n8n</td><td>VPS (Docker Compose)</td><td>קליטה מתוזמנת, ושליחת SMS ו־WhatsApp דרך Twilio (§6.4)</td></tr>
+    <tr><td>ספקי הודעות</td><td>SaaS</td><td>Expo Push ומייל (השרת קורא להם), Twilio SMS ו־WhatsApp (n8n קורא), Twilio Verify ל־OTP (Supabase Auth קורא)</td></tr>
+  </table>
+  <p><b>אזור:</b> האזור באירופה הקרוב לישראל (למשל פרנקפורט). יש לאשר מול עורך הדין את העברת המידע לחו״ל.</p>
+</section>
+
+<section id="s3">
+  <h2><span class="num">3</span>סביבות ומבנה ריפו</h2>
+  <table>
+    <tr><th>סביבה</th><th>Supabase</th><th>n8n</th><th>אפליקציה</th></tr>
+    <tr><td><code>local</code></td><td><code>supabase start</code> (Docker)</td><td>Docker מקומי מול ה־DB המקומי</td><td>dev build, <code>.env.local</code></td></tr>
+    <tr><td><code>staging</code></td><td>פרויקט נפרד</td><td>אותו VPS, מופע או credentials נפרדים</td><td>ערוץ EAS <code>preview</code></td></tr>
+    <tr><td><code>production</code></td><td>פרויקט נפרד</td><td>n8n של פרודקשן</td><td>ערוץ EAS <code>production</code></td></tr>
+  </table>
+<pre><code>/lib/domain/          # pure TS — NO react-native / expo / node imports
+  types.ts  score/  mortgage/  tax/  match/  regulation/
+/lib/api/             # app repositories (TanStack Query calls these)
+/supabase/
+  migrations/  seed.sql  config.toml
+  functions/
+    _shared/  worker-score/  worker-match/  worker-digest/  worker-dispatch/
+    property-detail/  delete-account/  export-account/  webhook-email/
+/n8n/
+  workflows/*.json  docker-compose.yml  Caddyfile  .env.example</code></pre>
+  <ul>
+    <li><b>כלל הקוד המשותף:</b> כל מה שב־<code>lib/domain</code> חייב לרוץ בלי שינוי ב־Hermes (אפליקציה), ב־Deno (Edge Functions) וב־Jest. בלי imports של פלטפורמה, בלי <code>Date.now()</code> בתוך חישובים (מעבירים <code>now</code> כפרמטר), ובלי I/O.</li>
+    <li><b>Spike ב־B0:</b> לאמת איך ה־Edge Functions מייבאות את <code>lib/domain</code> (import map שמצביע החוצה, או העתקה ל־<code>_shared/domain</code> לפני deploy), ולתעד את הבחירה.</li>
+    <li><b>טיפוסים:</b> <code>supabase gen types typescript</code> → <code>lib/api/database.types.ts</code>, ומיוצרים מחדש ב־CI בכל migration.</li>
+  </ul>
+</section>
+
+<section id="s4">
+  <h2><span class="num">4</span>סכמות וטבלאות</h2>
+  <table>
+    <tr><th>סכמה</th><th>חשופה ב־API</th><th>תוכן</th></tr>
+    <tr><td><code>public</code></td><td>כן (RLS על כל טבלה)</td><td>נכסים, ציונים, תוכניות, תוכן, פרופיל, העדפות, התאמות, תיבת התראות</td></tr>
+    <tr><td><code>ingest</code></td><td>לא</td><td>פונקציות שרק <code>n8n_ingest</code> מריץ, <code>ingestion_runs</code></td></tr>
+    <tr><td><code>delivery</code></td><td>לא</td><td>פונקציות שרק <code>n8n_delivery</code> מריץ (§6.4)</td></tr>
+    <tr><td><code>internal</code></td><td>לא</td><td>outbox, יומן הסכמות, היסטוריית קונפיג</td></tr>
+    <tr><td><code>pgmq</code></td><td>לא</td><td>תורים</td></tr>
+  </table>
+
+  <h3>4.1 דאטה של שוק ונכסים (נכתב ע״י ingest)</h3>
+  <p><code>properties</code> לפי spec.md §9, עם תוספות: <code>source</code> + <code>source_id</code> (ייחודי), <code>location geography(point)</code> עם אינדקס GiST, <code>content_hash</code> לזיהוי שינויים, <code>first_seen_at</code> / <code>last_seen_at</code> ו־<code>price_history</code>. ה־DDL המלא נמצא בגרסה האנגלית.</p>
+  <table>
+    <tr><th>טבלה</th><th>עמודות עיקריות</th></tr>
+    <tr><td><code>deals</code></td><td>תאריך, מחיר, מ״ר, חדרים, מיקום, עיר, שכונה, גוש/חלקה</td></tr>
+    <tr><td><code>city_plans</code></td><td>מספר תוכנית, שם, סטטוס, סוג, פוליגון, תאריך אישור</td></tr>
+    <tr><td><code>transit_stops</code></td><td>סוג (אוטובוס / רכבת / רק״ל / מטרו), מתוכנן?, מיקום</td></tr>
+    <tr><td><code>pois</code></td><td>קטגוריה, שם, מיקום</td></tr>
+    <tr><td><code>stat_areas</code></td><td>אזור סטטיסטי של הלמ״ס + אשכול חברתי־כלכלי</td></tr>
+    <tr><td><code>mortgage_rates</code></td><td>מסלול, טווח שנים, ריבית, חודש, מקור</td></tr>
+    <tr><td><code>macro_rates</code></td><td>ריבית בנק ישראל, פריים (= ריבית בנק ישראל + 1.5%), מדד</td></tr>
+  </table>
+
+  <h3>4.2 דאטה נגזר (נכתב רק ע״י השרת)</h3>
+  <table>
+    <tr><td><code>neighborhood_market_stats</code></td><td>Materialized View: חציון מחיר למ״ר, מגמה של 1/3/5 שנים, מספר עסקאות</td></tr>
+    <tr><td><code>property_scores</code></td><td>ציון לכל נכס ולכל גרסת אלגוריתם</td></tr>
+    <tr><td><code>property_context</code></td><td>inputs שמורים לכל נכס (תוכניות, תחנות, POIs, עסקאות דומות) לעמוד הנכס ולציון</td></tr>
+  </table>
+
+  <h3>4.3 קונפיגורציה (מנוהלת ע״י admin, עם גרסאות)</h3>
+  <table>
+    <tr><td><code>regulation_config</code></td><td>LTV מקסימלי לפי סוג קונה, יחס החזר מקסימלי, מגבלות תמהיל, תקופה מקסימלית</td></tr>
+    <tr><td><code>tax_brackets</code></td><td>מדרגות מס רכישה לפי שנה וסוג קונה. מתעדכן בכל ינואר</td></tr>
+    <tr><td><code>score_config</code></td><td>משקולות וספים לכל גרסת אלגוריתם</td></tr>
+    <tr><td><code>system_config</code></td><td>מגבלות התראות, שעות שקט, שעות digest, טולרנס מחיר להתאמה</td></tr>
+  </table>
+  <p>כל שינוי בקונפיג נרשם ב־<code>internal.config_audit</code> ומפעיל חישוב מחדש (§8).</p>
+
+  <h3>4.4 דאטה של משתמשים</h3>
+  <table>
+    <tr><th>טבלה</th><th>תוכן</th></tr>
+    <tr><td><code>buyer_profiles</code></td><td>הפרופיל מ־spec.md §9. נשמר רק אם <code>server_sync_consent = true</code>. שמות וגילאים אופציונליים</td></tr>
+    <tr><td><code>buyer_derived</code></td><td>מחושב מראש: סוג קונה, LTV מקסימלי, מזומן זמין, החזר חודשי מקסימלי, הלוואה מקסימלית, <b>מחיר מקסימלי</b> (אחרי מס ועלויות נלוות), וגרסאות של הקלטים</td></tr>
+    <tr><td><code>alert_preferences</code></td><td>ערים או אזור משורטט, חדרים, סוגי נכס, ציון מינימלי, ירידות מחיר, "נכנס לטווח"</td></tr>
+    <tr><td><code>channel_preferences</code></td><td>לכל ערוץ: פעיל, תדירות (מיידי / יומי / שבועי / כבוי), מקסימום ליום, כתובת, תאריך אימות</td></tr>
+    <tr><td><code>quiet_hours</code></td><td>התחלה, סוף, שמירת שבת (ברירת מחדל: כן), אזור זמן</td></tr>
+    <tr><td><code>push_tokens</code></td><td>Expo token לכל מכשיר</td></tr>
+    <tr><td><code>saved_properties</code></td><td>נכסים שמורים</td></tr>
+    <tr><td><code>matches</code></td><td>התאמה לכל צמד של משתמש ונכס: החזר חודשי, פער הון, יחס החזר, מס רכישה, סיבות</td></tr>
+    <tr><td><code>notifications</code></td><td>תיבת ההתראות באפליקציה</td></tr>
+    <tr><td><code>leads</code></td><td>לפי spec.md §9</td></tr>
+    <tr><td><code>internal.consents</code></td><td>יומן הסכמות append-only (סוג, ערוץ, נוסח, מקור, זמן). זו הראיה לחוק הספאם ולחוק הפרטיות</td></tr>
+    <tr><td><code>internal.notification_outbox</code></td><td>הודעות לשליחה: ערוץ, תבנית, payload, <code>dedupe_key</code> ייחודי, סטטוס (ממתין / מוחזק / נלקח / נשלח / נמסר / נכשל / דולג), <code>send_after</code>, ניסיונות, מזהה ספק</td></tr>
+  </table>
+</section>
+
+<section id="s5">
+  <h2><span class="num">5</span>הזדהות</h2>
+  <ul>
+    <li><b>חשבון חובה, בלי גישה אנונימית.</b> כל מסך, כולל המפה, דורש משתמש מחובר. כניסה עם <b>OTP בטלפון</b> (Supabase Auth). ממילא צריך טלפון מאומת ל־SMS ול־WhatsApp, זה הנורמה בישראל, ולידים דורשים טלפון.</li>
+    <li><b>ספק ה־OTP הוא Twilio</b> (האינטגרציה המובנית של Supabase Auth עם Twilio / Twilio Verify), ומוגדר ישירות ב־Supabase. ה־OTP <b>לא</b> עובר דרך n8n, כדי שהכניסה לא תהיה תלויה בשרת ה־VPS.</li>
+    <li><b>מייל</b> הוא אופציונלי, ומאומת ב־OTP לפני שערוץ המייל נפתח.</li>
+    <li><b>Apple / Google:</b> לא ב־v1. אם יתווספו בעתיד, חובה להציע גם Sign in with Apple ב־iOS.</li>
+    <li><b>Session</b> נשמר לפי מדריך Supabase ל־Expo, עם <code>expo-sqlite/localStorage</code>.</li>
+    <li><b>מחיקת חשבון מתוך האפליקציה</b> היא דרישה של App Store: Edge Function בשם <code>delete-account</code>.</li>
+  </ul>
+  <div class="callout warn">
+    <strong>סיכון App Store (מקובל עלינו)</strong>
+    הנחיה 5.1.1 של Apple לא אוהבת חובת הרשמה לפיצ'רים שלא צריכים חשבון. מה שמקטין את הסיכון: מסך הפתיחה מסביר מה החשבון נותן (התאמה אישית, יכולת מימון, התראות) לפני שמבקשים טלפון, ובהערות לבודקים מצרפים חשבון דמו. אם בכל זאת תהיה דחייה, הגיבוי הוא מפה ציבורית לקריאה בלבד: שינוי של policy אחת ב־RLS (§11), בלי שינוי סכמה.
+  </div>
+</section>
+
+<section id="s6">
+  <h2><span class="num">6</span>החוזים מול n8n (קליטה ושליחה)</h2>
+  <h3>6.1 גישה</h3>
+  <ul>
+    <li>n8n מתחבר ל־Postgres דרך ה־pooler של Supabase ב־TLS, עם התפקיד <b><code>n8n_ingest</code></b>.</li>
+    <li>ל־<code>n8n_ingest</code> יש רק <b>EXECUTE על פונקציות <code>ingest.*</code></b>: אין הרשאות ישירות לטבלאות, ואין גישה ל־<code>auth</code>, לטבלאות משתמשים או ל־<code>internal</code>.</li>
+    <li>n8n לא משתמש אף פעם במפתח <code>service_role</code>.</li>
+  </ul>
+  <h3>6.2 פונקציות ingest</h3>
+  <p>כל פונקציה היא <code>SECURITY DEFINER</code>, מקבלת batch של עד 500 שורות, מוודאת כל שורה ומחזירה <code>{inserted, updated, unchanged, rejected}</code>.</p>
+  <table>
+    <tr><th>פונקציה</th><th>מה עושה</th></tr>
+    <tr><td><code>start_run</code> / <code>finish_run</code></td><td>פתיחה וסגירה של ריצה ב־<code>ingestion_runs</code></td></tr>
+    <tr><td><code>upsert_properties</code></td><td>מחשבת hash. אם לא השתנה, מעדכנת רק <code>last_seen_at</code>. נכס חדש פולט <code>property.created</code>. מחיר שירד נשמר בהיסטוריה ופולט <code>property.price_dropped</code></td></tr>
+    <tr><td><code>mark_missing_properties</code></td><td>נכס שלא הופיע N ריצות מסומן off_market ופולט <code>property.removed</code></td></tr>
+    <tr><td><code>upsert_deals</code></td><td>בסוף הריצה מרעננת את סטטיסטיקות השוק</td></tr>
+    <tr><td><code>upsert_city_plans</code>, <code>transit_stops</code>, <code>pois</code>, <code>stat_areas</code></td><td>GeoJSON → PostGIS</td></tr>
+    <tr><td><code>upsert_mortgage_rates</code>, <code>upsert_macro_rates</code></td><td>שינוי פולט <code>rates.changed</code></td></tr>
+  </table>
+  <p><b>ולידציה:</b> קואורדינטות בתוך ישראל, מחיר וגודל בטווח סביר, מחיר למ״ר עד פי 5 מהחציון בשכונה, וערכי enum מוכרים.</p>
+  <h3>6.3 Workflows</h3>
+  <table>
+    <tr><th>Workflow</th><th>תזמון</th></tr>
+    <tr><td><code>listings-&lt;partner&gt;</code></td><td>כל 15–60 דק׳</td></tr>
+    <tr><td><code>deals-nadlan</code>, <code>plans-iplan</code></td><td>שבועי</td></tr>
+    <tr><td><code>transit-gtfs</code>, <code>pois-osm</code>, <code>cpi-cbs</code></td><td>חודשי</td></tr>
+    <tr><td><code>rates-boi</code></td><td>בדיקה יומית. הדאטה משתנה פעם בחודש, ריבית בנק ישראל בימי החלטה</td></tr>
+    <tr><td><code>stat-areas-cbs</code></td><td>שנתי או ידני</td></tr>
+    <tr><td><code>_error-handler</code></td><td>בכל כשל: טלגרם או מייל ל־admin (רק דאטה תפעולי)</td></tr>
+  </table>
+  <p><b>כללים:</b> upsert idempotent בלבד, בלי לוגיקה עסקית, workflows של קליטה לא נוגעים בדאטה של משתמשים, ייצוא ל־<code>n8n/workflows/</code> בכל שינוי, ואסור scraping ל־Yad2 או ל־Madlan.</p>
+
+  <h3>6.4 חוזה השליחה (SMS ו־WhatsApp דרך Twilio)</h3>
+  <p>השרת עושה הכול עד לנקודה של "את ההודעה המדויקת הזו שולחים עכשיו לטלפון הזה". n8n רק שולח ומדווח בחזרה.</p>
+  <p><b>גישה:</b> תפקיד DB שני, <b><code>n8n_delivery</code></b>, עם EXECUTE רק על פונקציות <code>delivery.*</code>, ו־credentials נפרדים מ־<code>n8n_ingest</code>. אין הרשאות לטבלאות.</p>
+  <table>
+    <tr><th>פונקציה</th><th>מה עושה</th></tr>
+    <tr><td><code>delivery.claim(channel, max)</code></td><td>לוקחת באופן אטומי הודעות שהגיע זמנן (<code>FOR UPDATE SKIP LOCKED</code>), <b>בודקת שוב הסכמה והסרה ברגע הלקיחה</b> ומסמנת אותן <code>claimed</code>. מחזירה רק <code>{id, טלפון, טקסט}</code> ל־SMS, או <code>{id, טלפון, content_sid, משתנים}</code> ל־WhatsApp</td></tr>
+    <tr><td><code>delivery.report(id, ok, twilio_sid, error)</code></td><td>מסמנת נשלח, או מחזירה לתור עם backoff. אחרי 5 ניסיונות: נכשל</td></tr>
+    <tr><td><code>delivery.status_callback(...)</code></td><td>סטטוס מסירה מ־Twilio (נמסר / לא נמסר / נכשל)</td></tr>
+    <tr><td><code>delivery.opt_out(phone, channel, keyword)</code></td><td>"הסר", STOP או "ביטול" נכנסים מבטלים את ההסכמה ואת הערוץ</td></tr>
+    <tr><td><code>delivery.opt_in(...)</code></td><td>START ב־WhatsApp, למי שכבר הסכים בעבר</td></tr>
+  </table>
+  <p>הודעה שנלקחה ולא דווחה תוך 10 דקות חוזרת לתור, כך ש־n8n שקרס באמצע לא מאבד הודעות. ה־<code>dedupe_key</code> וה־claim מונעים שליחה כפולה.</p>
+  <table>
+    <tr><th>Workflow</th><th>טריגר</th><th>שלבים</th></tr>
+    <tr><td><code>deliver-sms</code></td><td>כל דקה</td><td>claim → Twilio (Messaging Service, שם שולח) → report</td></tr>
+    <tr><td><code>deliver-whatsapp</code></td><td>כל דקה</td><td>claim → Twilio WhatsApp עם <b>תבנית מאושרת</b> (Content SID) → report</td></tr>
+    <tr><td><code>twilio-status</code></td><td>webhook</td><td>אימות <code>X-Twilio-Signature</code> → status_callback</td></tr>
+    <tr><td><code>twilio-inbound</code></td><td>webhook</td><td>אימות חתימה → זיהוי מילות הסרה או הצטרפות → opt_out / opt_in. כל טקסט אחר מקבל תשובה אוטומטית שמפנה לאפליקציה, ותוכן ההודעות לא נשמר</td></tr>
+  </table>
+  <p><b>מה השרת מבטיח לפני שהודעה זמינה ל־n8n:</b> הסכמה וטלפון מאומת, dedupe, תדירות, שעות שקט ושבת, מגבלה יומית, טקסט מרונדר בשפת המשתמש עם הוראות הסרה (SMS), ומיפוי לתבנית מאושרת (WhatsApp).</p>
+  <div class="callout warn">
+    <strong>כלל תוכן</strong>
+    ב־SMS וב־WhatsApp <b>אין דאטה פיננסי אישי</b> (הכנסה, הון, החזר חודשי, דירוג אשראי). יש רק פרטי נכס וקישור, למשל: <i>"נכס חדש שמתאים לך: 4 חד׳ ברמת גן, 2.4 מ׳ ₪. לפרטים: &lt;קישור&gt;. להסרה השב הסר"</i>. המספרים האישיים מוצגים באפליקציה אחרי כניסה. כך n8n, הלוגים של Twilio ומסך הנעילה נשארים נקיים מדאטה רגיש.
+  </div>
+  <p><b>הגדרות n8n ל־workflows של שליחה:</b> בלי שמירת executions מוצלחים ובלי שמירת התקדמות, ו־executions שנכשלו נמחקים אחרי 7 ימים. ה־credentials של Twilio נמצאים רק ב־n8n.</p>
+</section>
+
+<section id="s7">
+  <h2><span class="num">7</span>מנוע דומיין משותף (<code>lib/domain</code>)</h2>
+  <table>
+    <tr><th>מודול</th><th>פונקציה</th><th>משמש את</th></tr>
+    <tr><td><code>score</code></td><td><code>computeScore</code></td><td>worker-score, תצוגה מקדימה באפליקציה, טסטים</td></tr>
+    <tr><td><code>mortgage</code></td><td><code>buildPlans</code>, <code>monthlyPayment</code></td><td>טאב המשכנתא, worker-match</td></tr>
+    <tr><td><code>tax</code></td><td><code>purchaseTax</code></td><td>מסך העלות הכוללת, worker-match</td></tr>
+    <tr><td><code>regulation</code></td><td><code>buyerType</code>, <code>maxLtv</code>, <code>maxMonthlyPayment</code></td><td>בכל מקום</td></tr>
+    <tr><td><code>match</code></td><td><code>deriveBuyer</code>, <code>evaluateMatch</code></td><td>worker-match, כרטיס "למה זה מתאים לך"</td></tr>
+  </table>
+  <div class="callout info"><strong>חוק הזהב</strong>המספרים בהתראה והמספרים במסך חייבים לצאת מאותה פונקציה ומאותם קלטים. כל תוצאה נושאת <code>engineVersion</code>.</div>
+</section>
+
+<section id="s8">
+  <h2><span class="num">8</span>צנרת אירועים</h2>
+  <h3>8.1 תורים (pgmq)</h3>
+  <table>
+    <tr><th>תור</th><th>הודעות</th></tr>
+    <tr><td><code>property_events</code></td><td>נוצר, עודכן, ירד מחיר, הוסר</td></tr>
+    <tr><td><code>buyer_events</code></td><td>פרופיל עודכן, העדפות עודכנו</td></tr>
+    <tr><td><code>global_events</code></td><td>ריביות, קונפיג, מס, משקולות ציון</td></tr>
+    <tr><td><code>outbox_ready</code></td><td>מזהי outbox לשליחה</td></tr>
+  </table>
+  <h3>8.2 Workers (Edge Functions, מופעלים ע״י pg_cron כל דקה)</h3>
+  <table>
+    <tr><th>Worker</th><th>מה עושה</th></tr>
+    <tr><td><code>worker-score</code></td><td>בונה inputs מ־PostGIS, מריץ <code>computeScore</code>, שומר ומעביר להתאמה</td></tr>
+    <tr><td><code>worker-match</code></td><td><b>אירוע נכס:</b> סינון מוקדם, <code>evaluateMatch</code>, שמירה ל־<code>matches</code> ושורת outbox לכל ערוץ פעיל. <b>אירוע קונה:</b> חישוב מחדש של derived ושל ההתאמות שלו, בלי התראה. <b>אירוע גלובלי:</b> חישוב מחדש לכולם ב־batches, ו"נכנס לטווח" רק ל־digest</td></tr>
+    <tr><td><code>worker-digest</code></td><td>09:00 כל יום ו־09:00 ביום ראשון לשבועי: מאחד הודעות שממתינות להודעה אחת</td></tr>
+    <tr><td><code>worker-dispatch</code></td><td>מפעיל את כללי השליחה (§9.3) ומרנדר לכל הערוצים. <b>שולח בעצמו</b> אפליקציה, פוש ומייל. הודעות SMS ו־WhatsApp נשארות מוכנות בתור עד ש־n8n לוקח אותן (§6.4). מחזיר לתור הודעות "תקועות"</td></tr>
+    <tr><td><code>worker-push-receipts</code></td><td>כל 15 דק׳: בודק receipts ומבטל טוקנים לא תקינים</td></tr>
+  </table>
+  <p><b>אמינות:</b> visibility timeout של 60 שניות, עד 5 ניסיונות עם backoff, ואז dead letter עם התראה ל־admin. כל ה־workers הם idempotent.</p>
+  <h3>8.3 סינון מוקדם</h3>
+<pre><code>select d.user_id
+from buyer_derived d join alert_preferences a using (user_id)
+where a.enabled
+  and (cardinality(a.cities) = 0 or :city = any(a.cities))
+  and (a.area is null or ST_Covers(a.area, :location))
+  and :rooms between coalesce(a.rooms_min, 0) and coalesce(a.rooms_max, 99)
+  and :price &lt;= d.max_price * (1 + :tolerance)
+  and coalesce(:score, 0) &gt;= coalesce(a.min_score, 0);</code></pre>
+</section>
+
+<section id="s9">
+  <h2><span class="num">9</span>התראות</h2>
+  <h3>9.1 ערוצים</h3>
+  <table>
+    <tr><th>ערוץ</th><th>ספק (לבחירה)</th><th>עלות</th><th>הערות</th></tr>
+    <tr><td>באפליקציה</td><td>טבלת <code>notifications</code></td><td>חינם</td><td>תמיד פעיל. כל התראה נכנסת לכאן</td></tr>
+    <tr><td>פוש</td><td>Expo Push</td><td>חינם</td><td>הרשאת מערכת מתבקשת רק אחרי שהמשתמש מפעיל התראות</td></tr>
+    <tr><td>מייל</td><td>Resend או Amazon SES</td><td>נמוכה מאוד</td><td>מייל מאומת, <code>List-Unsubscribe</code>, תבנית RTL</td></tr>
+    <tr><td>SMS</td><td><b>Twilio</b>, נשלח ע״י <b>n8n</b> (§6.4)</td><td>לכל סגמנט (בעברית 70 תווים לסגמנט)</td><td>שם שולח (לבדוק את כללי הרישום לישראל ב־Twilio), הוראות הסרה בכל הודעה</td></tr>
+    <tr><td>WhatsApp</td><td><b>Twilio WhatsApp</b>, נשלח ע״י <b>n8n</b> (§6.4)</td><td>עמלת Meta לכל הודעה + עמלת Twilio</td><td>הודעה יזומה דורשת <b>תבנית מאושרת</b> (Twilio Content API) ו־opt-in. נדרש אימות עסק ב־Meta ומספר שולח</td></tr>
+  </table>
+  <h3>9.2 סוגי התראות</h3>
+  <table>
+    <tr><th>סוג</th><th>טריגר</th><th>ערוצי ברירת מחדל</th></tr>
+    <tr><td><code>new_match</code></td><td>נכס חדש מתאים</td><td>אפליקציה + פוש מיידי</td></tr>
+    <tr><td><code>price_drop_saved</code></td><td>ירידת מחיר בנכס שמור</td><td>אפליקציה + פוש מיידי</td></tr>
+    <tr><td><code>back_in_range</code></td><td>ירידת מחיר הכניסה נכס לטווח</td><td>אפליקציה + פוש</td></tr>
+    <tr><td><code>newly_affordable</code></td><td>שינוי ריבית, מס או פרופיל</td><td>אפליקציה + digest בלבד</td></tr>
+    <tr><td><code>saved_removed</code></td><td>נכס שמור נמכר</td><td>אפליקציה בלבד</td></tr>
+    <tr><td><code>lead_update</code></td><td>עדכון סטטוס בייעוץ</td><td>אפליקציה + פוש (טרנזקציונלי)</td></tr>
+  </table>
+  <h3>9.3 כללי שליחה (לפי הסדר)</h3>
+  <ol>
+    <li><b>הסכמה:</b> צריכה להיות הסכמה פעילה וכתובת מאומתת. אחרת: <code>skipped</code>.</li>
+    <li><b>Dedupe:</b> אם כבר נשלח על אותו נכס ואותו סוג: <code>skipped</code>.</li>
+    <li><b>תדירות:</b> אם הערוץ מוגדר יומי או שבועי: <code>held</code> ל־digest.</li>
+    <li><b>שעות שקט ושבת:</b> נדחה לסוף החלון (ב־v1 חלון קבוע: שישי 15:00 עד מוצ״ש 21:00).</li>
+    <li><b>מגבלה יומית:</b> אחרי המקסימום, ההודעה עוברת ל־digest הבא.</li>
+    <li>שליחה, שמירת התוצאה וניסיון חוזר בשגיאה זמנית.</li>
+  </ol>
+  <table>
+    <tr><th>ערוץ</th><th>תדירות ברירת מחדל</th><th>מקסימום מיידי ליום</th><th>למה</th></tr>
+    <tr><td>באפליקציה</td><td>מיידי</td><td>ללא הגבלה</td><td>לא מפריע ולא עולה כסף</td></tr>
+    <tr><td>פוש</td><td>מיידי</td><td>5</td><td>עייפות התראות: משתמש שמכבה פוש בהגדרות המכשיר לא יחזור</td></tr>
+    <tr><td>WhatsApp</td><td>סיכום יומי</td><td>2</td><td>עלות, חוק הספאם, ודירוג האיכות של Meta (חסימות ודיווחים מגבילים את המספר)</td></tr>
+    <tr><td>SMS</td><td>סיכום יומי</td><td>2</td><td>עלות וחוק הספאם</td></tr>
+    <tr><td>מייל</td><td>סיכום יומי</td><td>3</td><td>מוניטין מול תיבת הספאם</td></tr>
+  </table>
+  <p>הכול ניתן לשינוי ע״י המשתמש בתוך גבולות. עדכוני ייעוץ לא נספרים במגבלה. <b>אורך SMS בעברית:</b> עד 140 תווים (2 סגמנטים) כולל קישור ונוסח הסרה, עם דומיין קישורים קצר.</p>
+  <h3>9.4 תוכן</h3>
+  <ul>
+    <li>תבניות בעברית ובאנגלית ב־<code>notification_templates</code>. ל־WhatsApp נשמר ה־Content SID של התבנית המאושרת ב־Twilio.</li>
+    <li>SMS ו־WhatsApp כפופים לכלל התוכן ב־§6.4 (בלי דאטה פיננסי אישי).</li>
+    <li>כל התראה באפליקציה, בפוש ובמייל כוללת: למה זה מתאים (2 סיבות), החזר חודשי משוער, disclaimer ("הערכה בלבד, לא אישור הלוואה"), קישור עמוק לנכס, ואפשרות הסרה או הגדרות.</li>
+    <li>הודעות שיווקיות ב־SMS, במייל וב־WhatsApp כוללות זיהוי שולח ודרך הסרה (סעיף 30א). הנוסח הסופי באישור עורך הדין.</li>
+  </ul>
+</section>
+
+<section id="s10">
+  <h2><span class="num">10</span>API לאפליקציה</h2>
+  <table>
+    <tr><th>Endpoint (spec.md §9)</th><th>מימוש</th></tr>
+    <tr><td><code>GET /properties?bbox</code></td><td>RPC <code>properties_in_bbox</code> → שורות קלות, clustering בצד הלקוח</td></tr>
+    <tr><td><code>GET /properties/:id</code></td><td>Edge Function <code>property-detail</code>: נכס, ציון, הקשר, וההתאמה של המשתמש</td></tr>
+    <tr><td><code>GET /plans?bbox</code></td><td>RPC <code>plans_in_bbox</code></td></tr>
+    <tr><td>תוכן</td><td>טבלאות <code>learn_articles</code>, <code>glossary_terms</code></td></tr>
+    <tr><td><code>GET /mortgage/rates</code></td><td>View <code>current_rates</code> + ברירות מחדל באפליקציה</td></tr>
+    <tr><td>פרופיל</td><td>upsert ל־<code>buyer_profiles</code> (שורה של המשתמש בלבד)</td></tr>
+    <tr><td>התאמות</td><td>View <code>my_matches</code></td></tr>
+    <tr><td>התראות</td><td><code>notifications</code> ו־RPC <code>register_push_token</code></td></tr>
+    <tr><td>העדפות והסכמות</td><td>טבלאות ההעדפות ו־RPC <code>set_consent</code></td></tr>
+    <tr><td>לידים</td><td><code>leads</code></td></tr>
+    <tr><td>חשבון</td><td><code>export-account</code>, <code>delete-account</code></td></tr>
+  </table>
+  <p>באפליקציה, הכול עובר דרך repositories ב־<code>lib/api/*</code> ו־TanStack Query. קומפוננטות לא קוראות ל־Supabase ישירות.</p>
+</section>
+
+<section id="s11">
+  <h2><span class="num">11</span>הרשאות (RLS)</h2>
+  <table>
+    <tr><th>קבוצת טבלאות</th><th>anon</th><th>משתמש מחובר</th><th>n8n_ingest</th><th>n8n_delivery</th><th>workers</th></tr>
+    <tr><td>נכסים, ציונים, תוכניות, תחנות, POIs, סטטיסטיקות, תוכן, ריביות</td><td>אין</td><td>קריאה</td><td>רק דרך <code>ingest.*</code></td><td>אין</td><td>קריאה וכתיבה</td></tr>
+    <tr><td>קונפיג</td><td>אין</td><td>קריאה</td><td>אין</td><td>אין</td><td>קריאה</td></tr>
+    <tr><td>פרופיל, derived, התאמות, העדפות, טוקנים, שמורים, התראות, לידים</td><td>אין</td><td><b>שורות שלו בלבד</b> (derived והתאמות לקריאה בלבד)</td><td><b>אין</b></td><td><b>אין</b></td><td>קריאה וכתיבה</td></tr>
+    <tr><td><code>internal.*</code> (כולל outbox), <code>ingest.*</code>, <code>delivery.*</code></td><td>אין</td><td>אין</td><td>רק פונקציות <code>ingest.*</code></td><td>רק פונקציות <code>delivery.*</code></td><td>קריאה וכתיבה</td></tr>
+  </table>
+  <p>לתפקיד <code>anon</code> אין גישה לשום דבר (חשבון חובה, §5). רק ה־endpoints של Supabase Auth זמינים בלי session. Admin מוגדר בטבלת <code>admins</code> ובפונקציה <code>is_admin()</code>. שינויי קונפיג עוברים דרך RPC עם audit. ממשק ה־admin ב־v1 הוא Supabase Studio.</p>
+</section>
+
+<section id="s12">
+  <h2><span class="num">12</span>אבטחה ופרטיות</h2>
+  <ul>
+    <li><b>מינימום דאטה:</b> ההתאמה צריכה הכנסות, התחייבויות, הון, בעלות, בנק, טווח אשראי והעדפות. שמות וגילאים אופציונליים, וה־workers לא משתמשים בהם.</li>
+    <li><b>לוגים:</b> לא רושמים שדות פרופיל או תוכן הודעות, רק מזהים וספירות.</li>
+    <li><b>מה n8n רואה:</b> דאטה ציבורי של קליטה, ובשליחה רק <code>{id, טלפון, טקסט מרונדר}</code> של הודעות SMS ו־WhatsApp שהגיע זמנן. לפי הכלל, אין בהן דאטה פיננסי אישי (§6.4). executions מוצלחים של שליחה לא נשמרים.</li>
+    <li><b>סודות:</b> מפתחות ספקים ב־secrets של Supabase, credentials של n8n במאגר המוצפן שלו, ומפתחות האפליקציה ב־EAS.</li>
+    <li><b>הצפנה:</b> הצפנת דיסק ב־Supabase ו־TLS בכל מקום, כולל בין n8n ל־Postgres.</li>
+    <li><b>שמירה:</b> outbox נמחק אחרי 90 יום, והתאמות לנכסים שירדו מהשוק אחרי 180 יום. הסכמות נשמרות לפי הנחיית עורך הדין.</li>
+    <li><b>בלי הסכמה לשמירה בשרת:</b> הפרופיל נשאר במכשיר, ויש רק התראות לפי פילטרים (בלי יכולת מימון).</li>
+    <li><b>צ'קליסט לעורך הדין:</b> חובות תיקון 13 (רישום או הודעה על מאגר, רמת אבטחה), אחסון באירופה, נוסחי הסכמה, נוסח הסרה מספאם, opt-in ל־WhatsApp, שיתוף עם יועצים, ו־Twilio ושרת ה־VPS של n8n כמעבדי מידע (DPA מול Twilio, מיקום ה־VPS).</li>
+  </ul>
+</section>
+
+<section id="s13">
+  <h2><span class="num">13</span>תפעול n8n (self-hosted)</h2>
+  <table>
+    <tr><th>נושא</th><th>כלל</th></tr>
+    <tr><td>שרת</td><td>VPS קטן (2 vCPU / 4GB) עם Docker Compose: <code>n8n</code> + <code>postgres</code> פנימי משלו (לא Supabase) + <code>caddy</code> ל־TLS</td></tr>
+    <tr><td>גישה</td><td>ממשק העריכה לא פתוח לאינטרנט: Tailscale / VPN או IP allowlist, ומשתמש n8n עם 2FA</td></tr>
+    <tr><td>Webhooks</td><td>פידים של שותפים (header סודי), ו־status / inbound של Twilio (אימות <code>X-Twilio-Signature</code>). דרך Caddy רק נתיבי <code>/webhook/*</code> ציבוריים, ולא ממשק העריכה</td></tr>
+    <tr><td>מפתחות</td><td>גיבוי של <code>N8N_ENCRYPTION_KEY</code> מחוץ לשרת. בלעדיו כל ה־credentials אבודים</td></tr>
+    <tr><td>Executions</td><td>pruning (למשל 14 יום), ובלי שמירת דאטה של ריצות מוצלחות בפידים גדולים</td></tr>
+    <tr><td>גיבויים</td><td>dump לילי של ה־DB של n8n + ייצוא workflows ל־git</td></tr>
+    <tr><td>עדכונים</td><td>עדכון חודשי (תיקוני אבטחה), קודם ב־staging</td></tr>
+    <tr><td>ניטור</td><td>uptime check, <code>_error-handler</code>, בדיקה בשרת שמתריעה אם מקור לא הצליח במשך פי 2 מהתזמון שלו, ו<b>בדיקה שמתריעה אם הודעת SMS או WhatsApp ממתינה יותר מ־5 דקות בלי שנלקחה</b> (סימן ש־n8n למטה)</td></tr>
+    <tr><td>זמינות</td><td>n8n נמצא עכשיו בדרך של התראות SMS ו־WhatsApp. אם הוא נופל, ההודעות מחכות בתור ויוצאות כשהוא חוזר. אפליקציה, פוש ומייל לא מושפעים, וה־OTP אף פעם לא תלוי ב־n8n</td></tr>
+  </table>
+</section>
+
+<section id="s14">
+  <h2><span class="num">14</span>ניטור</h2>
+  <ul>
+    <li><code>ingestion_runs</code> → תצוגת admin של "רעננות דאטה לכל מקור".</li>
+    <li>עומק תור ו־dead letters לכל תור, עם התראה מעל סף.</li>
+    <li>סטטיסטיקת outbox לכל ערוץ: נשלח, נכשל, דולג, ממתין.</li>
+    <li>לוגים של Edge Functions, ואופציונלית Sentry.</li>
+    <li>האפליקציה מציגה "עודכן לפני X שעות".</li>
+  </ul>
+</section>
+
+<section id="s15">
+  <h2><span class="num">15</span>עלויות (הערכות, לאמת)</h2>
+  <table>
+    <tr><th>פריט</th><th>הערכה</th></tr>
+    <tr><td>Supabase Pro (לכל פרויקט, staging יכול להיות קטן יותר)</td><td>כ־25$ לחודש + שימוש</td></tr>
+    <tr><td>VPS ל־n8n</td><td>כ־5–20$ לחודש</td></tr>
+    <tr><td>Expo Push</td><td>חינם</td></tr>
+    <tr><td>מייל</td><td>שכבה חינמית, ואז נמוך</td></tr>
+    <tr><td>Twilio SMS (OTP דרך Verify + התראות)</td><td>לכל סגמנט לישראל + עמלת Verify לכל OTP, לבדוק מחירון עדכני</td></tr>
+    <tr><td>Twilio WhatsApp</td><td>עמלת Meta לכל הודעה + עמלת Twilio, לבדוק מחירון עדכני לישראל</td></tr>
+    <tr><td>Google APIs</td><td>לפי שימוש</td></tr>
+  </table>
+  <p>הגדרת ברירת מחדל של סיכום יומי בערוצים בתשלום היא הכלי העיקרי לשליטה בעלויות.</p>
+</section>
+
+<section id="s16">
+  <h2><span class="num">16</span>אבני דרך לבקאנד</h2>
+  <table>
+    <tr><th>שלב</th><th>תכולה</th><th>מול האפליקציה</th></tr>
+    <tr><td><b>B0: הקמה</b></td><td>פרויקטים (local / staging / prod), migrations ו־types ב־CI, spike לייבוא <code>lib/domain</code>, VPS ל־n8n עם Caddy וגיבויים, חשבון Twilio ורישום שולח לישראל, והתחלת אימות העסק ב־Meta ל־WhatsApp (לוקח זמן)</td><td>לפני M1</td></tr>
+    <tr><td><b>B1: הזדהות ופרופיל</b></td><td>OTP דרך Twilio Verify, כל הטבלאות סגורות ל־<code>anon</code>, <code>buyer_profiles</code>, הסכמות, מחיקה וייצוא</td><td>M1</td></tr>
+    <tr><td><b>B2: נכסים ו־API גאוגרפי</b></td><td>טבלאות, <code>properties_in_bbox</code>, <code>property-detail</code>, seed לעיר אחת, החלפת ה־mock</td><td>M2</td></tr>
+    <tr><td><b>B3: צנרת ציון</b></td><td>פונקציות ingest, תורים, <code>worker-score</code>, סטטיסטיקות שוק, workflows ראשונים</td><td>M3</td></tr>
+    <tr><td><b>B4: ריביות ויכולת מימון</b></td><td>workflows של ריבית ומדד, קונפיג רגולציה ומס, <code>buyer_derived</code></td><td>M4</td></tr>
+    <tr><td><b>B5: התאמות והתראות</b></td><td>worker-match, outbox, dispatch. קודם אפליקציה ופוש, אחר כך מייל, ואז SMS ו־WhatsApp דרך n8n ו־Twilio (<code>delivery.*</code> וארבעה workflows, אחרי אישור תבניות ועורך דין). מסכי העדפות</td><td>חדש: <b>M6.5</b></td></tr>
+    <tr><td><b>B6: לידים</b></td><td><code>leads</code>, התראה לשותף או ל־CRM, מעקב סטטוס</td><td>M6</td></tr>
+    <tr><td><b>B7: פידים אמיתיים והקשחה</b></td><td>workflows של שותפים, בדיקת עומס (10 אלף משתמשים × אלף נכסים ביום), ניטור, סקירת אבטחה</td><td>M7</td></tr>
+  </table>
+</section>
+
+<section id="s17">
+  <h2><span class="num">17</span>שאלות פתוחות</h2>
+  <ol>
+    <li><b>שותפי מודעות:</b> אילו פידים, באיזה פורמט (API, קבצים, webhook) ובאיזו תדירות?</li>
+    <li><s><b>ספקי SMS ו־WhatsApp</b></s> <b>נפתר:</b> Twilio, נשלח ע״י n8n (§6.4). OTP דרך Twilio Verify ב־Supabase Auth.</li>
+    <li><s><b>גלישה בלי חשבון</b></s> <b>נפתר:</b> לא. חשבון חובה בכל מקום (§5).</li>
+    <li><b>לוח חגים:</b> חלון שבת קבוע ב־v1, או לוח חגים מלא מההתחלה?</li>
+    <li><b>ממשק admin:</b> Supabase Studio מספיק ל־v1. מתי צריך פאנל אמיתי (יועצים, לידים, קונפיג)?</li>
+    <li><b>מספר WhatsApp:</b> מספר חדש וייעודי לשולח, או מספר עסקי קיים?</li>
+  </ol>
+</section>
+
+</main>
+</div>
+</body>
+</html>
