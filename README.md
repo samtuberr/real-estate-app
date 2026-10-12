@@ -4,11 +4,13 @@ Bilingual (Hebrew / English) Expo app for home buyers in Israel. `spec.md` is th
 
 ## Status
 
-**M0 — Foundation** (spec §14): Expo SDK 57 (React Native 0.86, React 19.2, React Compiler) + Expo Router + NativeWind v4.2, i18n + RTL bootstrap, "Orbit" design tokens (dark-first), base UI components incl. Liquid Glass `Glass` and SF/Material `Icon`, native tabs with a native stack per tab, EAS config. Tab screens are placeholders for M1–M6.
+**M0 — Foundation** (spec §14): Expo SDK 57 (React Native 0.86, React 19.2, React Compiler) + Expo Router + NativeWind v4.2, i18n + RTL bootstrap, "Orbit" design tokens (dark-first), base UI components incl. Liquid Glass `Glass` and SF/Material `Icon`, native tabs with a native stack per tab, EAS config. M1, M5 and M6 remain pending.
 
 **M2 — Map & Listings**: full-screen map (`react-native-maps`, `supercluster` clusters, score-colored price pills), glass search / filters / "Near me", listing sheet (`@gorhom/bottom-sheet` + FlashList), filters form sheet (`@expo/ui` controls), listing page + full-screen gallery, Saved tab. Data comes from a deterministic mock behind the `lib/api` repository (swapped for Supabase in backend B2).
 
 **M3 — Potential Score (app + shared engine)**: context-derived scores with versioned configuration, missing-data weight redistribution, coverage confidence and bilingual explanations. Native Skia ring with a first-view count-up and Reduce Motion support, score deep-dive, city plans with selectable native map polygons, amenity counts / nearest places, traffic / transport, and a Victory Native price-history chart with an accessible values view. All inputs are labeled fictional demo data. The model is uncalibrated; live ingest, database-backed configuration and `worker-score` deployment depend on B0–B3 and are **not implemented**. See [M3 implementation notes](docs/m3.md).
+
+**M4 — Mortgage planning (app + shared engine)**: tested Spitzer / equal-principal math, CPI scenarios, three plans and comparison, editable plan details and amortization charts, cash-aware affordability and total purchase costs. Planning inputs are session-only until M1 supplies a secure profile. Rates are explicitly illustrative fallbacks; tax/config are dated, and live B4 services are pending. See [M4 notes](docs/m4.md) and the standalone [M3 + M4 HTML summary](m3-m4-summary.html).
 
 ## Getting started
 
@@ -62,12 +64,13 @@ References: [Expo Maps setup](https://docs.expo.dev/versions/latest/sdk/map-view
 | `components/common/` | `Num`, `Money`, `Screen`, `NebulaGlow`, `SectionHeader`, `StatTile`, `EmptyState`, `Disclaimer` |
 | `components/navigation/` | `TabStack`: native stack + large-title header config shared by every tab |
 | `lib/i18n/` | i18next setup, `he.json` / `en.json`, RTL direction + locale switching |
-| `lib/domain/` | Pure-TS shared domain: types, filters/sort, score engine / config / grades (no RN/Expo imports — suitable for Edge Functions) |
-| `lib/api/` | Repositories (`properties.ts`, mock data in `mock/`) and TanStack Query hooks (`queries.ts`) |
+| `lib/domain/` | Pure-TS shared domain: types, filters/sort, score engine, mortgage math, affordability, tax and versioned regulation (no RN/Expo imports — suitable for Edge Functions) |
+| `lib/api/` | Property repositories, fictional context in `mock/`, illustrative mortgage-rate repository, and TanStack Query hooks (`queries.ts`) |
 | `lib/map/` | Region math, clustering, "Near me" permission flow |
 | `components/map/`, `components/property/` | Map markers, sheet, search; property card and listing-page sections |
+| `components/mortgage/`, `app/mortgage/` | Planning form, plan cards, comparison, editable details, charts and purchase costs |
 | `lib/utils/` | `cn()`, Intl formatting helpers |
-| `stores/` | Zustand stores persisted via `expo-sqlite/localStorage`: `settings` (locale, theme), `map` (region, filters, sort), `saved` |
+| `stores/` | Persisted Zustand stores: `settings`, `map`, `saved`; `mortgage` holds financial planning inputs in memory only |
 | `global.css`, `tailwind.config.js`, `constants/theme.ts` | "Orbit" design tokens (dark default + light) and their JS mirror |
 | `constants/icons.ts` | Icon registry: SF Symbol + Material Symbol per icon |
 

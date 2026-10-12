@@ -16,9 +16,9 @@ import { SaveButton } from '@/components/property/SaveButton';
 import { ScoreSummaryCard } from '@/components/property/ScoreSummaryCard';
 import { AmenitiesSection, PlansSection, TrafficSection } from '@/components/property/ContextSections';
 import { DataNotice } from '@/components/property/DataNotice';
+import { PropertyMortgageCard } from '@/components/mortgage/PropertyMortgageCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Glass } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
@@ -35,7 +35,7 @@ const CTA_SPACE = 112;
 
 /**
  * Listing page (spec §4.3). M3 covers scoring and neighborhood context.
- * M4 fills the mortgage card;
+ * M4 estimates mortgage costs from session planning inputs;
  * M6 wires the consultation CTA. Reachable by deep link (`nadlanscore://property/<id>`).
  */
 export default function PropertyScreen() {
@@ -154,12 +154,7 @@ export default function PropertyScreen() {
             <PropertyDetailsCard property={property} />
           </View>
 
-          <Card tone="solar" className="gap-2">
-            <Text role="heading" variant="h2">
-              {t('mortgage.title')}
-            </Text>
-            <Text variant="muted">{t('mortgage.body')}</Text>
-          </Card>
+          <PropertyMortgageCard price={property.price} />
 
           <Disclaimer />
         </View>

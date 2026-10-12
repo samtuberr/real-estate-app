@@ -1,0 +1,2165 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <title>Nadlan Score — סיכום M3 + M4</title>
+    <style>
+      :root {
+        --bg: #080b13;
+        --card: #111624;
+        --raised: #192132;
+        --text: #eef1fc;
+        --muted: #adb7d0;
+        --line: #2a344a;
+        --ion: #99a3ff;
+        --aqua: #62dff0;
+        --green: #70e6bc;
+        --gold: #ffc891;
+        --shadow: 0 20px 70px #0003;
+        color-scheme: dark;
+      }
+      :root[data-theme="light"] {
+        --bg: #f3f5fa;
+        --card: #fff;
+        --raised: #eaf0f8;
+        --text: #141d32;
+        --muted: #52617a;
+        --line: #cdd6e6;
+        --ion: #4353cd;
+        --aqua: #007b91;
+        --green: #007b58;
+        --gold: #8b470b;
+        --shadow: 0 16px 50px #2039670c;
+        color-scheme: light;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 92px;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font:
+          16px/1.8 system-ui,
+          -apple-system,
+          "Segoe UI",
+          Arial,
+          sans-serif;
+      }
+      button,
+      a,
+      input {
+        touch-action: manipulation;
+      }
+      a {
+        color: var(--ion);
+        text-underline-offset: 4px;
+      }
+      button {
+        font: inherit;
+        cursor: pointer;
+      }
+      button:focus-visible,
+      a:focus-visible {
+        outline: 3px solid var(--aqua);
+        outline-offset: 5px;
+      }
+      button {
+        color: var(--text);
+      }
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+      h1 {
+        font-size: clamp(38px, 6.2vw, 76px);
+        line-height: 1.12;
+        letter-spacing: -1.8px;
+        font-weight: 760;
+      }
+      h2 {
+        font-size: clamp(26px, 3.6vw, 40px);
+        line-height: 1.3;
+        letter-spacing: -0.6px;
+      }
+      h3 {
+        font-size: 20px;
+        line-height: 1.5;
+      }
+      p + p {
+        margin-top: 12px;
+      }
+      bdi,
+      .num {
+        font-variant-numeric: tabular-nums;
+      }
+      code {
+        direction: ltr;
+        unicode-bidi: isolate;
+        display: inline-block;
+        font:
+          13px/1.6 ui-monospace,
+          monospace;
+        background: var(--raised);
+        border-radius: 6px;
+        padding: 2px 7px;
+        overflow-wrap: anywhere;
+        max-width: 100%;
+      }
+      .wrap {
+        max-width: 1120px;
+        margin: auto;
+        padding-inline: 28px;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .small {
+        font-size: 14px;
+      }
+      .eyebrow {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: var(--aqua);
+        margin-bottom: 16px;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        border: 1px solid var(--line);
+        padding: 5px 12px;
+        border-radius: 99px;
+        color: var(--muted);
+        background: var(--card);
+      }
+      .dot {
+        width: 7px;
+        height: 7px;
+        display: inline-block;
+        background: var(--green);
+        border-radius: 50%;
+      }
+      .tag {
+        font-size: 12px;
+        padding: 3px 8px;
+        background: var(--raised);
+        border-radius: 6px;
+        color: var(--muted);
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 44px;
+        padding: 9px 18px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: var(--raised);
+        color: var(--text);
+        text-decoration: none;
+      }
+      .btn.primary {
+        background: var(--ion);
+        color: var(--bg);
+        border-color: var(--ion);
+        font-weight: 700;
+      }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      .skip {
+        position: absolute;
+        top: -90px;
+        inset-inline-start: 20px;
+        background: var(--card);
+        padding: 12px;
+        z-index: 20;
+      }
+      .skip:focus {
+        top: 12px;
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid var(--line);
+        background: var(--bg);
+      }
+      .header-inner {
+        min-height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 750;
+        font-size: 17px;
+      }
+      .brand-mark {
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        background: var(--raised);
+        color: var(--ion);
+        border-radius: 11px;
+        font-size: 22px;
+      }
+      nav {
+        display: flex;
+        gap: 22px;
+        font-size: 14px;
+      }
+      nav a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+      .tools {
+        display: flex;
+        gap: 8px;
+      }
+      .icon-btn {
+        min-width: 44px;
+        min-height: 44px;
+        background: transparent;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 6px 12px;
+      }
+      .hero {
+        padding-block: 72px 48px;
+        position: relative;
+      }
+      .hero:before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        inset: -80px -40px 0;
+        background: radial-gradient(ellipse at 80% 20%, #6476ff12, transparent 65%);
+        pointer-events: none;
+      }
+      .hero-top {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 24px;
+      }
+      .hero h1 span {
+        color: var(--ion);
+      }
+      .lead {
+        font-size: 19px;
+        max-width: 770px;
+        margin-top: 24px;
+        color: var(--muted);
+      }
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+      }
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        overflow: hidden;
+        margin-top: 48px;
+        background: var(--card);
+      }
+      .metric {
+        padding: 20px 24px;
+        border-inline-end: 1px solid var(--line);
+      }
+      .metric:last-child {
+        border: 0;
+      }
+      .metric strong {
+        display: block;
+        font-size: 30px;
+        line-height: 1.35;
+      }
+      .metric span {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      section {
+        padding-block: 48px;
+        border-top: 1px solid var(--line);
+      }
+      .section-head {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 26px;
+      }
+      .section-head p {
+        margin-top: 12px;
+        max-width: 660px;
+        color: var(--muted);
+      }
+      .milestone {
+        font:
+          700 16px/1 ui-monospace,
+          monospace;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        color: var(--aqua);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: 26px;
+        box-shadow: var(--shadow);
+        min-width: 0;
+      }
+      .feature {
+        padding: 17px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .feature:first-child {
+        padding-top: 0;
+      }
+      .feature:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+      .feature h3 {
+        font-size: 17px;
+        margin-bottom: 5px;
+      }
+      .feature p {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .feature .index {
+        font:
+          12px ui-monospace,
+          monospace;
+        color: var(--aqua);
+        margin-inline-end: 10px;
+      }
+      .demo-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .score {
+        display: flex;
+        align-items: center;
+        gap: 25px;
+        margin-block: 22px;
+      }
+      .ring {
+        position: relative;
+        width: 138px;
+        height: 138px;
+        flex-shrink: 0;
+      }
+      .ring svg {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+      }
+      .ring strong {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        font-size: 44px;
+        font-weight: 700;
+      }
+      .ring circle {
+        fill: none;
+        stroke-width: 8;
+      }
+      .score-bars {
+        display: grid;
+        gap: 16px;
+      }
+      .score-row .labels {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 7px;
+        font-size: 13px;
+      }
+      .track {
+        height: 6px;
+        border-radius: 30px;
+        background: var(--raised);
+        overflow: hidden;
+      }
+      .track span {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: var(--ion);
+      }
+      .note {
+        border-inline-start: 3px solid var(--gold);
+        padding: 13px 18px;
+        background: var(--raised);
+        border-radius: 0 10px 10px 0;
+        font-size: 14px;
+        color: var(--muted);
+        margin-top: 24px;
+      }
+      .note strong {
+        color: var(--text);
+      }
+      .mini-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 20px;
+        font-size: 14px;
+      }
+      .plan-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 20px 0;
+      }
+      .plan-buttons button {
+        border: 1px solid var(--line);
+        border-radius: 99px;
+        background: var(--raised);
+        padding: 7px 18px;
+        min-height: 44px;
+      }
+      .plan-buttons button[aria-pressed="true"] {
+        background: var(--ion);
+        color: var(--bg);
+        border-color: var(--ion);
+      }
+      .payment-label {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .payment {
+        font-size: 40px;
+        font-weight: 740;
+        line-height: 1.4;
+        margin-bottom: 8px;
+      }
+      .plan-mix {
+        display: flex;
+        direction: ltr;
+        height: 8px;
+        border-radius: 10px;
+        overflow: hidden;
+        gap: 3px;
+        margin: 22px 0 12px;
+      }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 16px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .swatch {
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        border-radius: 3px;
+        margin-inline-end: 5px;
+      }
+      .figures {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        margin-top: 24px;
+      }
+      .figures dt {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .figures dd {
+        margin: 3px 0 0;
+        font-size: 20px;
+        font-weight: 650;
+      }
+      .chart {
+        width: 100%;
+        height: 130px;
+        display: block;
+        margin-top: 25px;
+      }
+      .chart-labels {
+        display: flex;
+        justify-content: space-between;
+        direction: ltr;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .table-wrap {
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        margin-top: 24px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 14px;
+        text-align: start;
+        min-width: 580px;
+      }
+      th,
+      td {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+      th {
+        font-weight: 600;
+        background: var(--raised);
+        text-align: start;
+      }
+      td {
+        background: var(--card);
+      }
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      .status-good {
+        color: var(--green);
+      }
+      .status-wait {
+        color: var(--gold);
+      }
+      .build-card {
+        display: flex;
+        justify-content: space-between;
+        gap: 32px;
+        align-items: center;
+        background: var(--raised);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: 28px;
+      }
+      .build-card p {
+        margin-top: 10px;
+      }
+      .build-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+      .codeblock {
+        direction: ltr;
+        text-align: left;
+        white-space: pre-wrap;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        font:
+          13px/1.9 ui-monospace,
+          monospace;
+        padding: 20px;
+        margin-top: 24px;
+        overflow-wrap: anywhere;
+      }
+      .checks {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 13px;
+      }
+      .checks li {
+        display: flex;
+        gap: 10px;
+      }
+      .check {
+        color: var(--green);
+      }
+      .sources {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 24px;
+      }
+      .source {
+        padding: 16px 18px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        text-decoration: none;
+        font-size: 14px;
+      }
+      .source span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 4px;
+      }
+      details {
+        border-bottom: 1px solid var(--line);
+        padding-block: 18px;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: 650;
+        min-height: 28px;
+      }
+      details p {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      footer {
+        padding-block: 28px 40px;
+        color: var(--muted);
+        font-size: 13px;
+        border-top: 1px solid var(--line);
+      }
+      footer .wrap {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+      }
+      .no-script {
+        color: var(--gold);
+      }
+      @media (max-width: 800px) {
+        nav {
+          display: none;
+        }
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .hero {
+          padding-top: 40px;
+        }
+        .metrics {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .metric:nth-child(2) {
+          border-inline-end: 0;
+        }
+        .metric:nth-child(-n + 2) {
+          border-bottom: 1px solid var(--line);
+        }
+        .build-card {
+          align-items: stretch;
+          flex-direction: column;
+        }
+        .build-actions {
+          flex-direction: row;
+          flex-wrap: wrap;
+        }
+        .sources {
+          grid-template-columns: 1fr;
+        }
+        section {
+          padding-block: 36px;
+        }
+        .tools .print {
+          display: none;
+        }
+        .wrap {
+          padding-inline: 20px;
+        }
+        .card {
+          padding: 22px;
+        }
+        .hero:before {
+          inset-inline: 0;
+        }
+        .score {
+          gap: 20px;
+        }
+        .header-inner {
+          gap: 8px;
+        }
+        .brand {
+          font-size: 15px;
+        }
+        footer .wrap {
+          flex-direction: column;
+          gap: 6px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+      }
+      @media print {
+        header,
+        .hero-actions,
+        .tools,
+        .plan-buttons,
+        .build-actions {
+          display: none;
+        }
+        body {
+          --bg: #fff;
+          --card: #fff;
+          --raised: #f4f4f4;
+          --text: #111;
+          --muted: #444;
+          --line: #ccc;
+          --ion: #3946a0;
+          --aqua: #086b76;
+          --green: #176748;
+          --gold: #805010;
+          background: white;
+          color: #111;
+          font-size: 12px;
+        }
+        .wrap {
+          max-width: none;
+        }
+        .hero {
+          padding-top: 0;
+        }
+        section {
+          padding-block: 24px;
+        }
+        .card {
+          box-shadow: none;
+          break-inside: avoid;
+        }
+        .hero:before {
+          display: none;
+        }
+        .metrics {
+          margin-top: 24px;
+        }
+        .build-card {
+          break-inside: avoid;
+        }
+        .payment {
+          font-size: 30px;
+        }
+        a {
+          color: inherit;
+        }
+        h1 {
+          font-size: 40px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip" href="#main">דילוג לתוכן</a>
+    <header>
+      <div class="wrap header-inner">
+        <div class="brand"><span class="brand-mark" aria-hidden="true">⌂</span><bdi>Nadlan Score</bdi></div>
+        <nav aria-label="ניווט במסמך">
+          <a href="#m3">ציון הפוטנציאל</a><a href="#m4">משכנתאות</a><a href="#build">הבנייה</a
+          ><a href="#next">מה נשאר</a>
+        </nav>
+        <div class="tools">
+          <button class="icon-btn" id="theme" aria-label="החלפת מראה בהיר וכהה">מראה בהיר</button
+          ><button class="icon-btn print" onclick="window.print()">הדפסה</button>
+        </div>
+      </div>
+    </header>
+    <main class="wrap" id="main">
+      <div class="hero">
+        <div class="hero-top">
+          <span class="pill"><i class="dot" aria-hidden="true"></i> סיכום מימוש · 12.10.2026</span
+          ><span class="pill"><bdi>M3 + M4</bdi></span>
+        </div>
+        <div class="eyebrow">מנכס מעניין לתוכנית רכישה</div>
+        <h1>להבין את הפוטנציאל.<br /><span>לתכנן את המימון.</span></h1>
+        <p class="lead">
+          שלב <bdi>M3</bdi> הוסיף ציון מוסבר והקשר לסביבת הנכס. שלב <bdi>M4</bdi> מוסיף חישובי משכנתא, שלוש תוכניות,
+          השוואה ועלות רכישה מלאה. כאן מתועד מה נבנה באפליקציה, מה נבדק ומה עוד מחכה לחיבור לשרת.
+        </p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#m4">מה נוסף ב־M4 <span aria-hidden="true">↓</span></a
+          ><a class="btn" href="#m3">חזרה ליכולות M3</a><a class="btn" href="#build">פרטי הבנייה</a>
+        </div>
+        <div class="metrics">
+          <div class="metric">
+            <strong><bdi>119</bdi></strong
+            ><span>בדיקות עוברות בפרויקט</span>
+          </div>
+          <div class="metric">
+            <strong><bdi>53</bdi></strong
+            ><span>בדיקות חדשות ל־M4</span>
+          </div>
+          <div class="metric">
+            <strong><bdi>3</bdi></strong
+            ><span>תוכניות מימון להשוואה</span>
+          </div>
+          <div class="metric"><strong>עברית + English</strong><span>ממשק בשתי שפות</span></div>
+        </div>
+        <div class="note">
+          <strong>מצב המוצר:</strong> המימוש כולל אפליקציה ומנועי חישוב משותפים. נתוני הנכסים בדיוניים, מודל הציון עדיין
+          לא מכויל והריביות הן להדגמה. פרופיל מלא, נתונים חיים ושירותי השרת עדיין לא נבנו.
+        </div>
+      </div>
+      <section id="m3">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">מה יש בסביבה, ולמה זה משנה</div>
+            <h2>ציון הפוטנציאל, מוסבר.</h2>
+            <p>
+              המימוש של M3 כבר היה בפרויקט. הוא מחבר את הציון לנתוני הנכס והסביבה ומציג את הסיבות, הכיסוי והפרטים
+              שמאחוריו.
+            </p>
+          </div>
+          <span class="milestone">M3</span>
+        </div>
+        <div class="grid">
+          <div class="card">
+            <div class="feature">
+              <h3><span class="index">01</span>מנוע ציון משותף</h3>
+              <p>
+                חמישה רכיבים, משקלים וגרסת מודל. כשמידע חסר, המשקל מתחלק מחדש ורמת הכיסוי יורדת. כשאין מידע שימושי, לא
+                מוצג ציון מומצא.
+              </p>
+            </div>
+            <div class="feature">
+              <h3><span class="index">02</span>טבעת ציון ומסך פירוט</h3>
+              <p>טבעת Skia במובייל, הנפשה שמכבדת Reduce Motion, הסברים בשתי שפות, תרומת כל רכיב ותאריך חישוב.</p>
+            </div>
+            <div class="feature">
+              <h3><span class="index">03</span>תוכניות, שירותים ותחבורה</h3>
+              <p>
+                תוכניות עירוניות עם פוליגונים לבחירה במפה במובייל, שמונה סוגי שירותים, מרחקים, עומס תנועה, רעש ותחבורה
+                ציבורית.
+              </p>
+            </div>
+            <div class="feature">
+              <h3><span class="index">04</span>מחירים לאורך זמן</h3>
+              <p>תרשים Victory Native, חלופת SVG בדפדפן ותצוגת ערכים נגישה. גם העסקאות וההיסטוריה הן נתוני הדגמה.</p>
+            </div>
+            <div class="mini-links"><a href="docs/m3.md">הערות המימוש של M3 ↗</a></div>
+          </div>
+          <div class="card">
+            <div class="demo-head">
+              <h3>דוגמה מתוך המנוע</h3>
+              <span class="tag">נתונים בדיוניים</span>
+            </div>
+            <p class="muted small">פלורנטין 122, תל אביב־יפו · <bdi>p-0001</bdi></p>
+            <div class="score">
+              <div class="ring">
+                <svg viewBox="0 0 140 140" aria-hidden="true">
+                  <circle cx="70" cy="70" r="59" stroke="var(--raised)" />
+                  <circle
+                    cx="70"
+                    cy="70"
+                    r="59"
+                    stroke="var(--green)"
+                    stroke-dasharray="285.45 370.71"
+                    stroke-linecap="round"
+                  /></svg
+                ><strong><bdi>77</bdi></strong>
+              </div>
+              <div>
+                <h3>פוטנציאל טוב</h3>
+                <p class="muted small">כיסוי נתונים גבוה<br />מודל הדגמה לא מכויל</p>
+              </div>
+            </div>
+            <div class="score-bars" id="score-bars"></div>
+            <noscript><p>תוכניות 99 · שירותים 38 · תחבורה 83 · שוק 70 · מאפייני נכס 95</p></noscript>
+            <div class="note">
+              הציון, הרכיבים והמשקלים כאן הופקו מקוד הפרויקט. כיסוי גבוה מתאר זמינות של נתונים, ואינו הוכחה לאמינותם או
+              לתשואה עתידית.
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="m4">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">מההון הזמין ועד ההחזר האחרון</div>
+            <h2>שלוש דרכים לראות את המשכנתא.</h2>
+            <p>
+              נבנו מחשבון, מסך תקציב, שלוש תוכניות והשוואה ביניהן. אפשר לערוך את ההנחות ולראות איך ההחזר, ההצמדה ועלות
+              הרכישה משתנים.
+            </p>
+          </div>
+          <span class="milestone">M4</span>
+        </div>
+        <div class="grid">
+          <div class="card">
+            <div class="feature">
+              <h3><span class="index">01</span>היכולת לרכוש</h3>
+              <p>
+                מחיר, הון זמין, הכנסה נטו, התחייבויות וסוג רכישה. התקציב מתחשב גם במס ובעלויות הנלוות. פער בהון או החזר
+                גבוה מוצגים במפורש.
+              </p>
+            </div>
+            <div class="feature">
+              <h3><span class="index">02</span>תמהיל שאפשר לבדוק</h3>
+              <p>
+                יציבה, מאוזנת וגמישה. בכל תוכנית: תשלום ראשון, סך החזרים, ריבית והצמדה. מסך השוואה מציב אותן זו לצד זו
+                על אותן הנחות.
+              </p>
+            </div>
+            <div class="feature">
+              <h3><span class="index">03</span>שליטה בפרטים</h3>
+              <p>
+                עריכת סכום, תקופה, חלק קבוע וריבית בכל מסלול. בחירה בין שפיצר לקרן שווה, תרחישי מדד ודוגמה לעלייה של
+                נקודת אחוז בריבית המשתנה.
+              </p>
+            </div>
+            <div class="feature">
+              <h3><span class="index">04</span>לוח סילוקין ועלויות</h3>
+              <p>
+                תרשים קרן וריבית וערכים שנתיים, לצד מס רכישה, עו״ד, תיווך, שמאי, יועץ, הובלה ושיפוץ. ההצמדה לקרן נספרת
+                בנפרד מהריבית.
+              </p>
+            </div>
+            <div class="feature">
+              <h3><span class="index">05</span>חיבור לנכס ושמירה על הנתונים</h3>
+              <p>
+                כרטיס משכנתא בעמוד הנכס ומחשבון עם מחיר שמולא מראש. הנתונים הפיננסיים נשארים בזיכרון החיבור הנוכחי, עד
+                שיושלם הפרופיל המאובטח ב־M1.
+              </p>
+            </div>
+            <div class="mini-links"><a href="docs/m4.md">הערות המימוש של M4 ↗</a></div>
+          </div>
+          <div class="card">
+            <div class="demo-head">
+              <h3>התוכניות במספרים</h3>
+              <span class="tag">פלט מחושב, לא הצעה</span>
+            </div>
+            <p class="muted small">
+              מחיר: <bdi>₪2,400,000</bdi> · הון: <bdi>₪800,000</bdi><br />הכנסה: <bdi>₪30,000</bdi> · התחייבויות:
+              <bdi>₪2,000</bdi><br />דירה יחידה · 25 שנים · הנחת מדד 2% בשנה
+            </p>
+            <div class="plan-buttons" role="group" aria-label="בחירת תוכנית לדוגמה">
+              <button data-plan="stable" aria-pressed="false">יציבה</button
+              ><button data-plan="balanced" aria-pressed="true">מאוזנת</button
+              ><button data-plan="flexible" aria-pressed="false">גמישה</button>
+            </div>
+            <div aria-live="polite" aria-atomic="true">
+              <div class="payment-label" id="payment-label">החזר חודשי ראשון · מאוזנת</div>
+              <div class="payment"><bdi id="payment">₪9,453</bdi></div>
+              <p class="small muted" id="plan-description">50% קבועה לא צמודה, 30% פריים ו־20% קבועה צמודה.</p>
+              <div class="plan-mix" id="plan-mix" aria-hidden="true"></div>
+              <div class="legend" id="plan-legend"></div>
+              <dl class="figures">
+                <div>
+                  <dt>סך החזרים</dt>
+                  <dd><bdi id="repayment">₪2,980,526</bdi></dd>
+                </div>
+                <div>
+                  <dt>סך ריבית</dt>
+                  <dd><bdi id="interest">₪1,181,394</bdi></dd>
+                </div>
+                <div>
+                  <dt>תוספת הצמדה לקרן</dt>
+                  <dd><bdi id="indexation">₪113,934</bdi></dd>
+                </div>
+                <div>
+                  <dt>החזר חודשי מרבי בתרחיש</dt>
+                  <dd><bdi id="peak">₪10,503</bdi></dd>
+                </div>
+              </dl>
+              <svg
+                class="chart"
+                id="demo-chart"
+                viewBox="0 0 430 140"
+                role="img"
+                aria-label="קרן וריבית שנתיות בתוכנית שנבחרה"
+              >
+                <line x1="6" x2="424" y1="132" y2="132" stroke="var(--line)" />
+                <polyline id="principal-line" fill="none" stroke="var(--ion)" stroke-width="3" />
+                <polyline id="interest-line" fill="none" stroke="var(--aqua)" stroke-width="3" />
+              </svg>
+              <div class="chart-labels"><span>שנה 1</span><span>שנה 25</span></div>
+              <div class="legend" style="margin-top: 12px">
+                <span><i class="swatch" style="background: var(--ion)"></i>קרן ששולמה</span
+                ><span><i class="swatch" style="background: var(--aqua)"></i>ריבית ששולמה</span>
+              </div>
+              <details>
+                <summary>ערכים שנתיים נגישים</summary>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th scope="col">שנה</th>
+                        <th scope="col">קרן</th>
+                        <th scope="col">ריבית</th>
+                        <th scope="col">יתרה</th>
+                      </tr>
+                    </thead>
+                    <tbody id="annual-values"></tbody>
+                  </table>
+                </div>
+              </details>
+            </div>
+            <div class="note">
+              הדוגמה משתמשת בריביות הדגמה ובפלטים שהופקו מהמנוע. החלפת תוכנית מציגה תרחיש מחושב אחר; זה אינו מחשבון
+              עצמאי של נתונים חדשים.
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <caption style="text-align: start; padding: 16px; background: var(--card); font-weight: 650">
+              ההון העצמי צריך לכסות גם את עלויות הרכישה — באותה דוגמה
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">רכיב</th>
+                <th scope="col">סכום</th>
+                <th scope="col">משמעות</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>עלויות נלוות</td>
+                <td><bdi>₪85,198</bdi></td>
+                <td>כולל מס רכישה של <bdi>₪15,538</bdi> והנחות העלויות שהוזנו.</td>
+              </tr>
+              <tr>
+                <td>עלות רכישה כוללת</td>
+                <td><bdi>₪2,485,198</bdi></td>
+                <td>מחיר הנכס ועוד עלויות; ללא ריבית עתידית והצמדה למשכנתא.</td>
+              </tr>
+              <tr>
+                <td>הלוואה שנדרשת</td>
+                <td><bdi>₪1,685,198</bdi></td>
+                <td>העלויות נוכו תחילה מתוך ההון הזמין.</td>
+              </tr>
+              <tr>
+                <td>תקציב רכישה משוער</td>
+                <td><bdi>₪2,300,269</bdi></td>
+                <td>
+                  לפי כלל תכנון של 33% מההכנסה לאחר התחייבויות, ריבית דוגמה של 5%, מס ועלויות. המחיר שבדוגמה גבוה
+                  מהתקציב הזה.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section id="build">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">מהקוד לגרסה שאפשר להריץ</div>
+            <h2>בנייה ואימות.</h2>
+            <p>האפליקציה יוצאה בהצלחה לשלוש פלטפורמות. בנוסף הושלמה בניית Android בפרופיל הפיתוח הקיים של הפרויקט.</p>
+          </div>
+        </div>
+        <div class="build-card">
+          <div>
+            <span class="pill" id="build-status">Android · הבנייה הושלמה בהצלחה</span>
+            <h3 style="margin-top: 16px">גרסת פיתוח עם M3 ו־M4</h3>
+            <p class="muted small">
+              פרופיל <bdi>development</bdi> · חתימת Android הקיימת · מפתח המפות מסביבת EAS.<br />APK של פיתוח דורש חיבור
+              ל־Metro כדי להריץ את קוד האפליקציה הנוכחי.
+            </p>
+          </div>
+          <div class="build-actions">
+            <a
+              class="btn primary"
+              href="https://expo.dev/accounts/samtuberr/projects/nadlan-score/builds/be611c51-791e-4e09-bfa1-babcb68d63ca"
+              >פתיחת הבנייה ב־EAS ↗</a
+            ><span id="apk-link"><a class="btn" href="https://expo.dev/artifacts/eas/JeJSDi2NjIXxyLem9DQeBxOXsIOJwL8xWRRV9gpmuOQ.apk">הורדת APK הפיתוח ↓</a></span>
+          </div>
+        </div>
+        <div class="grid" style="margin-top: 24px">
+          <div class="card">
+            <h3 style="margin-bottom: 18px">בדיקות שעברו</h3>
+            <ul class="checks">
+              <li>
+                <span class="check">✓</span
+                ><span><bdi>119</bdi> בדיקות יחידה, כולל <bdi>53</bdi> חדשות למתמטיקה, מס ויכולת רכישה.</span>
+              </li>
+              <li><span class="check">✓</span><span>TypeScript ו־ESLint.</span></li>
+              <li><span class="check">✓</span><span>ייצוא Web ו־Hermes ל־iOS ול־Android.</span></li>
+              <li><span class="check">✓</span><span>בדפדפן: תוכניות, השוואה, פירוט, מדד וערכים שנתיים.</span></li>
+              <li><span class="check">✓</span><span>חסימת מחיר ריק, פער בהון ומס דירה חליפית שמרני.</span></li>
+              <li>
+                <span class="check">✓</span><span>עברית RTL ואנגלית ברוחב מובייל, ללא גלישה אופקית במסכים שנבדקו.</span>
+              </li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>להריץ את התוצאה</h3>
+            <p class="muted small" style="margin-top: 10px">
+              התקינו את APK הפיתוח, הפעילו את Metro ופתחו את הפרויקט במכשיר. תצוגת הווב מיועדת לבדיקה מהירה.
+            </p>
+            <pre class="codeblock">
+npx expo start --dev-client
+
+# Web preview
+npm run web
+
+# Verification
+npm test -- --runInBand
+npm run typecheck
+npm run lint
+npx expo export --platform all</pre>
+          </div>
+        </div>
+        <div class="note">
+          <strong>גבולות האימות:</strong> הגישה למכשירים מושבתת בסביבה הזאת. תרשימי Skia/Victory, מפות, מקלדת, קוראי מסך
+          ו־RTL בגופן גדול עדיין דורשים בדיקה על מכשיר. כלי צילום המסך של הדפדפן נכשל; בדיקות הניווט והאינטראקציות בוצעו
+          דרך ה־preview המשותף.
+        </div>
+      </section>
+      <section id="next">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">נקודת ההמשך</div>
+            <h2>מה עוד צריך כדי להגיע למוצר חי.</h2>
+            <p>המספור אינו אומר שכל השלבים הקודמים הושלמו. המנועים והמסכים זמינים עכשיו; התשתיות הבאות עדיין חסרות.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">שלב</th>
+                <th scope="col">מצב</th>
+                <th scope="col">המשך נדרש</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><bdi>M3</bdi> · ציון וסביבה</td>
+                <td class="status-good">מומש עם נתוני הדגמה</td>
+                <td>כיול המודל, נתונים מורשים ושרת חישוב ב־B3.</td>
+              </tr>
+              <tr>
+                <td><bdi>M4</bdi> · משכנתאות</td>
+                <td class="status-good">מומש עם ריביות הדגמה</td>
+                <td>פרופיל מאובטח, נתוני ריבית ומדד חיים, ניהול הגדרות ובדיקת מכשיר.</td>
+              </tr>
+              <tr>
+                <td><bdi>M1 + B0/B1</bdi></td>
+                <td class="status-wait">טרם מומש</td>
+                <td>הרשמה, פרופיל קונה מלא, הסכמות ואחסון מאובטח.</td>
+              </tr>
+              <tr>
+                <td><bdi>B2–B4</bdi></td>
+                <td class="status-wait">טרם מומש</td>
+                <td>Supabase, קליטת נכסים, worker לציון, ריביות/מדד והפקת יכולת רכישה בשרת.</td>
+              </tr>
+              <tr>
+                <td><bdi>M5 / M6</bdi></td>
+                <td class="status-wait">בהמשך</td>
+                <td>תוכן למידה והזמנת ייעוץ. כפתור היועץ מציג הודעה ואינו שולח ליד.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <details>
+          <summary>מה חשוב לדעת על הכללים הפיננסיים?</summary>
+          <p>
+            ההגדרות מבוססות על הוראת בנק ישראל 329 והוראת רשות המסים 1/2026, שנבדקו ב־12.10.2026. טבלאות המס במחשבון
+            מכסות את 2026 בלבד; אחרי כן החישוב ייעצר עד לעדכון. למשפר דיור לא ניתנת אוטומטית זכאות למס דירה יחידה. המודל
+            מיועד לרכישה רגילה ואינו מכסה מיחזור, דיור מסובסד, זכאויות מיוחדות או הלוואות שכבר מובטחות בנכס.
+          </p>
+        </details>
+        <details>
+          <summary>מה ההבדל בין חישוב לתחזית?</summary>
+          <p>
+            ההחזרים מחושבים מתמטית לפי ההנחות שהוזנו. הריבית המשתנה נשארת קבועה בתוך כל תרחיש, והמדד מחושב בקצב שנתי
+            קבוע. זו אינה תחזית לריבית, למדד או ליכולת לקבל הלוואה. נתוני הדוגמה במסמך הופקו מאותו קוד חישוב של
+            האפליקציה.
+          </p>
+        </details>
+        <details>
+          <summary>איפה נמצא הקוד?</summary>
+          <p>
+            חישובים משותפים ב־<code>lib/domain/mortgage</code>,
+            <code>lib/domain/tax</code> ו־<code>lib/domain/regulation</code>. מסכי פירוט ב־<code>app/mortgage</code>,
+            רכיבים ב־<code>components/mortgage</code>, והנתונים הזמניים ב־<code>stores/mortgage.ts</code>. מנוע M3 נמצא
+            ב־<code>lib/domain/score</code>.
+          </p>
+        </details>
+        <div class="sources">
+          <a class="source" href="docs/m3.md"
+            >M3 · תיעוד המימוש<span>מנוע הציון, המקורות, הגרפיקה ומגבלות הכיסוי</span></a
+          ><a class="source" href="docs/m4.md">M4 · תיעוד המימוש<span>חישובים, הנחות, בדיקות וגבולות השרת</span></a
+          ><a class="source" href="https://www.boi.org.il/media/ez4npagt/329.pdf"
+            >בנק ישראל · הוראה 329<span>מגבלות הלוואות לדיור · נוסח יוני 2026</span></a
+          ><a class="source" href="https://www.gov.il/BlobFolder/policy/inst-01-2026/he/realestate_inst-01-2026.pdf"
+            >רשות המסים · הוראת ביצוע 1/2026<span>מדרגות מס רכישה ותקופת תחולתן</span></a
+          >
+        </div>
+      </section>
+    </main>
+    <footer>
+      <div class="wrap">
+        <span><bdi>Nadlan Score · M3 + M4 · 12.10.2026</bdi></span
+        ><span>מסמך עצמאי · ללא ספריות או גופנים חיצוניים · הנתונים להדגמה בלבד</span>
+      </div>
+    </footer>
+    <script id="engine-output" type="application/json">
+      {
+        "inputs": {
+          "price": 2400000,
+          "equity": 800000,
+          "monthlyIncome": 30000,
+          "monthlyObligations": 2000,
+          "buyerType": "first_home",
+          "replacementTaxEligible": false,
+          "termYears": 25,
+          "annualCpi": 0.02,
+          "fees": {
+            "lawyerRate": 0.0059,
+            "agentRate": 0,
+            "appraiser": 2500,
+            "advisor": 8000,
+            "moving": 5000,
+            "renovation": 40000
+          }
+        },
+        "purchase": {
+          "costs": {
+            "items": {
+              "tax": 15538.33,
+              "lawyer": 14160,
+              "agent": 0,
+              "appraiser": 2500,
+              "advisor": 8000,
+              "moving": 5000,
+              "renovation": 40000
+            },
+            "closingCosts": 85198.33,
+            "total": 2485198.33
+          },
+          "loanNeeded": 1685198.33,
+          "maxLoan": 1800000,
+          "requiredEquity": 685198.33,
+          "disposableIncome": 28000,
+          "equityGap": 0,
+          "ltv": 0.7021659708333333,
+          "recommendedPayment": 9240,
+          "maxPropertyPrice": 2300269,
+          "incomeLimitedLoan": 1580594.83465797
+        },
+        "plans": [
+          {
+            "id": "stable",
+            "tracks": [
+              {
+                "type": "fixed_unlinked",
+                "share": 0.8,
+                "amount": 1348158.664,
+                "annualRate": 0.05,
+                "termYears": 25
+              },
+              {
+                "type": "prime",
+                "share": 0.2,
+                "amount": 337039.666,
+                "annualRate": 0.0475,
+                "termYears": 25
+              }
+            ],
+            "schedule": [
+              {
+                "year": 1,
+                "principal": 35002.15442302536,
+                "interest": 82630.5209059089,
+                "indexation": 0,
+                "payment": 117632.67532893427,
+                "balance": 1650196.1755769749
+              },
+              {
+                "year": 2,
+                "principal": 36774.09870935339,
+                "interest": 80858.57661958082,
+                "indexation": 0,
+                "payment": 117632.67532893427,
+                "balance": 1613422.0768676214
+              },
+              {
+                "year": 3,
+                "principal": 38635.78475694055,
+                "interest": 78996.89057199369,
+                "indexation": 0,
+                "payment": 117632.67532893427,
+                "balance": 1574786.292110681
+              },
+              {
+                "year": 4,
+                "principal": 40591.759538673985,
+                "interest": 77040.91579026026,
+                "indexation": 0,
+                "payment": 117632.67532893427,
+                "balance": 1534194.532572007
+              },
+              {
+                "year": 5,
+                "principal": 42646.80050436015,
+                "interest": 74985.87482457409,
+                "indexation": 0,
+                "payment": 117632.67532893427,
+                "balance": 1491547.732067647
+              },
+              {
+                "year": 6,
+                "principal": 44805.9272677483,
+                "interest": 72826.74806118595,
+                "indexation": 0,
+                "payment": 117632.67532893427,
+                "balance": 1446741.8047998988
+              },
+              {
+                "year": 7,
+                "principal": 47074.41388640554,
+                "interest": 70558.26144252869,
+                "indexation": 0,
+                "payment": 117632.67532893427,
+                "balance": 1399667.390913493
+              },
+              {
+                "year": 8,
+                "principal": 49457.80176452841,
+                "interest": 68174.87356440582,
+                "indexation": 0,
+                "payment": 117632.67532893427,
+                "balance": 1350209.5891489647
+              },
+              {
+                "year": 9,
+                "principal": 51961.91321030283,
+                "interest": 65670.7621186314,
+                "indexation": 0,
+                "payment": 117632.67532893427,
+                "balance": 1298247.675938662
+              },
+              {
+                "year": 10,
+                "principal": 54592.86568102942,
+                "interest": 63039.80964790482,
+                "indexation": 0,
+                "payment": 117632.67532893427,
+                "balance": 1243654.8102576325
+              },
+              {
+                "year": 11,
+                "principal": 57357.08675091735,
+                "interest": 60275.58857801689,
+                "indexation": 0,
+                "payment": 117632.67532893427,
+                "balance": 1186297.7235067154
+              },
+              {
+                "year": 12,
+                "principal": 60261.32983822171,
+                "interest": 57371.34549071252,
+                "indexation": 0,
+                "payment": 117632.67532893426,
+                "balance": 1126036.3936684933
+              },
+              {
+                "year": 13,
+                "principal": 63312.69073026128,
+                "interest": 54319.984598672956,
+                "indexation": 0,
+                "payment": 117632.67532893425,
+                "balance": 1062723.702938232
+              },
+              {
+                "year": 14,
+                "principal": 66518.62494681023,
+                "interest": 51114.050382124005,
+                "indexation": 0,
+                "payment": 117632.67532893425,
+                "balance": 996205.077991422
+              },
+              {
+                "year": 15,
+                "principal": 69886.96598441295,
+                "interest": 47745.709344521296,
+                "indexation": 0,
+                "payment": 117632.67532893423,
+                "balance": 926318.1120070092
+              },
+              {
+                "year": 16,
+                "principal": 73425.94448633121,
+                "interest": 44206.73084260303,
+                "indexation": 0,
+                "payment": 117632.67532893422,
+                "balance": 852892.1675206778
+              },
+              {
+                "year": 17,
+                "principal": 77144.20838510338,
+                "interest": 40488.466943830856,
+                "indexation": 0,
+                "payment": 117632.67532893422,
+                "balance": 775747.9591355743
+              },
+              {
+                "year": 18,
+                "principal": 81050.84406707983,
+                "interest": 36581.83126185441,
+                "indexation": 0,
+                "payment": 117632.67532893425,
+                "balance": 694697.1150684943
+              },
+              {
+                "year": 19,
+                "principal": 85155.39861080586,
+                "interest": 32477.276718128378,
+                "indexation": 0,
+                "payment": 117632.67532893423,
+                "balance": 609541.7164576886
+              },
+              {
+                "year": 20,
+                "principal": 89467.90315375642,
+                "interest": 28164.77217517782,
+                "indexation": 0,
+                "payment": 117632.67532893427,
+                "balance": 520073.81330393214
+              },
+              {
+                "year": 21,
+                "principal": 93998.89744469477,
+                "interest": 23633.777884239473,
+                "indexation": 0,
+                "payment": 117632.67532893427,
+                "balance": 426074.91585923743
+              },
+              {
+                "year": 22,
+                "principal": 98759.45564183488,
+                "interest": 18873.219687099347,
+                "indexation": 0,
+                "payment": 117632.67532893426,
+                "balance": 327315.46021740255
+              },
+              {
+                "year": 23,
+                "principal": 103761.2134200435,
+                "interest": 13871.461908890727,
+                "indexation": 0,
+                "payment": 117632.67532893427,
+                "balance": 223554.24679735902
+              },
+              {
+                "year": 24,
+                "principal": 109016.39645352798,
+                "interest": 8616.278875406244,
+                "indexation": 0,
+                "payment": 117632.67532893427,
+                "balance": 114537.85034383106
+              },
+              {
+                "year": 25,
+                "principal": 114537.85034383106,
+                "interest": 3094.824985103435,
+                "indexation": 0,
+                "payment": 117632.67532893452,
+                "balance": 0
+              }
+            ],
+            "loanAmount": 1685198.33,
+            "monthlyPayment": 9802.722944077854,
+            "peakPayment": 9802.722944078105,
+            "totalRepayment": 2940816.883223364,
+            "totalInterest": 1255618.5532233575,
+            "totalIndexation": 0
+          },
+          {
+            "id": "balanced",
+            "tracks": [
+              {
+                "type": "fixed_unlinked",
+                "share": 0.5,
+                "amount": 842599.165,
+                "annualRate": 0.05,
+                "termYears": 25
+              },
+              {
+                "type": "prime",
+                "share": 0.3,
+                "amount": 505559.499,
+                "annualRate": 0.0475,
+                "termYears": 25
+              },
+              {
+                "type": "fixed_linked",
+                "share": 0.2,
+                "amount": 337039.666,
+                "annualRate": 0.0325,
+                "termYears": 25
+              }
+            ],
+            "schedule": [
+              {
+                "year": 1,
+                "principal": 37163.847457759075,
+                "interest": 76454.81208585178,
+                "indexation": 6659.513783376989,
+                "payment": 113618.65954361085,
+                "balance": 1654693.996325618
+              },
+              {
+                "year": 2,
+                "principal": 39059.30873457677,
+                "interest": 74957.79601166719,
+                "indexation": 6608.670157053514,
+                "payment": 114017.10474624397,
+                "balance": 1622243.3577480947
+              },
+              {
+                "year": 3,
+                "principal": 41051.5723344739,
+                "interest": 73371.94651845584,
+                "indexation": 6546.936555523384,
+                "payment": 114423.51885292973,
+                "balance": 1587738.7219691442
+              },
+              {
+                "year": 4,
+                "principal": 43145.58855766388,
+                "interest": 71692.47268408537,
+                "indexation": 6473.5655042852,
+                "payment": 114838.06124174924,
+                "balance": 1551066.6989157659
+              },
+              {
+                "year": 5,
+                "principal": 45346.56118781962,
+                "interest": 69914.3332905255,
+                "indexation": 6387.766163193887,
+                "payment": 115260.89447834512,
+                "balance": 1512107.9038911401
+              },
+              {
+                "year": 6,
+                "principal": 47659.96048888014,
+                "interest": 68032.22389079278,
+                "indexation": 6288.701934670007,
+                "payment": 115692.18437967291,
+                "balance": 1470736.6453369304
+              },
+              {
+                "year": 7,
+                "principal": 50091.53686910697,
+                "interest": 66040.56320992032,
+                "indexation": 6175.487942287609,
+                "payment": 116132.10007902727,
+                "balance": 1426820.5964101108
+              },
+              {
+                "year": 8,
+                "principal": 52647.33524669073,
+                "interest": 63933.47884567801,
+                "indexation": 6047.188372760599,
+                "payment": 116580.81409236873,
+                "balance": 1380220.4495361806
+              },
+              {
+                "year": 9,
+                "principal": 55333.71015297403,
+                "interest": 61704.79223300297,
+                "indexation": 5902.813673972487,
+                "payment": 117038.502385977,
+                "balance": 1330789.553057179
+              },
+              {
+                "year": 10,
+                "principal": 58157.341611213014,
+                "interest": 59348.00283424445,
+                "indexation": 5741.317601299367,
+                "payment": 117505.34444545745,
+                "balance": 1278373.5290472659
+              },
+              {
+                "year": 11,
+                "principal": 61125.25183075205,
+                "interest": 56856.27151537543,
+                "indexation": 5561.59410405955,
+                "payment": 117981.52334612749,
+                "balance": 1222809.8713205734
+              },
+              {
+                "year": 12,
+                "principal": 64244.82275853931,
+                "interest": 54222.40306627165,
+                "indexation": 5362.474043484677,
+                "payment": 118467.22582481094,
+                "balance": 1163927.5226055183
+              },
+              {
+                "year": 13,
+                "principal": 67523.81453206857,
+                "interest": 51438.8278209995,
+                "indexation": 5142.72173314492,
+                "payment": 118962.64235306808,
+                "balance": 1101546.429806595
+              },
+              {
+                "year": 14,
+                "principal": 70970.38488010388,
+                "interest": 48497.582331786434,
+                "indexation": 4901.031292273755,
+                "payment": 119467.9672118903,
+                "balance": 1035477.0762187648
+              },
+              {
+                "year": 15,
+                "principal": 74593.10951992919,
+                "interest": 45390.28904795986,
+                "indexation": 4636.022801924733,
+                "payment": 119983.39856788905,
+                "balance": 965519.9895007603
+              },
+              {
+                "year": 16,
+                "principal": 78401.00360237567,
+                "interest": 42108.134948632054,
+                "indexation": 4346.238253351927,
+                "payment": 120509.13855100772,
+                "balance": 891465.2241517365
+              },
+              {
+                "year": 17,
+                "principal": 82403.54425851925,
+                "interest": 38641.849075269514,
+                "indexation": 4030.1372774359643,
+                "payment": 121045.39333378879,
+                "balance": 813091.817170653
+              },
+              {
+                "year": 18,
+                "principal": 86610.69430471513,
+                "interest": 34981.67890751034,
+                "indexation": 3686.0926433773043,
+                "payment": 121592.37321222546,
+                "balance": 730167.2155093153
+              },
+              {
+                "year": 19,
+                "principal": 91032.9271655556,
+                "interest": 31117.365522675293,
+                "indexation": 3312.3855142458583,
+                "payment": 122150.29268823088,
+                "balance": 642446.6738580054
+              },
+              {
+                "year": 20,
+                "principal": 95681.25307740628,
+                "interest": 27038.117476350126,
+                "indexation": 2907.200446309589,
+                "payment": 122719.3705537564,
+                "balance": 549672.6212269088
+              },
+              {
+                "year": 21,
+                "principal": 100567.24663840301,
+                "interest": 22732.58333818942,
+                "indexation": 2468.6201183624758,
+                "payment": 123299.82997659242,
+                "balance": 451573.9947068682
+              },
+              {
+                "year": 22,
+                "principal": 105703.07577418548,
+                "interest": 18188.822813699706,
+                "indexation": 1994.6197765323298,
+                "payment": 123891.8985878852,
+                "balance": 347865.538709215
+              },
+              {
+                "year": 23,
+                "principal": 111101.53219221266,
+                "interest": 13394.276379191135,
+                "indexation": 1483.0613792692704,
+                "payment": 124495.8085714038,
+                "balance": 238247.0678962717
+              },
+              {
+                "year": 24,
+                "principal": 116776.06340125791,
+                "interest": 8335.733353334866,
+                "indexation": 931.6874263942202,
+                "payment": 125111.79675459275,
+                "balance": 122402.69192140801
+              },
+              {
+                "year": 25,
+                "principal": 122740.80637662922,
+                "interest": 2999.2983248175815,
+                "indexation": 338.11445522121215,
+                "payment": 125740.10470144678,
+                "balance": 0
+              }
+            ],
+            "loanAmount": 1685198.33,
+            "monthlyPayment": 9453.194900601211,
+            "peakPayment": 10502.64492364994,
+            "totalRepayment": 2980525.948480094,
+            "totalInterest": 1181393.6555262867,
+            "totalIndexation": 113933.96295381091
+          },
+          {
+            "id": "flexible",
+            "tracks": [
+              {
+                "type": "fixed_unlinked",
+                "share": 0.34,
+                "amount": 572967.4322,
+                "annualRate": 0.05,
+                "termYears": 25
+              },
+              {
+                "type": "prime",
+                "share": 0.5,
+                "amount": 842599.165,
+                "annualRate": 0.0475,
+                "termYears": 25
+              },
+              {
+                "type": "variable5_linked",
+                "share": 0.16,
+                "amount": 269631.7328,
+                "annualRate": 0.03,
+                "termYears": 25
+              }
+            ],
+            "schedule": [
+              {
+                "year": 1,
+                "principal": 37259.92963438569,
+                "interest": 76089.05493415786,
+                "indexation": 5325.336664821932,
+                "payment": 113348.98456854354,
+                "balance": 1653263.7370304365
+              },
+              {
+                "year": 2,
+                "principal": 39118.11423119056,
+                "interest": 74541.05450642575,
+                "indexation": 5279.710995994901,
+                "payment": 113659.1687376163,
+                "balance": 1619425.3337952408
+              },
+              {
+                "year": 3,
+                "principal": 41069.02919168574,
+                "interest": 72906.52739838476,
+                "indexation": 5225.41036810896,
+                "payment": 113975.55659007048,
+                "balance": 1583581.7149716641
+              },
+              {
+                "year": 4,
+                "principal": 43117.305148524196,
+                "interest": 71180.96705104955,
+                "indexation": 5161.8652088116005,
+                "payment": 114298.27219957377,
+                "balance": 1545626.2750319515
+              },
+              {
+                "year": 5,
+                "principal": 45267.80412328214,
+                "interest": 69359.63799798494,
+                "indexation": 5088.474344956427,
+                "payment": 114627.44212126709,
+                "balance": 1505446.945253626
+              },
+              {
+                "year": 6,
+                "principal": 47525.631096287405,
+                "interest": 67437.5643451069,
+                "indexation": 5004.603339419994,
+                "payment": 114963.19544139432,
+                "balance": 1462925.9174967587
+              },
+              {
+                "year": 7,
+                "principal": 49896.1461553314,
+                "interest": 65409.51767259266,
+                "indexation": 4909.582742040414,
+                "payment": 115305.66382792406,
+                "balance": 1417939.3540834675
+              },
+              {
+                "year": 8,
+                "principal": 52384.977252247154,
+                "interest": 63270.004329937234,
+                "indexation": 4802.706250275536,
+                "payment": 115654.98158218441,
+                "balance": 1370357.083081496
+              },
+              {
+                "year": 9,
+                "principal": 54998.03359778756,
+                "interest": 61013.25209374239,
+                "indexation": 4683.228774953526,
+                "payment": 116011.28569152995,
+                "balance": 1320042.2782586622
+              },
+              {
+                "year": 10,
+                "principal": 57741.5197267628,
+                "interest": 58633.19615629962,
+                "indexation": 4550.3644062520825,
+                "payment": 116374.71588306241,
+                "balance": 1266851.1229381517
+              },
+              {
+                "year": 11,
+                "principal": 60621.9502669972,
+                "interest": 56123.46441142834,
+                "indexation": 4403.284274794003,
+                "payment": 116745.41467842553,
+                "balance": 1210632.4569459483
+              },
+              {
+                "year": 12,
+                "principal": 63646.16544734712,
+                "interest": 53477.36200234879,
+                "indexation": 4241.1143024855,
+                "payment": 117123.5274496959,
+                "balance": 1151227.405801087
+              },
+              {
+                "year": 13,
+                "principal": 66821.3473817871,
+                "interest": 50687.85509460459,
+                "indexation": 4062.9328374490174,
+                "payment": 117509.20247639169,
+                "balance": 1088468.9912567486
+              },
+              {
+                "year": 14,
+                "principal": 70155.03716842594,
+                "interest": 47747.55383519544,
+                "indexation": 3867.768167113728,
+                "payment": 117902.59100362139,
+                "balance": 1022181.7222554362
+              },
+              {
+                "year": 15,
+                "principal": 73655.15284426138,
+                "interest": 44648.694457134305,
+                "indexation": 3654.5959032234355,
+                "payment": 118303.8473013957,
+                "balance": 952181.1653143984
+              },
+              {
+                "year": 16,
+                "principal": 77330.00823852727,
+                "interest": 41383.12048659819,
+                "indexation": 3422.3362322027547,
+                "payment": 118713.12872512545,
+                "balance": 878273.4933080737
+              },
+              {
+                "year": 17,
+                "principal": 81188.33276963395,
+                "interest": 37942.26300769589,
+                "indexation": 3169.8510239873294,
+                "payment": 119130.59577732984,
+                "balance": 800255.0115624272
+              },
+              {
+                "year": 18,
+                "principal": 85239.29223295815,
+                "interest": 34317.119937620155,
+                "indexation": 2895.940792071542,
+                "payment": 119556.4121705783,
+                "balance": 717911.6601215405
+              },
+              {
+                "year": 19,
+                "principal": 89492.5106291064,
+                "interest": 30498.23426258536,
+                "indexation": 2599.3414971569428,
+                "payment": 119990.74489169175,
+                "balance": 631018.4909895911
+              },
+              {
+                "year": 20,
+                "principal": 93958.09308476314,
+                "interest": 26475.671182464303,
+                "indexation": 2278.7211863954794,
+                "payment": 120433.76426722744,
+                "balance": 539339.1190912235
+              },
+              {
+                "year": 21,
+                "principal": 98646.64992084626,
+                "interest": 22238.994109427604,
+                "indexation": 1932.6764598126122,
+                "payment": 120885.64403027388,
+                "balance": 442625.14563018974
+              },
+              {
+                "year": 22,
+                "principal": 103569.32192543476,
+                "interest": 17777.239463146423,
+                "indexation": 1559.728755065467,
+                "payment": 121346.5613885812,
+                "balance": 340615.5524598204
+              },
+              {
+                "year": 23,
+                "principal": 108737.80689181446,
+                "interest": 13078.890202240247,
+                "indexation": 1158.320441239399,
+                "payment": 121816.6970940547,
+                "balance": 233036.0660092454
+              },
+              {
+                "year": 24,
+                "principal": 114164.38748501061,
+                "interest": 8131.848028627074,
+                "indexation": 726.8107119113821,
+                "payment": 122296.23551363766,
+                "balance": 119598.48923614624
+              },
+              {
+                "year": 25,
+                "principal": 119861.96050335577,
+                "interest": 2923.404198258058,
+                "indexation": 263.47126720953935,
+                "payment": 122785.36470161384,
+                "balance": 0
+              }
+            ],
+            "loanAmount": 1685198.33,
+            "monthlyPayment": 9434.050610722672,
+            "peakPayment": 10251.033175029497,
+            "totalRepayment": 2942758.9981128084,
+            "totalInterest": 1167292.4911650564,
+            "totalIndexation": 90268.1769477534
+          }
+        ],
+        "property": {
+          "id": "p-0001",
+          "address": {
+            "city": {
+              "he": "תל אביב-יפו",
+              "en": "Tel Aviv-Yafo"
+            },
+            "neighborhood": {
+              "he": "פלורנטין",
+              "en": "Florentin"
+            },
+            "street": {
+              "he": "פלורנטין",
+              "en": "Florentin"
+            },
+            "number": "122"
+          },
+          "score": {
+            "total": 77,
+            "grade": "good",
+            "confidence": "high",
+            "subScores": [
+              {
+                "key": "plans",
+                "value": 99,
+                "weight": 0.3,
+                "highlights": [
+                  {
+                    "en": "2 plans within the scoring radius. Approved plans carry more weight than proposals.",
+                    "he": "2 תוכניות בטווח החישוב. לתוכניות מאושרות משקל גבוה יותר מהצעות."
+                  },
+                  {
+                    "en": "Building renewal eligibility is recorded.",
+                    "he": "נרשמה זכאות הבניין להתחדשות."
+                  }
+                ]
+              },
+              {
+                "key": "amenities",
+                "value": 38,
+                "weight": 0.2,
+                "highlights": [
+                  {
+                    "en": "12 amenities across 4 categories within 800m. More variety and shorter distances raise this score.",
+                    "he": "12 שירותים ב־4 קטגוריות בטווח 800 מ׳. מגוון ומרחקים קצרים מעלים את הציון."
+                  }
+                ]
+              },
+              {
+                "key": "traffic",
+                "value": 83,
+                "weight": 0.15,
+                "highlights": [
+                  {
+                    "en": "Nearest public transport stop: 150m. Shorter distances improve access.",
+                    "he": "תחנת התחבורה הציבורית הקרובה: 150 מ׳. מרחק קצר משפר את הנגישות."
+                  },
+                  {
+                    "en": "Peak congestion: low; road noise: moderate. Congestion and noise reduce this score.",
+                    "he": "עומס בשעות השיא: נמוך; רעש כביש: בינוני. עומס ורעש מורידים את הציון."
+                  }
+                ]
+              },
+              {
+                "key": "market",
+                "value": 70,
+                "weight": 0.25,
+                "highlights": [
+                  {
+                    "en": "Price per sqm is 4% below the neighborhood median (3 comparable deals). A lower relative price raises this score.",
+                    "he": "המחיר למ״ר 4% מתחת לחציון בשכונה (3 עסקאות להשוואה). מחיר יחסי נמוך מעלה את הציון."
+                  },
+                  {
+                    "en": "Five-year price change: +30%. Past growth is not a forecast.",
+                    "he": "שינוי המחיר בחמש שנים: +30%. צמיחה בעבר אינה תחזית."
+                  }
+                ]
+              },
+              {
+                "key": "property",
+                "value": 95,
+                "weight": 0.1,
+                "highlights": [
+                  {
+                    "en": "Built 2001. Parking: 1. Safe room: yes. Newer buildings and value-holding features raise this score.",
+                    "he": "שנת בנייה: 2001. חניות: 1. ממ״ד: כן. בניינים חדשים ומאפיינים ששומרים על ערך מעלים את הציון."
+                  },
+                  {
+                    "en": "No upper-floor walk-up penalty.",
+                    "he": "אין הפחתה בגין קומה גבוהה ללא מעלית."
+                  }
+                ]
+              }
+            ],
+            "algorithmVersion": "1.0.0-preview",
+            "computedAt": "2026-10-12T17:46:49.557Z"
+          },
+          "plansCount": 2
+        }
+      }
+    </script>
+    <script>
+      const data = JSON.parse(document.getElementById("engine-output").textContent);
+      const money = (n) =>
+        new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 0 }).format(n);
+      const names = { stable: "יציבה", balanced: "מאוזנת", flexible: "גמישה" };
+      const trackNames = {
+        fixed_unlinked: "קבועה לא צמודה",
+        prime: "פריים",
+        fixed_linked: "קבועה צמודה",
+        variable5_linked: "משתנה צמודה",
+      };
+      const descriptions = {
+        stable: "80% קבועה לא צמודה ו־20% פריים.",
+        balanced: "50% קבועה לא צמודה, 30% פריים ו־20% קבועה צמודה.",
+        flexible: "34% קבועה לא צמודה, 50% פריים ו־16% משתנה צמודה.",
+      };
+      const categoryNames = {
+        plans: "תוכניות ופיתוח",
+        amenities: "שירותים בסביבה",
+        traffic: "תחבורה ונגישות",
+        market: "שוק הדיור",
+        property: "מאפייני הנכס",
+      };
+      const colors = ["var(--ion)", "var(--aqua)", "var(--green)"];
+      const bars = document.getElementById("score-bars");
+      data.property.score.subScores.forEach((s) => {
+        const row = document.createElement("div");
+        row.className = "score-row";
+        row.innerHTML =
+          '<div class="labels"><span>' +
+          categoryNames[s.key] +
+          " · משקל " +
+          Math.round(s.weight * 100) +
+          "%</span><bdi>" +
+          s.value +
+          '/100</bdi></div><div class="track" aria-hidden="true"><span style="width:' +
+          s.value +
+          '%"></span></div>';
+        bars.append(row);
+      });
+      function renderPlan(id) {
+        const plan = data.plans.find((p) => p.id === id);
+        document
+          .querySelectorAll("[data-plan]")
+          .forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.plan === id)));
+        document.getElementById("payment-label").textContent = "החזר חודשי ראשון · " + names[id];
+        [
+          ["payment", "monthlyPayment"],
+          ["repayment", "totalRepayment"],
+          ["interest", "totalInterest"],
+          ["indexation", "totalIndexation"],
+          ["peak", "peakPayment"],
+        ].forEach(([el, key]) => (document.getElementById(el).textContent = money(plan[key])));
+        document.getElementById("plan-description").textContent = descriptions[id];
+        document.getElementById("plan-mix").innerHTML = plan.tracks
+          .map((t, i) => '<span style="width:' + t.share * 100 + "%;background:" + colors[i] + '"></span>')
+          .join("");
+        document.getElementById("plan-legend").innerHTML = plan.tracks
+          .map(
+            (t, i) =>
+              '<span><i class="swatch" style="background:' + colors[i] + '"></i>' + trackNames[t.type] + "</span>",
+          )
+          .join("");
+        const max = Math.max(...plan.schedule.flatMap((r) => [r.principal, r.interest]));
+        for (const key of ["principal", "interest"])
+          document
+            .getElementById(key + "-line")
+            .setAttribute(
+              "points",
+              plan.schedule
+                .map((r, i) => 6 + (i / (plan.schedule.length - 1)) * 418 + "," + (132 - (r[key] / max) * 120))
+                .join(" "),
+            );
+        document.getElementById("annual-values").innerHTML = plan.schedule
+          .map(
+            (r) =>
+              '<tr><th scope="row">' +
+              r.year +
+              "</th><td><bdi>" +
+              money(r.principal) +
+              "</bdi></td><td><bdi>" +
+              money(r.interest) +
+              "</bdi></td><td><bdi>" +
+              money(r.balance) +
+              "</bdi></td></tr>",
+          )
+          .join("");
+        document.getElementById("demo-chart").setAttribute("aria-label", "קרן וריבית שנתיות · תוכנית " + names[id]);
+      }
+      document
+        .querySelectorAll("[data-plan]")
+        .forEach((b) => b.addEventListener("click", () => renderPlan(b.dataset.plan)));
+      renderPlan("balanced");
+      document.getElementById("theme").addEventListener("click", () => {
+        const light = document.documentElement.dataset.theme !== "light";
+        document.documentElement.dataset.theme = light ? "light" : "dark";
+        document.getElementById("theme").textContent = light ? "מראה כהה" : "מראה בהיר";
+      });
+    </script>
+  </body>
+</html>

@@ -4,6 +4,11 @@ import type { Bbox, PropertyFilters } from '@/lib/domain/types';
 import { snapBbox } from '@/lib/map/region';
 
 import { getPropertiesByIds, getPropertiesInBbox, getProperty, searchPlaces } from './properties';
+import { getMortgageRates } from './mortgage';
+
+export function useMortgageRates() {
+  return useQuery({ queryKey: ['mortgage', 'rates'], queryFn: getMortgageRates, staleTime: 60 * 60 * 1000 });
+}
 
 export const queryKeys = {
   bbox: (bbox: Bbox, filters: PropertyFilters) => ['properties', 'bbox', bbox, filters] as const,
