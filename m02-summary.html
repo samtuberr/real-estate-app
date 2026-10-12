@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>סיכום שלב M2 — מפה ונכסים (Nadlan Score)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* "Orbit" palette, matching the app's dark theme (spec §7). */
+  :root {
+    --primary: #6E7BFF;
+    --plasma: #3EE6FF;
+    --bg: #05060B;
+    --card: #0E101A;
+    --surface: #161926;
+    --fg: #F0F3FF;
+    --muted: #8B93B0;
+    --border: #222638;
+    --aurora: #0A2622;
+    --solar: #2C1C0E;
+    --nebula: #1C163C;
+    --ion: #0A1C34;
+    --radius: 24px;
+    --glow: 0 0 32px rgba(110, 123, 255, .25);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: 'Rubik', 'Heebo', 'Segoe UI', Arial, sans-serif;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(110,123,255,.22), transparent 70%),
+      radial-gradient(ellipse 50% 40% at 100% 0%, rgba(62,230,255,.08), transparent 70%),
+      var(--bg);
+    background-attachment: fixed;
+    color: var(--fg);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+  .layout { display: flex; gap: 32px; max-width: 1280px; margin: 0 auto; padding: 32px 24px; align-items: flex-start; }
+  nav.toc {
+    position: sticky; top: 24px; flex: 0 0 260px;
+    background: rgba(14,16,26,.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(240,243,255,.08); border-radius: var(--radius); padding: 24px;
+    max-height: calc(100vh - 48px); overflow-y: auto;
+  }
+  nav.toc h2 { font-size: 15px; margin: 0 0 12px; color: var(--muted); font-weight: 600; }
+  nav.toc ol { list-style: none; padding: 0; margin: 0; }
+  nav.toc a { display: block; padding: 6px 12px; border-radius: 999px; color: var(--fg); text-decoration: none; font-size: 14px; transition: background .2s, color .2s; }
+  nav.toc a:hover { background: var(--nebula); color: var(--plasma); }
+  main { flex: 1; min-width: 0; }
+  header.hero {
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, rgba(110,123,255,.9), rgba(62,230,255,.75));
+    color: #fff; border-radius: 28px; padding: 40px; margin-bottom: 24px;
+    box-shadow: 0 0 60px rgba(110,123,255,.35);
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 36px; font-weight: 700; letter-spacing: -.3px; }
+  header.hero p { margin: 0; opacity: .92; }
+  .pill { display: inline-block; background: rgba(5,6,11,.25); padding: 4px 14px; border-radius: 999px; font-size: 13px; margin-top: 16px; margin-inline-end: 8px; }
+  section {
+    background: var(--card); border: 1px solid rgba(240,243,255,.06); border-radius: var(--radius); padding: 32px;
+    margin-bottom: 24px;
+  }
+  h2 { font-size: 24px; margin: 0 0 16px; font-weight: 600; }
+  h2 .num { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 12px; background: var(--bg); border: 1px solid rgba(110,123,255,.5); box-shadow: var(--glow); color: var(--plasma); font-size: 16px; margin-inline-end: 10px; }
+  h3 { font-size: 19px; margin: 28px 0 10px; font-weight: 600; }
+  h4 { font-size: 16px; margin: 20px 0 8px; font-weight: 600; }
+  p { margin: 8px 0; }
+  ul, ol { padding-inline-start: 22px; }
+  li { margin: 4px 0; }
+  li::marker { color: var(--primary); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 12px 0 16px; font-size: 14.5px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  th, td { text-align: start; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: var(--surface); font-weight: 600; color: var(--muted); }
+  tr:last-child td { border-bottom: none; }
+  code { font-family: 'JetBrains Mono', Consolas, monospace; background: var(--surface); color: #C9D0FF; padding: 1px 6px; border-radius: 6px; font-size: 13.5px; direction: ltr; unicode-bidi: isolate; }
+  pre { direction: ltr; text-align: left; background: #020308; color: #E2E8F0; padding: 20px; border-radius: 16px; overflow-x: auto; font-size: 13px; line-height: 1.6; border: 1px solid var(--border); }
+  pre code { background: none; padding: 0; color: inherit; }
+  .callout { border-radius: 16px; padding: 14px 18px; margin: 14px 0; border: 1px solid rgba(240,243,255,.06); }
+  .callout.info { background: var(--ion); }
+  .callout.warn { background: var(--solar); }
+  .callout.ok { background: var(--aurora); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .card-mini { border-radius: 16px; padding: 16px 20px; }
+  .card-mini h4 { margin-top: 0; }
+  .must { background: var(--aurora); }
+  .never { background: var(--solar); }
+  .swatch { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: middle; margin-inline-end: 6px; border: 1px solid rgba(255,255,255,.15); }
+  .ltr { direction: ltr; unicode-bidi: isolate; }
+  a { color: var(--plasma); }
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 16px; }
+  @media (max-width: 900px) {
+    .layout { flex-direction: column; padding: 16px; }
+    nav.toc { position: static; width: 100%; max-height: none; }
+    .grid2 { grid-template-columns: 1fr; }
+    section { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc">
+  <h2>תוכן עניינים</h2>
+  <ol>
+    <li><a href="#s1">1. בקצרה</a></li>
+    <li><a href="#s2">2. מה נבנה באפליקציה</a></li>
+    <li><a href="#s3">3. שכבת הנתונים</a></li>
+    <li><a href="#s4">4. החלטות שהתקבלו</a></li>
+    <li><a href="#s5">5. קבצים חדשים ומעודכנים</a></li>
+    <li><a href="#s6">6. בדיקות ואימות</a></li>
+    <li><a href="#s7">7. פערים ידועים</a></li>
+    <li><a href="#s8">8. בילד והרצה</a></li>
+    <li><a href="#s9">9. מה הלאה</a></li>
+  </ol>
+</nav>
+<main>
+<header class="hero">
+  <h1>סיכום שלב M2 — מפה ונכסים</h1>
+  <p>כל מה שנבנה בענף <code>m02</code>: מפה עם קלאסטרים, רשימת נכסים ב־bottom sheet, סינון, עמוד נכס, גלריה ושמורים — מעל נתוני דמה בצורת ה־API.</p>
+  <span class="pill">ענף: m02</span><span class="pill">Expo SDK 57</span><span class="pill">2026-10-05</span><span class="pill">53 טסטים עוברים</span>
+</header>
+
+<section id="s1">
+  <h2><span class="num">1</span>בקצרה</h2>
+  <div class="callout ok"><strong>הושלם:</strong> כל ההיקף של M2 לפי <code>spec.md</code> §14 — מפה עם קלאסטרים, FlashList ב־bottom sheet, פילטרים ועמוד נכס עם נתוני דמה. בנוסף: גלריה במסך מלא, טאב השמורים, חיפוש עיר/שכונה וכפתור "לידי".</div>
+  <div class="grid2">
+    <div class="card-mini must"><h4>מה עובד</h4>
+      <ul>
+        <li>Typecheck, lint ו־expo-doctor (21/21) — נקיים</li>
+        <li>53 טסטים עוברים (היו 9 לפני השלב)</li>
+        <li>בנדל ל־iOS, Android ו־web עובר</li>
+        <li>עמוד הנכס, הסינון וה־sheet נבדקו בדפדפן בעברית ובאנגלית</li>
+      </ul>
+    </div>
+    <div class="card-mini never"><h4>מה עוד לא נבדק</h4>
+      <ul>
+        <li>המפה עצמה, המרקרים, הרשאת המיקום ותנועת ה־sheet — לא רצו על סימולטור או מכשיר</li>
+        <li>המפה דורשת development build (לא Expo Go)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="s2">
+  <h2><span class="num">2</span>מה נבנה באפליקציה</h2>
+
+  <h3>טאב חיפוש — המפה</h3>
+  <ul>
+    <li><strong>מפה במסך מלא:</strong> Apple Maps ב־iOS, Google Maps ב־Android. במצב כהה המפה כהה (ב־Android עם סגנון "deep space" מותאם).</li>
+    <li><strong>מרקרים:</strong> "גלולת מחיר" (למשל <span class="ltr">₪2.4M</span>) עם מסגרת בצבע רצועת הציון — ירוק / צהוב / אדום. המרקר הנבחר זוהר בכחול.</li>
+    <li><strong>קלאסטרים:</strong> כשמתרחקים, נכסים קרובים מתאחדים לבועה עם מספר (<code>supercluster</code>). לחיצה מגדילה את המפה עד שהקלאסטר מתפצל.</li>
+    <li><strong>חיפוש:</strong> שורת חיפוש מזכוכית עם הצעות של ערים ושכונות, בעברית או באנגלית. בחירה מזיזה את המפה.</li>
+    <li><strong>כפתור סינון</strong> עם תג של מספר הסינונים הפעילים.</li>
+    <li><strong>"לידי":</strong> ההרשאה מתבקשת רק אחרי לחיצה, ואחרי הסבר באפליקציה (spec §11). אם המשתמש סירב — הודעה עם קישור להגדרות, והחיפוש הידני ממשיך לעבוד.</li>
+    <li><strong>כרטיס קטן:</strong> לחיצה על מרקר מציגה כרטיס זכוכית מעל ה־sheet. לחיצה עליו פותחת את עמוד הנכס.</li>
+  </ul>
+
+  <h3>ה־Bottom sheet</h3>
+  <ul>
+    <li>שלושה גבהים: הצצה (כמות הנכסים + מיון), חצי, ומסך מלא.</li>
+    <li>רשימה ב־FlashList של כרטיסי נכס: תמונה, מחיר, כתובת, חדרים · מ״ר · קומה, תג ציון, תג "חדש" (פורסם ב־3 הימים האחרונים) ולב לשמירה.</li>
+    <li>מיון: החדשים ביותר, מחיר עולה, מחיר יורד, ציון גבוה.</li>
+    <li>מצבים: טעינה, שגיאה עם "נסו שוב", ו"אין כאן נכסים" עם "ניקוי סינון".</li>
+  </ul>
+
+  <h3>מסך הסינון</h3>
+  <p>Form sheet נייטיב (<code>presentation: 'formSheet'</code>) עם רכיבי <code>@expo/ui</code> (Slider, Switch):</p>
+  <table>
+    <tr><th>סינון</th><th>איך</th></tr>
+    <tr><td>מחיר</td><td>שני סליידרים — מינימום ומקסימום. הטווח תמיד נשאר תקין</td></tr>
+    <tr><td>חדרים</td><td>צ'יפים: הכול, +2, +3, +4, +5</td></tr>
+    <tr><td>שטח</td><td>סליידר "מ־X מ״ר"</td></tr>
+    <tr><td>סוג נכס</td><td>בחירה מרובה: דירה, דירת גן, פנטהאוז, בית פרטי, דופלקס, חדש מקבלן</td></tr>
+    <tr><td>ציון מינימלי</td><td>הכול, +50, +65, +80 (לפי ספי הדירוג)</td></tr>
+    <tr><td>חובה שיהיה</td><td>מתגים: חניה, מעלית, ממ״ד, מרפסת</td></tr>
+    <tr><td>בתקציב שלי</td><td>מוצג אבל כבוי עד שיהיה פרופיל רוכש (M1)</td></tr>
+  </table>
+  <p>השינויים חלים מיד, והכפתור מראה כמה נכסים מתאימים באזור המפה: "הצגת 37 נכסים".</p>
+
+  <h3>עמוד נכס (<code>property/[id]</code>)</h3>
+  <ol>
+    <li>קרוסלת תמונות עם blurhash ומונה <span class="ltr">1 / 6</span>. לחיצה פותחת גלריה במסך מלא.</li>
+    <li>מחיר גדול, כתובת, שכונה ועיר, חדרים · מ״ר · קומה, מחיר למ״ר, כפתורי שיתוף ושמירה.</li>
+    <li>כרטיס ציון פוטנציאל: המספר בצבע הרצועה, דירוג (מצוין / טוב / בינוני / נמוך), שורת הסבר, תג "נתונים חלקיים" כשצריך, ו־5 פסי תת־ציון.</li>
+    <li>על הנכס — תיאור בשפת המשתמש.</li>
+    <li>פרטי הנכס: סוג, שנת בנייה, קומה, חדרים, שטח, חניה, גוש/חלקה ותגי מאפיינים.</li>
+    <li>עסקאות ושוק: מחיר למ״ר מול החציון בשכונה ("16% מעל החציון"), מגמת 5 שנים, ועסקאות אחרונות באזור.</li>
+    <li>"המשכנתא שלכם לנכס הזה" — placeholder עד M1/M4.</li>
+    <li>כפתור זכוכית קבוע "דברו עם מומחה לפני שקונים" — כרגע מציג "בקרוב" (M6).</li>
+    <li>הסתייגות בתחתית.</li>
+  </ol>
+  <p>Deep link עובד מבחוץ (<code class="ltr">nadlanscore://property/p-0001</code>), כמו שנדרש להתראות בעתיד.</p>
+
+  <h3>טאב שמורים</h3>
+  <p>רשימת FlashList של הנכסים ששמרתם, מהאחרון לראשון. נשמר בין הפעלות. נכס שהוסר מהשמורים נעלם מיד.</p>
+</section>
+
+<section id="s3">
+  <h2><span class="num">3</span>שכבת הנתונים</h2>
+  <p>בנוי בדיוק לפי <code>data-architecture.html</code> §12, כך ש־B2 יחליף רק את גוף ה־repository ב־Supabase:</p>
+  <pre><code>lib/domain/      טיפוסים + לוגיקה טהורה (סינון, מיון, דירוג ציון) — בלי RN/Expo, ירוץ גם ב־Deno
+lib/api/
+  mock/data.ts   220 נכסים דטרמיניסטיים ב־10 שכונות (ת״א, ר״ג, גבעתיים)
+  properties.ts  repository: getPropertiesInBbox, getProperty, getPropertiesByIds, searchPlaces
+  queries.ts     TanStack Query hooks מעל ה־repository
+lib/map/         חישובי אזור מפה, קלאסטרים, זרימת הרשאת "לידי"
+stores/map.ts    אזור המפה, סינון ומיון — נשמרים בין טאבים והפעלות
+stores/saved.ts  נכסים שמורים</code></pre>
+  <div class="callout info">
+    <strong>נתוני הדמה</strong> נראים כמו תגובת ה־API (<code>GET /properties?bbox=</code>, <code>GET /properties/:id</code>), כולל <code>score</code>, <code>createdAt</code> ו־<code>status</code>. בכוונה יש בהם נכסים בלי ציון (~8%), נכסים שנמכרו (~3%) ונכסים חדשים — כדי לראות את כל המצבים במסך. אותו seed נותן אותם נכסים בכל הרצה.
+  </div>
+  <p>כדי לחסוך בקשות, ה־bbox מעוגל לרשת, כך שתזוזה קטנה של המפה משתמשת שוב באותה תוצאה. בזמן הזזה התוצאה הקודמת נשארת על המסך, כך שהמרקרים לא מהבהבים.</p>
+</section>
+
+<section id="s4">
+  <h2><span class="num">4</span>החלטות שהתקבלו</h2>
+  <table>
+    <tr><th>נושא</th><th>החלטה</th><th>למה</th></tr>
+    <tr><td>Bottom sheet במפה</td><td><code>@gorhom/bottom-sheet</code> v5 במקום <code>@expo/ui</code> BottomSheet</td><td>ה־sheet של <code>@expo/ui</code> מודאלי: ב־iOS הוא מכסה את סרגל הטאבים, וב־Android השכבה הכהה שלו חוסמת את המפה. הספק מתיר את החלופה הזו (§4.2). עודכן ב־<code>spec.md</code> וב־<code>spec.html</code></td></tr>
+    <tr><td>כתובות</td><td>רחוב, שכונה ועיר הם עכשיו <code>LocalizedText</code> (עברית + אנגלית)</td><td>כדי שמשתמשים באנגלית לא יקראו שמות רחובות בעברית. עודכן §9 בספק</td></tr>
+    <tr><td><code>&lt;Num&gt;</code></td><td>מספרים נשמרים LTR בעזרת bidi isolate של Unicode</td><td>השיטה הקודמת (<code>writingDirection: 'ltr'</code>) גם הצמידה מחירים לשמאל במסכים בעברית</td></tr>
+    <tr><td>רבים בעברית</td><td>נוספה צורת הזוגי (<code>_two</code>), והטסט שמשווה מפתחות מתעלם מסיומות רבים</td><td>i18next מחפש צורת "two" בעברית</td></tr>
+    <tr><td>נתיב עמוד נכס</td><td><code>property/[id]/index.tsx</code> במקום <code>[id].tsx</code></td><td>אותה כתובת, וחד־משמעי לצד <code>gallery.tsx</code>. עץ הנתיבים בספק עודכן</td></tr>
+    <tr><td>מפתח Google Maps</td><td>מוזרק מ־<code>app.config.ts</code> מתוך משתנה סביבה</td><td>סודות לא נכנסים ל־git (§13)</td></tr>
+    <tr><td>ESLint</td><td>הוגדר (<code>eslint.config.js</code>)</td><td>לא היה מוגדר קודם; <code>expo lint</code> התקין אותו</td></tr>
+  </table>
+</section>
+
+<section id="s5">
+  <h2><span class="num">5</span>קבצים חדשים ומעודכנים</h2>
+  <h3>מסכים</h3>
+  <table>
+    <tr><th>קובץ</th><th>תוכן</th></tr>
+    <tr><td><code>app/(tabs)/explore/index.tsx</code></td><td>מסך המפה (נכתב מחדש)</td></tr>
+    <tr><td><code>app/filters.tsx</code></td><td>מסך הסינון (form sheet)</td></tr>
+    <tr><td><code>app/property/[id]/index.tsx</code></td><td>עמוד נכס</td></tr>
+    <tr><td><code>app/property/[id]/gallery.tsx</code></td><td>גלריה במסך מלא</td></tr>
+    <tr><td><code>app/(tabs)/saved/index.tsx</code></td><td>טאב שמורים (נכתב מחדש)</td></tr>
+    <tr><td><code>app/_layout.tsx</code></td><td>QueryClientProvider + רישום המסכים החדשים</td></tr>
+  </table>
+  <h3>רכיבים</h3>
+  <table>
+    <tr><th>תיקייה</th><th>רכיבים</th></tr>
+    <tr><td><code>components/map/</code></td><td>PropertyMap (+ גרסת web), PropertyMarker, ClusterMarker, ListingSheet, MapSearchBar, MiniPropertyCard</td></tr>
+    <tr><td><code>components/property/</code></td><td>PropertyCard, ScoreBadge, PropertySpecs, SaveButton, PhotoCarousel, ScoreSummaryCard, PropertyDetailsCard, MarketCard</td></tr>
+    <tr><td><code>components/common/</code></td><td>StickyCTA (חדש), Num (עודכן)</td></tr>
+    <tr><td><code>components/ui/</code></td><td>image, flash-list — עטיפות עם תמיכה ב־className</td></tr>
+  </table>
+  <h3>תשתית</h3>
+  <ul>
+    <li><code>constants/icons.ts</code> — 21 אייקונים חדשים (SF Symbol + Material Symbol לכל אחד)</li>
+    <li><code>constants/mapStyle.ts</code> — סגנון מפה כהה ל־Android</li>
+    <li><code>lib/i18n/locales/he.json</code> / <code>en.json</code> — namespaces חדשים: <code>filters</code>, <code>property</code>, והרחבה של <code>explore</code> ו־<code>common</code></li>
+    <li><code>app.json</code> — plugin של expo-location עם טקסט ההרשאה</li>
+    <li><code>.env.example</code> — <code>GOOGLE_MAPS_ANDROID_API_KEY</code></li>
+  </ul>
+  <h3>חבילות שנוספו</h3>
+  <p><code>react-native-maps</code>, <code>supercluster</code>, <code>@gorhom/bottom-sheet</code>, <code>@shopify/flash-list</code>, <code>@tanstack/react-query</code>, <code>expo-location</code>, <code>@expo/ui</code>, <code>eslint</code> + <code>eslint-config-expo</code>.</p>
+</section>
+
+<section id="s6">
+  <h2><span class="num">6</span>בדיקות ואימות</h2>
+  <table>
+    <tr><th>בדיקה</th><th>תוצאה</th></tr>
+    <tr><td>טסטים (Jest)</td><td>53/53 עוברים — סינון ומיון, דירוג ציון, חישובי מפה, קלאסטרים, repository ונתוני הדמה, עיצוב כתובות ומחירים מקוצרים, התאמת מפתחות תרגום</td></tr>
+    <tr><td>TypeScript</td><td>נקי</td></tr>
+    <tr><td>ESLint</td><td>נקי</td></tr>
+    <tr><td>expo-doctor</td><td>21/21</td></tr>
+    <tr><td>בנדל</td><td>iOS, Android ו־web עוברים</td></tr>
+    <tr><td>בדיקה ויזואלית</td><td>עמוד נכס, סינון ו־sheet בדפדפן headless, בעברית (RTL) ובאנגלית</td></tr>
+  </table>
+</section>
+
+<section id="s7">
+  <h2><span class="num">7</span>פערים ידועים</h2>
+  <ul>
+    <li><strong>לא נבדק על מכשיר:</strong> המפה, המרקרים, הרשאת המיקום ותנועת ה־sheet.</li>
+    <li><strong>Android בלי מפתח Google Maps:</strong> בלי <code>GOOGLE_MAPS_ANDROID_API_KEY</code> המפה ב־Android תהיה ריקה.</li>
+    <li><strong>Web:</strong> במקום המפה מוצג כרטיס ("המפה זמינה באפליקציה"). קרוסלת התמונות ריקה בעברית ב־web בגלל באג RTL של FlashList — ב־native זה אמור לעבוד.</li>
+    <li><strong>תמונות דמה</strong> מ־picsum.photos — תמונות אקראיות, לא בתים.</li>
+    <li><strong>לא בהיקף M2:</strong> טבעת הציון ב־Skia וצלילת עומק (M3), תוכניות / שירותים / תנועה (M3), המשכנתא (M4), קביעת ייעוץ (M6), "בתקציב שלי" (M1).</li>
+    <li>אנימציית "קפיצה" של מרקרים לא נוספה — מרקרים מותאמים עם אנימציה פוגעים בביצועים ב־Android.</li>
+  </ul>
+</section>
+
+<section id="s8">
+  <h2><span class="num">8</span>בילד והרצה</h2>
+  <p>השלב מוסיף מודולים נייטיב (מפות, מיקום, <code>@expo/ui</code>), ולכן צריך <strong>EAS Build</strong> חדש — לא EAS Update.</p>
+  <pre><code># מפתח Google Maps ל-Android (פעם אחת)
+eas env:create --name GOOGLE_MAPS_ANDROID_API_KEY --value &lt;key&gt; --environment development
+
+# development build
+eas build --profile development --platform android
+eas build --profile development --platform ios
+
+# הרצה
+npx expo start</code></pre>
+</section>
+
+<section id="s9">
+  <h2><span class="num">9</span>מה הלאה</h2>
+  <ul>
+    <li>להתקין את ה־development build ולבדוק על מכשיר: מפה, קלאסטרים, sheet, "לידי", ועברית RTL.</li>
+    <li>M1 — Onboarding ופרופיל (יפעיל את "בתקציב שלי" ואת כרטיס המשכנתא).</li>
+    <li>M3 — ציון הפוטנציאל: טבעת Skia, צלילת עומק, תוכניות / שירותים / תנועה.</li>
+    <li>B2 — להחליף את ה־repository המדומה ב־Supabase (<code>properties_in_bbox</code>, <code>property-detail</code>).</li>
+  </ul>
+</section>
+
+<footer>Nadlan Score · סיכום שלב M2 · נוצר אוטומטית מהענף m02</footer>
+</main>
+</div>
+</body>
+</html>

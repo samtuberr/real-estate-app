@@ -19,7 +19,44 @@
       "title": "Restart required",
       "body": "The app will restart to apply the language.",
       "action": "Restart"
-    }
+    },
+    "retry": "Try again",
+    "error": "Something went wrong.",
+    "done": "Done",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "new": "New",
+    "save": "Save",
+    "unsave": "Remove from saved",
+    "share": "Share",
+    "roomsValue": "{{value}} rooms",
+    "sqmValue": "{{value}} sqm",
+    "floorValue": "Floor {{floor}}",
+    "floorOf": "Floor {{floor}}/{{total}}",
+    "groundFloor": "Ground floor",
+    "propertyTypes": {
+      "apartment": "Apartment",
+      "garden": "Garden apartment",
+      "penthouse": "Penthouse",
+      "house": "Private house",
+      "duplex": "Duplex",
+      "new_project": "New from contractor"
+    },
+    "features": {
+      "parking": "Parking",
+      "elevator": "Elevator",
+      "mamad": "Safe room",
+      "balcony": "Balcony",
+      "storage": "Storage"
+    },
+    "grades": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "fair": "Fair",
+      "low": "Low"
+    },
+    "scoreLabel": "Potential Score {{score}}"
   },
   "tabs": {
     "explore": "Explore",
@@ -29,17 +66,45 @@
     "profile": "Profile"
   },
   "explore": {
-    "title": "Find your next home",
-    "subtitle": "Browse listings on the map and see each property's Potential Score.",
-    "searchPlaceholder": "City, neighborhood or street",
-    "emptyTitle": "The map is on its way",
-    "emptyBody": "Map discovery and listings arrive in the next milestone.",
-    "filters": "Filters"
+    "searchPlaceholder": "City or neighborhood",
+    "searchNoResults": "No matching places",
+    "clearSearch": "Clear search",
+    "filters": "Filters",
+    "filtersActive": "Filters, {{count}} active",
+    "nearMe": "Near me",
+    "homesInView_one": "{{count}} home in view",
+    "homesInView_other": "{{count}} homes in view",
+    "sortBy": "Sort",
+    "sort": {
+      "newest": "Newest",
+      "priceAsc": "Price: low to high",
+      "priceDesc": "Price: high to low",
+      "score": "Top score"
+    },
+    "noResultsTitle": "No homes here",
+    "noResultsBody": "Move the map or loosen your filters.",
+    "clearFilters": "Clear filters",
+    "clusterLabel": "{{count}} homes, zoom in",
+    "locationPrompt": {
+      "title": "Show homes near you?",
+      "body": "We use your location once to center the map. It's never stored or shared.",
+      "allow": "Use my location"
+    },
+    "locationDenied": {
+      "title": "Location is off",
+      "body": "You can still search by city or neighborhood, or turn on location in Settings.",
+      "settings": "Open Settings"
+    },
+    "locationError": "We couldn't find your location. Try again or search by city.",
+    "webTitle": "The map lives in the app",
+    "webBody": "Open Nadlan Score on iOS or Android to browse listings on the map."
   },
   "saved": {
     "title": "Saved",
     "emptyTitle": "No saved homes yet",
-    "emptyBody": "Tap the heart on a listing to keep it here."
+    "emptyBody": "Tap the heart on a listing to keep it here.",
+    "subtitle_one": "{{count}} saved home",
+    "subtitle_other": "{{count}} saved homes"
   },
   "mortgage": {
     "title": "Mortgage",
@@ -69,5 +134,78 @@
     "buyerProfile": "Buyer profile",
     "buyerProfileBody": "Tell us about your household and finances to unlock mortgage plans.",
     "version": "Version {{version}}"
+  },
+  "filters": {
+    "title": "Filters",
+    "price": "Price",
+    "priceFrom": "Minimum",
+    "priceTo": "Maximum",
+    "any": "Any",
+    "rooms": "Rooms",
+    "roomsMin": "{{value}}+",
+    "size": "Size",
+    "sizeMin": "From {{value}} sqm",
+    "type": "Property type",
+    "minScore": "Minimum Potential Score",
+    "features": "Must have",
+    "withinBudget": "Within my budget",
+    "withinBudgetHint": "Complete your buyer profile to use this filter.",
+    "reset": "Reset",
+    "showResults_one": "Show {{count}} home",
+    "showResults_other": "Show {{count}} homes"
+  },
+  "property": {
+    "notFoundTitle": "This listing isn't available",
+    "notFoundBody": "It may have been sold or removed.",
+    "sold": "Sold",
+    "offMarket": "Off market",
+    "pricePerSqm": "{{value}} / sqm",
+    "photos": "Photos",
+    "photoOf": "Photo {{index}} of {{total}}",
+    "score": {
+      "title": "Potential Score",
+      "none": "Score not available yet",
+      "noneBody": "We don't have enough data about this home yet.",
+      "limitedData": "Limited data",
+      "deepDiveSoon": "Full breakdown coming soon"
+    },
+    "subScores": {
+      "plans": "City plans",
+      "amenities": "Amenities",
+      "traffic": "Traffic & access",
+      "market": "Market",
+      "property": "Property"
+    },
+    "about": "About this home",
+    "details": {
+      "title": "Property details",
+      "type": "Type",
+      "buildingYear": "Built",
+      "floor": "Floor",
+      "rooms": "Rooms",
+      "size": "Size",
+      "parking": "Parking",
+      "parkingSpots_one": "{{count}} spot",
+      "parkingSpots_other": "{{count}} spots",
+      "gushHelka": "Block / parcel"
+    },
+    "market": {
+      "title": "Nearby deals & market",
+      "median": "Neighborhood median",
+      "thisHome": "This home",
+      "belowMedian": "{{pct}}% below the neighborhood median",
+      "aboveMedian": "{{pct}}% above the neighborhood median",
+      "atMedian": "In line with the neighborhood median",
+      "fiveYear": "5-year price trend",
+      "recentDeals": "Recent deals nearby",
+      "deal": "{{rooms}} rooms · {{size}} sqm"
+    },
+    "mortgage": {
+      "title": "Your mortgage for this home",
+      "body": "Complete your buyer profile to see your estimated monthly payment and required equity."
+    },
+    "cta": "Talk to an expert before you buy",
+    "ctaSoon": "Consultation booking opens soon.",
+    "shareMessage": "{{address}} · {{price}} — on Nadlan Score"
   }
 }

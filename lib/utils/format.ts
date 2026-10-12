@@ -18,3 +18,14 @@ export function formatDate(value: Date | string, locale: Locale, options?: Intl.
     typeof value === 'string' ? new Date(value) : value,
   );
 }
+
+/**
+ * Short price for map pills: ₪2.4M, ₪850K. Hand-rolled because Hermes' Intl
+ * doesn't reliably support `notation: 'compact'` on every platform.
+ */
+export function formatCompactPrice(value: number, locale: Locale) {
+  const [scaled, suffix] = value >= 1_000_000 ? [value / 1_000_000, 'M'] : [value / 1_000, 'K'];
+  const digits = value >= 1_000_000 && scaled < 10 ? 1 : 0;
+  const n = formatNumber(Number(scaled.toFixed(digits)), locale, { maximumFractionDigits: digits });
+  return `₪${n}${suffix}`;
+}

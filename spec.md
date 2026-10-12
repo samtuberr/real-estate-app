@@ -132,8 +132,8 @@ app/
 │   └── profile/index.tsx          # Profile, language, appearance
 │
 ├── property/
-│   ├── [id].tsx                   # Full listing page
 │   └── [id]/
+│       ├── index.tsx              # Full listing page
 │       ├── score.tsx              # Potential Score deep-dive
 │       ├── plans.tsx              # City plans near property
 │       └── gallery.tsx            # Full-screen photo gallery
@@ -204,7 +204,7 @@ Multi-step form with a progress indicator, one topic per screen. Each step is sa
 
 - Full-screen `react-native-maps` (Apple Maps on iOS, Google Maps on Android) with **clustered** property markers (`supercluster`). Each marker is a glowing price pill colored by Potential Score band. Dark map style in dark mode.
 - **Top bar:** floating `<Glass>` search pill (city / neighborhood / street) + glass filter button → `filters.tsx` form sheet.
-- **Bottom sheet** (`@expo/ui` BottomSheet, native on both platforms) with 3 detents: peek (count + sort), half (FlashList of `PropertyCard`), full. Validate FlashList-inside-sheet in M2; fall back to `@gorhom/bottom-sheet` v5 only if the native sheet can't host it.
+- **Bottom sheet** with 3 detents: peek (count + sort), half (FlashList of `PropertyCard`), full. **Decided in M2: `@gorhom/bottom-sheet` v5**, because the `@expo/ui` BottomSheet is presented modally (it covers the tab bar on iOS and its scrim blocks the map on Android), so it can't stay docked while the user pans the map. Use `@expo/ui` BottomSheet for modal sheets.
 - Tapping a marker shows a mini card above the sheet. Tapping the card opens `property/[id]`.
 - **"Near me" button:** location permission is requested **only when tapped**, never on mount.
 - **Map layers toggle** (v1.1): city plans polygons, light rail / metro lines, traffic heat, commercial zones.
@@ -451,7 +451,7 @@ type Property = {
   status: 'active' | 'sold' | 'off_market';
   price: number;                   // ILS
   location: { lat: number; lng: number };
-  address: { city: string; neighborhood?: string; street: string; number?: string };
+  address: { city: LocalizedText; neighborhood?: LocalizedText; street: LocalizedText; number?: string };
   gushHelka?: { gush: number; helka: number };
   rooms: number;
   sizeSqm: number;
@@ -580,7 +580,7 @@ Each request is preceded by an in-app explanation screen. If the user denies, th
 |---|---|
 | **M0: Foundation** ✅ | Expo SDK 57 + Expo Router + NativeWind v4.2, React Compiler, i18n + RTL bootstrap, "Orbit" design tokens, `/components/ui` base components (incl. `Glass`, `Icon`), native tabs + per-tab native stacks, EAS project |
 | **M1: Onboarding & Profile** | Landing page, multi-step profile form, Zustand persistence, derived affordability |
-| **M2: Map & Listings** | Map with clusters, bottom sheet FlashList, filters, listing page (with mock data) |
+| **M2: Map & Listings** ✅ | Map with clusters, bottom sheet FlashList, filters, listing page (with mock data) |
 | **M3: Potential Score** | Score engine (server + `lib/score`), score card + deep-dive, plans / amenities / traffic sections |
 | **M4: Mortgage** | Mortgage math lib + tests, 3 plans, plan detail with charts, total cost of purchase |
 | **M5: Learn Hub** | Guides + glossary (HE/EN), search |

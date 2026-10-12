@@ -278,8 +278,8 @@
 │   └── profile/index.tsx          # פרופיל, שפה, מראה
 │
 ├── property/
-│   ├── [id].tsx                   # עמוד נכס מלא
 │   └── [id]/
+│       ├── index.tsx              # עמוד נכס מלא
 │       ├── score.tsx              # צלילה לעומק בציון הפוטנציאל
 │       ├── plans.tsx              # תוכניות עירוניות ליד הנכס
 │       └── gallery.tsx            # גלריית תמונות במסך מלא
@@ -347,7 +347,7 @@ global.css             # Tailwind directives</code></pre>
   <ul>
     <li><code>react-native-maps</code> במסך מלא (Apple Maps ב-iOS, Google Maps באנדרואיד) עם סמני נכסים <strong>מקובצים (clusters)</strong> באמצעות <code>supercluster</code>. כל סמן הוא "גלולת" מחיר זוהרת שצבעה לפי טווח ציון הפוטנציאל. סגנון מפה כהה במצב כהה.</li>
     <li><strong>פס עליון:</strong> גלולת חיפוש צפה מ-<code>&lt;Glass&gt;</code> (עיר / שכונה / רחוב) + כפתור פילטרים מזכוכית ← form sheet של <code>filters.tsx</code>.</li>
-    <li><strong>Bottom sheet</strong> (BottomSheet של <code>@expo/ui</code>, נייטיב בשתי הפלטפורמות) עם 3 נקודות עצירה: הצצה (כמות + מיון), חצי (FlashList של <code>PropertyCard</code>), מלא. לאמת FlashList בתוך ה-sheet ב-M2; לחזור ל-<code>@gorhom/bottom-sheet</code> v5 רק אם ה-sheet הנייטיב לא מסוגל להכיל אותו.</li>
+    <li><strong>Bottom sheet</strong> עם 3 נקודות עצירה: הצצה (כמות + מיון), חצי (FlashList של <code>PropertyCard</code>), מלא. <strong>הוחלט ב-M2: <code>@gorhom/bottom-sheet</code> v5</strong>, כי ה-BottomSheet של <code>@expo/ui</code> מוצג כמודאל (ב-iOS הוא מכסה את סרגל הטאבים, וב-Android השכבה הכהה שלו חוסמת את המפה), ולכן הוא לא יכול להישאר פתוח בזמן שמזיזים את המפה. את <code>@expo/ui</code> BottomSheet משתמשים לגיליונות מודאליים.</li>
     <li>לחיצה על סמן מציגה כרטיס מיני מעל ה-sheet. לחיצה על הכרטיס פותחת את <code>property/[id]</code>.</li>
     <li><strong>כפתור "קרוב אליי":</strong> הרשאת מיקום מתבקשת <strong>רק בלחיצה</strong>, לעולם לא בטעינת המסך.</li>
     <li><strong>מתג שכבות מפה</strong> (v1.1): פוליגונים של תוכניות עירוניות, קווי רכבת קלה / מטרו, מפת חום של תנועה, אזורי מסחר.</li>
@@ -607,7 +607,7 @@ global.css             # Tailwind directives</code></pre>
   status: 'active' | 'sold' | 'off_market';
   price: number;                   // ILS
   location: { lat: number; lng: number };
-  address: { city: string; neighborhood?: string; street: string; number?: string };
+  address: { city: LocalizedText; neighborhood?: LocalizedText; street: LocalizedText; number?: string };
   gushHelka?: { gush: number; helka: number };
   rooms: number;
   sizeSqm: number;
@@ -741,7 +741,7 @@ type LocalizedText = { he: string; en: string };</code></pre>
     <tr><th>שלב</th><th>היקף</th></tr>
     <tr><td><strong>M0: תשתית</strong> ✅</td><td>Expo SDK 57 + Expo Router + NativeWind v4.2, React Compiler, אתחול i18n ו-RTL, טוקני העיצוב "Orbit", קומפוננטות בסיס ב-<code>/components/ui</code> (כולל <code>Glass</code>, <code>Icon</code>), native tabs + native stack לכל טאב, פרויקט EAS</td></tr>
     <tr><td><strong>M1: אונבורדינג ופרופיל</strong></td><td>דף נחיתה, טופס פרופיל רב-שלבי, שמירה ב-Zustand, יכולת החזר נגזרת</td></tr>
-    <tr><td><strong>M2: מפה ונכסים</strong></td><td>מפה עם קלאסטרים, FlashList ב-bottom sheet, פילטרים, עמוד נכס (עם נתוני דמה)</td></tr>
+    <tr><td><strong>M2: מפה ונכסים</strong> ✅</td><td>מפה עם קלאסטרים, FlashList ב-bottom sheet, פילטרים, עמוד נכס (עם נתוני דמה)</td></tr>
     <tr><td><strong>M3: ציון פוטנציאל</strong></td><td>מנוע הציון (שרת + <code>lib/score</code>), כרטיס ציון + צלילה לעומק, אזורי תוכניות / שירותים / תנועה</td></tr>
     <tr><td><strong>M4: משכנתא</strong></td><td>ספריית חישובי משכנתא + בדיקות, 3 תוכניות, פירוט תוכנית עם גרפים, עלות רכישה כוללת</td></tr>
     <tr><td><strong>M5: מרכז למידה</strong></td><td>מדריכים + מילון (עברית/אנגלית), חיפוש</td></tr>
