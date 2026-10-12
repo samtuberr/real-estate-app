@@ -47,7 +47,13 @@
       "expo-font",
       "expo-asset",
       "expo-sqlite",
-      "expo-image"
+      "expo-image",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Nadlan Score uses your location to show homes near you when you tap \"Near me\"."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

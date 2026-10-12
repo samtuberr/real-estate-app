@@ -19,7 +19,44 @@
       "title": "נדרשת הפעלה מחדש",
       "body": "האפליקציה תופעל מחדש כדי להחיל את השפה.",
       "action": "הפעלה מחדש"
-    }
+    },
+    "retry": "נסו שוב",
+    "error": "משהו השתבש.",
+    "done": "סיום",
+    "close": "סגירה",
+    "yes": "כן",
+    "no": "לא",
+    "new": "חדש",
+    "save": "שמירה",
+    "unsave": "הסרה מהשמורים",
+    "share": "שיתוף",
+    "roomsValue": "{{value}} חד׳",
+    "sqmValue": "{{value}} מ״ר",
+    "floorValue": "קומה {{floor}}",
+    "floorOf": "קומה {{floor}}/{{total}}",
+    "groundFloor": "קומת קרקע",
+    "propertyTypes": {
+      "apartment": "דירה",
+      "garden": "דירת גן",
+      "penthouse": "פנטהאוז",
+      "house": "בית פרטי",
+      "duplex": "דופלקס",
+      "new_project": "חדש מקבלן"
+    },
+    "features": {
+      "parking": "חניה",
+      "elevator": "מעלית",
+      "mamad": "ממ״ד",
+      "balcony": "מרפסת",
+      "storage": "מחסן"
+    },
+    "grades": {
+      "excellent": "מצוין",
+      "good": "טוב",
+      "fair": "בינוני",
+      "low": "נמוך"
+    },
+    "scoreLabel": "ציון פוטנציאל {{score}}"
   },
   "tabs": {
     "explore": "חיפוש",
@@ -29,17 +66,47 @@
     "profile": "פרופיל"
   },
   "explore": {
-    "title": "מצאו את הבית הבא שלכם",
-    "subtitle": "גלשו בנכסים על המפה וראו את ציון הפוטנציאל של כל נכס.",
-    "searchPlaceholder": "עיר, שכונה או רחוב",
-    "emptyTitle": "המפה בדרך",
-    "emptyBody": "חיפוש במפה ומודעות נכסים יגיעו באבן הדרך הבאה.",
-    "filters": "סינון"
+    "searchPlaceholder": "עיר או שכונה",
+    "searchNoResults": "לא נמצאו מקומות",
+    "clearSearch": "ניקוי החיפוש",
+    "filters": "סינון",
+    "filtersActive": "סינון, {{count}} פעילים",
+    "nearMe": "לידי",
+    "homesInView_one": "נכס אחד באזור",
+    "homesInView_two": "{{count}} נכסים באזור",
+    "homesInView_other": "{{count}} נכסים באזור",
+    "sortBy": "מיון",
+    "sort": {
+      "newest": "החדשים ביותר",
+      "priceAsc": "מחיר: מהנמוך לגבוה",
+      "priceDesc": "מחיר: מהגבוה לנמוך",
+      "score": "ציון גבוה"
+    },
+    "noResultsTitle": "אין כאן נכסים",
+    "noResultsBody": "הזיזו את המפה או הרחיבו את הסינון.",
+    "clearFilters": "ניקוי סינון",
+    "clusterLabel": "{{count}} נכסים, הגדילו את המפה",
+    "locationPrompt": {
+      "title": "להציג נכסים לידכם?",
+      "body": "נשתמש במיקום שלכם פעם אחת כדי למרכז את המפה. הוא לא נשמר ולא משותף.",
+      "allow": "שימוש במיקום שלי"
+    },
+    "locationDenied": {
+      "title": "המיקום כבוי",
+      "body": "אפשר לחפש לפי עיר או שכונה, או להפעיל מיקום בהגדרות.",
+      "settings": "פתיחת ההגדרות"
+    },
+    "locationError": "לא הצלחנו למצוא את המיקום שלכם. נסו שוב או חפשו לפי עיר.",
+    "webTitle": "המפה זמינה באפליקציה",
+    "webBody": "פתחו את נדל״ן סקור ב־iOS או ב־Android כדי לגלוש בנכסים על המפה."
   },
   "saved": {
     "title": "שמורים",
     "emptyTitle": "עדיין אין נכסים שמורים",
-    "emptyBody": "לחצו על הלב במודעה כדי לשמור אותה כאן."
+    "emptyBody": "לחצו על הלב במודעה כדי לשמור אותה כאן.",
+    "subtitle_one": "נכס שמור אחד",
+    "subtitle_two": "{{count}} נכסים שמורים",
+    "subtitle_other": "{{count}} נכסים שמורים"
   },
   "mortgage": {
     "title": "משכנתא",
@@ -69,5 +136,80 @@
     "buyerProfile": "פרופיל רוכש",
     "buyerProfileBody": "ספרו לנו על משק הבית והמצב הכלכלי כדי לקבל תמהילי משכנתא.",
     "version": "גרסה {{version}}"
+  },
+  "filters": {
+    "title": "סינון",
+    "price": "מחיר",
+    "priceFrom": "מינימום",
+    "priceTo": "מקסימום",
+    "any": "הכול",
+    "rooms": "חדרים",
+    "roomsMin": "+{{value}}",
+    "size": "שטח",
+    "sizeMin": "מ־{{value}} מ״ר",
+    "type": "סוג נכס",
+    "minScore": "ציון פוטנציאל מינימלי",
+    "features": "חובה שיהיה",
+    "withinBudget": "בתקציב שלי",
+    "withinBudgetHint": "השלימו את פרופיל הרוכש כדי להשתמש בסינון הזה.",
+    "reset": "איפוס",
+    "showResults_one": "הצגת נכס אחד",
+    "showResults_two": "הצגת {{count}} נכסים",
+    "showResults_other": "הצגת {{count}} נכסים"
+  },
+  "property": {
+    "notFoundTitle": "המודעה לא זמינה",
+    "notFoundBody": "ייתכן שהנכס נמכר או הוסר.",
+    "sold": "נמכר",
+    "offMarket": "לא בשוק",
+    "pricePerSqm": "{{value}} למ״ר",
+    "photos": "תמונות",
+    "photoOf": "תמונה {{index}} מתוך {{total}}",
+    "score": {
+      "title": "ציון פוטנציאל",
+      "none": "עדיין אין ציון",
+      "noneBody": "אין לנו עדיין מספיק נתונים על הנכס הזה.",
+      "limitedData": "נתונים חלקיים",
+      "deepDiveSoon": "פירוט מלא יגיע בקרוב"
+    },
+    "subScores": {
+      "plans": "תוכניות בניין",
+      "amenities": "שירותים ומסחר",
+      "traffic": "תנועה ונגישות",
+      "market": "שוק",
+      "property": "הנכס"
+    },
+    "about": "על הנכס",
+    "details": {
+      "title": "פרטי הנכס",
+      "type": "סוג",
+      "buildingYear": "שנת בנייה",
+      "floor": "קומה",
+      "rooms": "חדרים",
+      "size": "שטח",
+      "parking": "חניה",
+      "parkingSpots_one": "חניה אחת",
+      "parkingSpots_two": "{{count}} חניות",
+      "parkingSpots_other": "{{count}} חניות",
+      "gushHelka": "גוש / חלקה"
+    },
+    "market": {
+      "title": "עסקאות ושוק באזור",
+      "median": "חציון בשכונה",
+      "thisHome": "הנכס הזה",
+      "belowMedian": "{{pct}}% מתחת לחציון בשכונה",
+      "aboveMedian": "{{pct}}% מעל החציון בשכונה",
+      "atMedian": "בהתאם לחציון בשכונה",
+      "fiveYear": "מגמת מחיר ב־5 שנים",
+      "recentDeals": "עסקאות אחרונות באזור",
+      "deal": "{{rooms}} חד׳ · {{size}} מ״ר"
+    },
+    "mortgage": {
+      "title": "המשכנתא שלכם לנכס הזה",
+      "body": "השלימו את פרופיל הרוכש כדי לראות החזר חודשי משוער והון עצמי נדרש."
+    },
+    "cta": "דברו עם מומחה לפני שקונים",
+    "ctaSoon": "קביעת פגישות ייעוץ תיפתח בקרוב.",
+    "shareMessage": "{{address}} · {{price}} — בנדל״ן סקור"
   }
 }

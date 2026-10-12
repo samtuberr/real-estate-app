@@ -13,6 +13,12 @@ function keyPaths(obj: object, prefix = ''): string[] {
   );
 }
 
+// Plural forms differ by language (Hebrew has `_two`, English doesn't), so compare base keys.
+const PLURAL_SUFFIX = /_(zero|one|two|few|many|other)$/;
+function baseKeys(obj: object) {
+  return [...new Set(keyPaths(obj).map((k) => k.replace(PLURAL_SUFFIX, '')))].sort();
+}
+
 describe('getDeviceLocale', () => {
   it.each([
     ['he', 'he'],
@@ -37,6 +43,6 @@ describe('locales', () => {
   });
 
   it('Hebrew and English have the same translation keys', () => {
-    expect(keyPaths(he).sort()).toEqual(keyPaths(en).sort());
+    expect(baseKeys(he)).toEqual(baseKeys(en));
   });
 });

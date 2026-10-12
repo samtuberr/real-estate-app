@@ -132,8 +132,8 @@ app/
 │   └── profile/index.tsx          # Profile, language, appearance
 │
 ├── property/
-│   ├── [id].tsx                   # Full listing page
 │   └── [id]/
+│       ├── index.tsx              # Full listing page
 │       ├── score.tsx              # Potential Score deep-dive
 │       ├── plans.tsx              # City plans near property
 │       └── gallery.tsx            # Full-screen photo gallery
@@ -181,7 +181,7 @@ global.css             # Tailwind directives
 
 ### 4.1 Landing Page & Buyer Profile (Onboarding)
 
-**Welcome / landing:** a hero illustration, the value proposition, a language toggle (עברית / English), and "Get started" and "I already have an account" buttons. Users can choose **"Skip — just browse the map"**. The profile can be completed later. Mortgage plans and consultation booking prompt for it.
+**Welcome / landing:** a hero illustration, the value proposition, a language toggle (עברית / English), and "Get started" and "I already have an account" buttons. **An account is required before anything else, including the map** (phone OTP, see `backend-spec.md` §5). The landing screen explains what the account gives (personal fit, affordability, alerts) before asking for the phone number. After sign-in the user can **"Skip the profile — just browse the map"**. The profile can be completed later. Mortgage plans, alerts, and consultation booking prompt for it.
 
 Multi-step form with a progress indicator, one topic per screen. Each step is saved to the Zustand store as the user goes, so they can leave and resume.
 
@@ -204,7 +204,7 @@ Multi-step form with a progress indicator, one topic per screen. Each step is sa
 
 - Full-screen `react-native-maps` (Apple Maps on iOS, Google Maps on Android) with **clustered** property markers (`supercluster`). Each marker is a glowing price pill colored by Potential Score band. Dark map style in dark mode.
 - **Top bar:** floating `<Glass>` search pill (city / neighborhood / street) + glass filter button → `filters.tsx` form sheet.
-- **Bottom sheet** (`@expo/ui` BottomSheet, native on both platforms) with 3 detents: peek (count + sort), half (FlashList of `PropertyCard`), full. Validate FlashList-inside-sheet in M2; fall back to `@gorhom/bottom-sheet` v5 only if the native sheet can't host it.
+- **Bottom sheet** with 3 detents: peek (count + sort), half (FlashList of `PropertyCard`), full. **Decided in M2: `@gorhom/bottom-sheet` v5**, because the `@expo/ui` BottomSheet is presented modally (it covers the tab bar on iOS and its scrim blocks the map on Android), so it can't stay docked while the user pans the map. Use `@expo/ui` BottomSheet for modal sheets.
 - Tapping a marker shows a mini card above the sheet. Tapping the card opens `property/[id]`.
 - **"Near me" button:** location permission is requested **only when tapped**, never on mount.
 - **Map layers toggle** (v1.1): city plans polygons, light rail / metro lines, traffic heat, commercial zones.
@@ -315,7 +315,7 @@ The key conversion step: **before the user buys, offer a consultation so they ca
 ### 4.7 Profile & Settings
 - Edit buyer profile (re-runs the derived calculations).
 - Language: עברית / English (see §6 for RTL switching).
-- Saved searches & notifications (v1.1: alerts for new listings matching filters / score above X).
+- Alerts: personalized notifications when a new property fits the user's profile (income, equity, buyer type, purchase tax), plus price drops on saved properties. The user picks channels (in-app, push, email, SMS, WhatsApp), frequency, and quiet hours. See `backend-spec.md` §9.
 - Consultation requests and their status.
 - Privacy: export data, delete account.
 - Legal: terms, privacy policy, disclaimers.
@@ -433,15 +433,15 @@ type PotentialScore = {
 | Amenities / POI | Google Places API or OpenStreetMap (Overpass) | Shops, schools, parks |
 | Traffic | Google Routes / Distance Matrix (traffic-aware), Waze for Cities | Peak congestion |
 | Demographics | Central Bureau of Statistics (CBS / הלמ"ס) | Socio-economic cluster |
-| Mortgage rates | Bank of Israel published average rates | Admin-maintained in backend |
+| Mortgage rates | Bank of Israel published average rates (no per-bank rates in v1) | Pulled by n8n (`backend-spec.md` §6) |
 
 Data ingestion runs as **scheduled backend jobs**, not in the app. The app only calls the backend API.
 
 ---
 
-## 9. Backend & Data Model (proposal)
+## 9. Backend & Data Model
 
-**Proposed backend:** Supabase (Postgres + **PostGIS** for geo queries + Auth + Edge Functions + Storage). Alternative: a custom Node API. See Open Questions.
+**Backend:** Supabase (Postgres + **PostGIS** + Auth + Edge Functions + Storage + Queues) with **self-hosted n8n** for data ingestion. The full backend spec is in **`backend-spec.md`** (source of truth for the backend). The entities below are the app-facing shapes.
 
 **Core entities**
 ```ts
@@ -451,7 +451,7 @@ type Property = {
   status: 'active' | 'sold' | 'off_market';
   price: number;                   // ILS
   location: { lat: number; lng: number };
-  address: { city: string; neighborhood?: string; street: string; number?: string };
+  address: { city: LocalizedText; neighborhood?: LocalizedText; street: LocalizedText; number?: string };
   gushHelka?: { gush: number; helka: number };
   rooms: number;
   sizeSqm: number;
@@ -580,11 +580,12 @@ Each request is preceded by an in-app explanation screen. If the user denies, th
 |---|---|
 | **M0: Foundation** ✅ | Expo SDK 57 + Expo Router + NativeWind v4.2, React Compiler, i18n + RTL bootstrap, "Orbit" design tokens, `/components/ui` base components (incl. `Glass`, `Icon`), native tabs + per-tab native stacks, EAS project |
 | **M1: Onboarding & Profile** | Landing page, multi-step profile form, Zustand persistence, derived affordability |
-| **M2: Map & Listings** | Map with clusters, bottom sheet FlashList, filters, listing page (with mock data) |
+| **M2: Map & Listings** ✅ | Map with clusters, bottom sheet FlashList, filters, listing page (with mock data) |
 | **M3: Potential Score** | Score engine (server + `lib/score`), score card + deep-dive, plans / amenities / traffic sections |
 | **M4: Mortgage** | Mortgage math lib + tests, 3 plans, plan detail with charts, total cost of purchase |
 | **M5: Learn Hub** | Guides + glossary (HE/EN), search |
 | **M6: Consultation** | Booking flow, leads backend, status tracking, CTAs across the app |
+| **M6.5: Alerts** | Account + profile sync, alert & channel preferences, in-app inbox, push, then email / SMS / WhatsApp, "Why this fits you" card (backend: `backend-spec.md` §16 B5) |
 | **M7: Real data & launch** | Data source integrations, privacy review, store submission |
 
 ---
@@ -593,9 +594,9 @@ Each request is preceded by an in-app explanation screen. If the user denies, th
 
 1. ~~**Expo SDK version**~~ **Resolved (v0.2):** track the latest stable SDK (currently 57). See §2 version policy.
 2. **Listing source:** Which brokers or partners will supply listings in v1? Or launch with a curated dataset in one city first (e.g. Tel Aviv / Ramat Gan / Haifa)?
-3. **Backend:** Is Supabase + PostGIS approved, or is there a preferred backend?
+3. ~~**Backend:**~~ **Resolved:** Supabase + PostGIS + self-hosted n8n. See `backend-spec.md`.
 4. **Consultants:** In-house team or partner network? How are leads routed and monetized (fixed fee, referral, success fee)?
-5. **Authentication:** Phone OTP (common in Israel), Google/Apple sign-in, or both? Can users browse anonymously?
+5. ~~**Authentication:**~~ **Resolved:** an account is required for everything, including the map. Sign-in by phone OTP (Twilio Verify). No anonymous browsing. App Store guideline 5.1.1 risk accepted, mitigation in `backend-spec.md` §5.
 6. **Credit score:** Self-reported only, or integrate with a licensed credit bureau later?
 7. **Additional languages:** Russian / French / Arabic in a later phase?
 8. **Design:** "Orbit" direction adopted (§7). Produce a Figma file for the signature moments (score ring, map markers, property page) before M2–M3?

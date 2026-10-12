@@ -5,7 +5,7 @@ import en from './locales/en.json';
 import he from './locales/he.json';
 import type { Locale } from './locales';
 
-export const NAMESPACES = ['common', 'tabs', 'explore', 'saved', 'mortgage', 'learn', 'profile'] as const;
+export const NAMESPACES = ['common', 'tabs', 'explore', 'filters', 'property', 'saved', 'mortgage', 'learn', 'profile'] as const;
 
 export const resources = { en, he } as const;
 

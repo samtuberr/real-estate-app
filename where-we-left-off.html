@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <meta name="description" content="איפה עצרנו בפרויקט Nadlan Score: מה נבנה, מה עוד פתוח ומה הצעד הבא. תמונת מצב ל־11 באוקטובר 2026.">
+    <title>איפה עצרנו? · Nadlan Score</title>
+    <style>
+      :root {
+        --bg: #0b0e14;
+        --surface: #121720;
+        --raised: #19202c;
+        --line: #2b3443;
+        --text: #f1f3f8;
+        --muted: #adb6c6;
+        --accent: #b5baff;
+        --green: #8be0bb;
+        --amber: #f3cf8c;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; scroll-padding-top: 28px; }
+      body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.75 "Segoe UI", Arial, sans-serif; }
+      a { color: var(--accent); text-underline-offset: 5px; }
+      a:hover { color: var(--text); }
+      a, button, summary { -webkit-tap-highlight-color: transparent; }
+      :focus-visible { outline: 3px solid var(--accent); outline-offset: 5px; }
+      button, summary { font: inherit; }
+      button { cursor: pointer; }
+      [hidden] { display: none !important; }
+      h1, h2, h3, p { margin: 0; }
+      h1, h2, h3 { line-height: 1.3; }
+      h2 { font-size: clamp(24px, 3vw, 32px); letter-spacing: -.5px; }
+      h3 { font-size: 19px; }
+      p + p { margin-top: 12px; }
+      bdi, code, .number { font-variant-numeric: tabular-nums; }
+      code { display: inline-block; direction: ltr; unicode-bidi: isolate; font: .85em/1.6 Consolas, monospace; color: var(--accent); overflow-wrap: anywhere; }
+      .wrap { width: min(1120px, calc(100% - 64px)); margin-inline: auto; }
+      .skip { position: absolute; inset-block-start: -100px; inset-inline-start: 20px; padding: 12px 20px; z-index: 10; background: var(--surface); }
+      .skip:focus { inset-block-start: 12px; }
+      .topbar { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding-block: 26px; border-bottom: 1px solid var(--line); }
+      .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: .2px; }
+      .brand-icon { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 10px; color: var(--accent); }
+      .top-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; color: var(--muted); font-size: 13px; }
+      .print { background: transparent; color: var(--text); border: 1px solid var(--line); border-radius: 8px; min-height: 44px; padding: 7px 14px; }
+      .print:hover { background: var(--raised); }
+      .hero { padding-top: 54px; }
+      .eyebrow { color: var(--accent); font-size: 13px; font-weight: 600; letter-spacing: .5px; margin-bottom: 14px; }
+      .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) 282px; gap: 60px; align-items: center; }
+      h1 { font-size: clamp(44px, 6.5vw, 72px); letter-spacing: -2px; margin-bottom: 18px; }
+      .lead { font-size: clamp(21px, 2.4vw, 27px); max-width: 630px; line-height: 1.5; margin-bottom: 16px; }
+      .intro { color: var(--muted); max-width: 650px; }
+      .checkpoint { background: var(--surface); border: 1px solid #535a81; border-radius: 18px; padding: 26px; position: relative; }
+      .checkpoint-label { color: var(--muted); font-size: 13px; }
+      .checkpoint-number { display: block; font-size: 84px; font-weight: 700; line-height: 1.1; letter-spacing: -5px; color: var(--accent); margin-block: 14px 4px; }
+      .checkpoint h2 { font-size: 23px; margin-bottom: 18px; }
+      .tag { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); border-radius: 6px; padding: 3px 9px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+      .tag.done { color: var(--green); background: #142b26; border-color: #28493d; }
+      .tag.open { color: var(--amber); background: #2b241b; border-color: #52412a; }
+      .tag.later { color: var(--muted); background: var(--raised); }
+      .checkpoint small { display: block; color: var(--muted); margin-top: 12px; }
+      .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding-block: 25px; border-block: 1px solid var(--line); margin-top: 38px; }
+      .metric { display: flex; align-items: center; gap: 14px; padding-inline: 28px; }
+      .metric:first-child { padding-inline-start: 0; }
+      .metric + .metric { border-inline-start: 1px solid var(--line); }
+      .metric strong { font-size: 34px; line-height: 1.2; color: var(--text); }
+      .metric span { color: var(--muted); font-size: 13px; line-height: 1.6; }
+      nav { display: flex; flex-wrap: wrap; gap: 5px 24px; padding-block: 15px; border-bottom: 1px solid var(--line); }
+      nav a { min-height: 44px; display: inline-flex; align-items: center; font-size: 14px; text-decoration: none; color: var(--muted); }
+      section { padding-top: 52px; }
+      .section-heading { display: flex; gap: 15px; align-items: baseline; margin-bottom: 22px; }
+      .section-number { font-size: 12px; font-family: Consolas, monospace; color: var(--accent); }
+      .section-note { color: var(--muted); margin-top: -10px; margin-bottom: 24px; }
+      .features { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+      .feature { padding: 24px 0; border-bottom: 1px solid var(--line); }
+      .feature:nth-child(odd) { padding-inline-end: 36px; }
+      .feature:nth-child(even) { padding-inline-start: 36px; border-inline-start: 1px solid var(--line); }
+      .feature h3 { margin-bottom: 9px; }
+      .feature p, .issue p, .step p { color: var(--muted); font-size: 15px; }
+      .feature-mark { color: var(--green); font-size: 15px; margin-inline-end: 8px; }
+      .note { margin-top: 24px; border-inline-start: 3px solid var(--accent); padding: 17px 22px; background: var(--surface); border-radius: 0 4px 4px 0; font-size: 15px; }
+      .note p { color: var(--muted); }
+      .note strong { color: var(--text); }
+      .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+      table { width: 100%; border-collapse: collapse; text-align: start; font-size: 14px; }
+      th { text-align: start; color: var(--muted); background: var(--surface); font-weight: 600; font-size: 12px; }
+      th, td { padding: 15px 18px; border-bottom: 1px solid var(--line); vertical-align: top; }
+      tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
+      tbody th { background: transparent; color: var(--text); font-size: 14px; }
+      td:last-child { color: var(--muted); }
+      .phase { white-space: nowrap; color: var(--accent); margin-inline-end: 6px; }
+      .current-row { background: #181d2d; }
+      .issues { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+      .issue { border: 1px solid var(--line); border-radius: 12px; padding: 23px; background: var(--surface); }
+      .issue .tag { margin-bottom: 18px; }
+      .issue h3 { margin-bottom: 12px; }
+      .issue p + p { margin-top: 10px; }
+      .next { border: 1px solid #405647; background: #121e1c; border-radius: 16px; padding: 28px 30px; }
+      .next-intro { color: var(--green); margin-bottom: 22px; font-weight: 600; }
+      .steps { margin: 0; padding: 0; list-style: none; }
+      .step { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 16px; padding-block: 18px; border-top: 1px solid #2a3b35; }
+      .step-number { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid #42564c; border-radius: 50%; color: var(--green); font-size: 13px; }
+      .step h3 { font-size: 17px; margin-bottom: 7px; }
+      .step:last-child { padding-bottom: 0; }
+      .verified { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+      .check { padding: 18px 22px; border: 1px solid var(--line); border-radius: 10px; }
+      .check strong { display: block; color: var(--green); font-size: 22px; margin-block: 4px; }
+      .check span { color: var(--muted); font-size: 13px; }
+      .check code { font-size: 12px; }
+      .fine { color: var(--muted); font-size: 13px; margin-top: 15px; }
+      details { margin-top: 24px; border: 1px solid var(--line); border-radius: 10px; padding: 0 22px; }
+      summary { cursor: pointer; padding-block: 18px; font-weight: 600; }
+      .details-body { padding-bottom: 22px; }
+      .details-body p, .details-body li { color: var(--muted); font-size: 14px; }
+      .details-body ul { padding-inline-start: 20px; margin-block: 10px 20px; }
+      .details-body li { margin-block: 7px; }
+      .details-body h3 { margin-block: 14px 8px; font-size: 16px; }
+      .sources { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      .source { padding: 17px 20px; border: 1px solid var(--line); border-radius: 10px; text-decoration: none; }
+      .source strong { display: block; font-size: 15px; color: var(--text); }
+      .source span { display: block; color: var(--muted); font-size: 12px; margin-top: 4px; }
+      .source:hover { background: var(--surface); border-color: var(--accent); }
+      footer { margin-top: 48px; padding-block: 22px 32px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 12px; }
+      @media (max-width: 850px) {
+        .hero-grid { gap: 30px; grid-template-columns: minmax(0, 1fr) 230px; }
+        .issues { grid-template-columns: 1fr; }
+        .issue { padding: 22px; }
+        .issue .tag { margin-bottom: 12px; }
+        .metric { padding-inline: 18px; }
+        .metric strong { font-size: 29px; }
+      }
+      @media (max-width: 620px) {
+        .wrap { width: calc(100% - 36px); }
+        .topbar { align-items: flex-start; padding-block: 18px; gap: 14px; }
+        .top-meta { justify-content: flex-end; gap: 10px; }
+        .top-meta time { display: none; }
+        .hero { padding-top: 34px; }
+        .hero-grid { grid-template-columns: 1fr; gap: 25px; }
+        .checkpoint { padding: 20px 24px; }
+        .checkpoint-number { float: left; margin: 8px 0 0; font-size: 70px; }
+        .checkpoint h2 { margin-block: 9px 12px; }
+        .metrics { margin-top: 26px; padding-block: 20px; }
+        .metric { flex-direction: column; align-items: flex-start; gap: 6px; padding-inline: 12px; }
+        .metric strong { font-size: 28px; }
+        .metric span { font-size: 12px; }
+        nav { gap: 0 20px; }
+        section { padding-top: 36px; }
+        .features, .sources { grid-template-columns: 1fr; }
+        .feature:nth-child(n) { padding: 20px 0; border-inline-start: 0; }
+        th, td { padding: 12px 10px; font-size: 13px; }
+        .roadmap { min-width: 560px; }
+        .table-wrap:focus-visible { outline-offset: 2px; }
+        .verified { grid-template-columns: 1fr; gap: 10px; }
+        .check { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 5px 15px; }
+        .check code { width: 100%; }
+        .next { padding: 22px 20px; }
+        .step { gap: 10px; }
+      }
+      @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+      @media print {
+        :root { --bg: #fff; --surface: #f3f4f6; --raised: #e9ebf0; --line: #c9ced7; --text: #152033; --muted: #4b5563; --accent: #4548a1; --green: #216344; --amber: #76520d; }
+        @page { size: A4; margin: 16mm; }
+        body { font-size: 11pt; }
+        .wrap { width: 100%; }
+        nav, .print, .skip { display: none; }
+        .topbar { padding-block: 0 12px; }
+        .hero { padding-top: 24px; }
+        .hero-grid { grid-template-columns: minmax(0, 1fr) 180px; gap: 25px; }
+        h1 { font-size: 42px; }
+        .lead { font-size: 18px; }
+        .checkpoint-number { font-size: 60px; }
+        section { padding-top: 26px; }
+        .current-row, .next, .tag.done, .tag.open { background: var(--surface); }
+        .tag { color: var(--text) !important; }
+        .issue, .step, .check, .feature, tr, .checkpoint, .source { break-inside: avoid; }
+        h2, h3, .section-heading { break-after: avoid; }
+        .issues { grid-template-columns: 1fr; }
+        .issue { padding: 15px; }
+        .table-wrap { overflow: visible; }
+        .roadmap { min-width: 0; }
+        .fine, .source span, footer { font-size: 9pt; }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip" href="#main">דילוג לתוכן</a>
+    <div class="wrap">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7M5 9v12h14V9M10 21v-7h4v7"/></svg></span>
+          <bdi lang="en">Nadlan Score</bdi>
+        </div>
+        <div class="top-meta">
+          <time datetime="2026-10-11">11 באוקטובר 2026</time>
+          <span>ענף <code>m02</code></span>
+          <button class="print" id="print-button" type="button" hidden>הדפסה / PDF</button>
+        </div>
+      </header>
+
+      <main id="main">
+        <div class="hero">
+          <p class="eyebrow">סיכום לחזרה לעבודה · 11.10.2026</p>
+          <div class="hero-grid">
+            <div>
+              <h1>איפה עצרנו?</h1>
+              <p class="lead">המפה והנכסים כבר ממומשים.<br>הצעד הבא: לבדוק אותם על מכשיר.</p>
+              <p class="intro">סיימנו את מימוש שלב <bdi>M2</bdi> עם נתוני דמה. תהליך ההצטרפות ופרופיל הקונה (<bdi>M1</bdi>) עדיין לא נבנו, והחיבור לשרת ולנתונים אמיתיים עוד לפנינו.</p>
+            </div>
+            <aside class="checkpoint" aria-label="נקודת העצירה בפרויקט">
+              <span class="checkpoint-label">נקודת העצירה</span>
+              <bdi class="checkpoint-number">M2</bdi>
+              <h2>מפה ונכסים</h2>
+              <span class="tag done">✓ מומש עם נתוני דמה</span>
+              <small>אימות על מכשיר עדיין פתוח</small>
+            </aside>
+          </div>
+          <div class="metrics" aria-label="הפרויקט במספרים">
+            <div class="metric"><strong class="number">220</strong><span>נכסי דמה<br>לבדיקת המסכים</span></div>
+            <div class="metric"><strong class="number"><bdi>53/53</bdi></strong><span>בדיקות עוברות<br>בהרצה הנוכחית</span></div>
+            <div class="metric"><strong><bdi>HE / EN</bdi></strong><span>עברית ואנגלית<br>כולל תמיכה ב־RTL</span></div>
+          </div>
+        </div>
+
+        <nav aria-label="ניווט בסיכום">
+          <a href="#built">מה כבר נבנה</a>
+          <a href="#roadmap">מצב השלבים</a>
+          <a href="#gaps">מה עוד פתוח</a>
+          <a href="#next">מאיפה ממשיכים</a>
+          <a href="#checks">בדיקות ומקורות</a>
+        </nav>
+
+        <section id="built" aria-labelledby="built-title">
+          <div class="section-heading"><span class="section-number" aria-hidden="true">01</span><h2 id="built-title">מה כבר נבנה</h2></div>
+          <p class="section-note">התשתית של <bdi>M0</bdi> ומסכי <bdi>M2</bdi> קיימים בקוד. אלה היכולות שמומשו:</p>
+          <div class="features">
+            <article class="feature"><h3><span class="feature-mark" aria-hidden="true">✓</span>מפה וחיפוש באזור</h3><p>מפה עם מחירים על הנכסים, קיבוץ נכסים קרובים לבועות, חיפוש עיר או שכונה וכפתור ״לידי״ שמבקש הרשאת מיקום רק בלחיצה.</p></article>
+            <article class="feature"><h3><span class="feature-mark" aria-hidden="true">✓</span>רשימה, סינון ומיון</h3><p>רשימת נכסים נשלפת מעל המפה, עם סינון לפי מחיר, חדרים, שטח, סוג נכס, ציון ומאפיינים. אזור המפה והסינונים נשמרים בין הפעלות.</p></article>
+            <article class="feature"><h3><span class="feature-mark" aria-hidden="true">✓</span>עמוד נכס וגלריה</h3><p>תמונות, מחיר, כתובת, פרטי הנכס, תצוגת ציון ונתוני שוק לדוגמה. נוספו גלריה במסך מלא וכפתורי שיתוף ושמירה.</p></article>
+            <article class="feature"><h3><span class="feature-mark" aria-hidden="true">✓</span>נכסים שמורים</h3><p>הוספה והסרה של נכסים מרשימת השמורים, עם שמירה מקומית בין הפעלות. סנכרון לחשבון משתמש עדיין לא מחובר.</p></article>
+            <article class="feature"><h3><span class="feature-mark" aria-hidden="true">✓</span>תשתית האפליקציה</h3><p>אפליקציית Expo עם ניווט, רכיבי עיצוב, עברית ואנגלית, כיווניות מימין לשמאל והחלפת שפה וערכת צבעים במסך הפרופיל.</p></article>
+            <article class="feature"><h3><span class="feature-mark" aria-hidden="true">✓</span>שכבת נתונים להמשך</h3><p>המסכים מקבלים מידע דרך שכבה נפרדת בקוד. כיום היא מחזירה 220 נכסי דמה; בשלב <bdi>B2</bdi> מתוכנן לחבר אותה ל־Supabase.</p></article>
+          </div>
+          <div class="note"><p><strong>הנתונים הם להדגמה:</strong> המחירים, ציוני הפוטנציאל והעסקאות אינם נתוני שוק אמיתיים. גם התמונות הן תמונות דמה. תצוגת הציון קיימת; מנוע החישוב האמיתי מתוכנן ל־<bdi>M3 / B3</bdi>.</p></div>
+        </section>
+
+        <section id="roadmap" aria-labelledby="roadmap-title">
+          <div class="section-heading"><span class="section-number" aria-hidden="true">02</span><h2 id="roadmap-title">מצב השלבים</h2></div>
+          <p class="section-note"><bdi>M2</bdi> נבנה לפני <bdi>M1</bdi>. המספור באפיון מתאר את שלבי המוצר; הוא לא אומר שכל השלבים הקודמים הושלמו.</p>
+          <div class="table-wrap" tabindex="0" role="region" aria-label="טבלת שלבי הפרויקט; במסך צר אפשר לגלול לרוחב">
+            <table class="roadmap">
+              <thead><tr><th scope="col">שלב</th><th scope="col">מצב בקוד</th><th scope="col">מה המשמעות</th></tr></thead>
+              <tbody>
+                <tr><th scope="row"><bdi class="phase">M0</bdi> תשתית</th><td><span class="tag done">מומש</span></td><td>ניווט, עיצוב, שפות, רכיבי בסיס ותצורת בנייה.</td></tr>
+                <tr><th scope="row"><bdi class="phase">M1</bdi> הצטרפות ופרופיל</th><td><span class="tag later">טרם מומש</span></td><td>טופס פרופיל קונה וחישוב יכולת רכישה. כיום קיימות הגדרות שפה ועיצוב בלבד לצד מציין מקום לפרופיל.</td></tr>
+                <tr class="current-row"><th scope="row"><bdi class="phase">M2</bdi> מפה ונכסים</th><td><span class="tag done">מומש עם דמה</span></td><td>כאן עצרנו. נדרשת השלמת בדיקות המפה וההתנהגות על מכשיר.</td></tr>
+                <tr><th scope="row"><bdi class="phase">M3</bdi> ציון פוטנציאל</th><td><span class="tag later">טרם מומש</span></td><td>מנוע ציון, מסך פירוט ותוכניות, שירותים ותחבורה בסביבת הנכס.</td></tr>
+                <tr><th scope="row"><bdi class="phase">M4</bdi> משכנתאות</th><td><span class="tag later">מסך ראשוני</span></td><td>יש מצייני מקום; אין עדיין חישובים, מסלולים או התאמה לפרופיל.</td></tr>
+                <tr><th scope="row"><bdi class="phase">M5</bdi> מרכז ידע</th><td><span class="tag later">מסך ראשוני</span></td><td>יש בחירה בין מדריכים למילון; התוכן והחיפוש טרם מומשו.</td></tr>
+                <tr><th scope="row"><bdi class="phase">M6</bdi> ייעוץ</th><td><span class="tag later">טרם מומש</span></td><td>הכפתור בעמוד הנכס מציג הודעת ״בקרוב״; תהליך הזמנת הייעוץ לא מחובר.</td></tr>
+                <tr><th scope="row"><bdi class="phase">M6.5</bdi> התראות</th><td><span class="tag later">בתכנון</span></td><td>התאמת נכסים לפרופיל, העדפות התראה וערוצי שליחה.</td></tr>
+                <tr><th scope="row"><bdi class="phase">M7</bdi> נתונים והשקה</th><td><span class="tag later">בתכנון</span></td><td>חיבור למקורות מידע, הכנה להשקה והגשה לחנויות.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="gaps" aria-labelledby="gaps-title">
+          <div class="section-heading"><span class="section-number" aria-hidden="true">03</span><h2 id="gaps-title">מה עוד פתוח</h2></div>
+          <div class="issues">
+            <article class="issue">
+              <span class="tag open">נדרש אימות</span><h3>בדיקה במכשיר</h3>
+              <p>בסיכום הקודם נשארו פתוחות בדיקות המפה, סמני המחיר, קיבוץ הנכסים, הרשאות המיקום ותנועת הרשימה הנשלפת.</p>
+              <p>נדרשת גרסת פיתוח מותקנת עם המודולים החדשים. לפי תצורת הפרויקט, מפת Android דורשת <code>GOOGLE_MAPS_ANDROID_API_KEY</code>.</p>
+            </article>
+            <article class="issue">
+              <span class="tag open">פער מתועד</span><h3>תצוגת הדפדפן</h3>
+              <p>בדפדפן מופיע מציין מקום במקום מפה. בסיכום <bdi>M2</bdi> דווחה גם גלריה ריקה בעברית בגלל בעיית RTL ב־FlashList.</p>
+              <p>בעיית הגלריה לא נבדקה מחדש במסגרת הסיכום הזה. בדיקת דפדפן לבדה אינה מאמתת את חוויית המפה באפליקציה.</p>
+            </article>
+            <article class="issue">
+              <span class="tag later">מוגדר באפיון</span><h3>שרת וחשבון משתמש</h3>
+              <p>נבחרו Supabase עם PostGIS ו־n8n, והוחלט על התחברות באמצעות קוד לטלפון. כרגע האפליקציה נפתחת ישירות למסך החיפוש.</p>
+              <p>במאגר אין עדיין תיקיות מימוש <code>supabase/</code> או <code>n8n/</code>. מצב שירותים חיצוניים לא נבדק.</p>
+            </article>
+          </div>
+          <div class="note"><p><strong>הסינון ״בתקציב שלי״ עוד ממתין לפרופיל:</strong> ההכנסות, ההון העצמי וההתחייבויות ייאספו ב־<bdi>M1</bdi>. חישובי המשכנתא המלאים שייכים ל־<bdi>M4</bdi>.</p></div>
+        </section>
+
+        <section id="next" aria-labelledby="next-title">
+          <div class="section-heading"><span class="section-number" aria-hidden="true">04</span><h2 id="next-title">מאיפה ממשיכים</h2></div>
+          <div class="next">
+            <p class="next-intro">סדר המשך מומלץ על בסיס המצב הנוכחי</p>
+            <ol class="steps">
+              <li class="step"><span class="step-number" aria-hidden="true">1</span><div><h3>להשלים את אימות M2</h3><p>להריץ גרסת פיתוח על מכשיר או סימולטור: מפה, קיבוץ נכסים, סינון, פתיחת נכס, גלריה, שמורים והרשאת ״לידי״. לבדוק גם עברית וגם אנגלית, ולתעד או לתקן בעיות.</p></div></li>
+              <li class="step"><span class="step-number" aria-hidden="true">2</span><div><h3>לשמור נקודת התקדמות ב־Git</h3><p>מימוש <bdi>M2</bdi> נמצא בתיקיית העבודה בענף <code>m02</code>, עם קבצים ששונו וקבצים חדשים שטרם נכנסו ל־commit. לאחר סקירה ותיקונים, לשמור את השלב כנקודת חזרה מסודרת.</p></div></li>
+              <li class="step"><span class="step-number" aria-hidden="true">3</span><div><h3>לבנות פרופיל והתחברות: M1 יחד עם B0/B1</h3><p>לפי אפיון השרת, <bdi>B0</bdi> מקים את התשתית ו־<bdi>B1</bdi> מוסיף התחברות ופרופיל. בצד האפליקציה: תהליך הצטרפות, טופס קונה ושמירת הנתונים, לקראת התאמת נכסים לתקציב.</p></div></li>
+              <li class="step"><span class="step-number" aria-hidden="true">4</span><div><h3>לחבר את מסכי הנכסים לשרת: B2</h3><p>להקים את טבלאות הנכסים והשאילתות הגאוגרפיות, לטעון נתוני התחלה לעיר אחת ולהחליף את מקור הדמה בשכבת הנתונים. חיבור זה כשלעצמו עדיין אינו חיבור למאגר מודעות אמיתי; מקור המודעות לשלב ההשקה עוד צריך להיבחר.</p></div></li>
+            </ol>
+          </div>
+        </section>
+
+        <section id="checks" aria-labelledby="checks-title">
+          <div class="section-heading"><span class="section-number" aria-hidden="true">05</span><h2 id="checks-title">מה אומת עכשיו</h2></div>
+          <p class="section-note">הבדיקות הבאות הורצו בהכנת הסיכום, ב־11 באוקטובר 2026:</p>
+          <div class="verified">
+            <div class="check"><span>בדיקות יחידה · 9 קובצי בדיקה</span><strong><bdi>53 / 53</bdi> עוברות</strong><code>npm test -- --runInBand</code></div>
+            <div class="check"><span>בדיקת טיפוסים · TypeScript</span><strong>ללא שגיאות</strong><code>npm run typecheck</code></div>
+            <div class="check"><span>בדיקת קוד · ESLint</span><strong>ללא שגיאות</strong><code>npm run lint</code></div>
+          </div>
+          <p class="fine">בסיכום מ־5 באוקטובר תועדו גם בדיקות בנדל ל־iOS, ל־Android ולדפדפן, וכן <bdi>expo-doctor</bdi>. הן לא הורצו מחדש כאן. גם בדיקת האפליקציה על מכשיר לא בוצעה במסגרת הכנת מסמך זה.</p>
+
+          <details>
+            <summary>פרטים טכניים לחזרה לקוד</summary>
+            <div class="details-body">
+              <h3>נקודת השמירה האחרונה</h3>
+              <p>ה־commit האחרון בהיסטוריה המקומית הוא <code>0fba222</code> מ־5 באוקטובר 2026: הוספת אפיון השרת ומסמך ארכיטקטורת הנתונים. שינויי <bdi>M2</bdi> מופיעים כשינויים מקומיים שטרם נשמרו ב־commit.</p>
+              <h3>קבצים שכדאי לפתוח</h3>
+              <ul>
+                <li><code>app/(tabs)/explore/index.tsx</code> — מסך החיפוש והמפה.</li>
+                <li><code>app/filters.tsx</code> — טופס הסינון.</li>
+                <li><code>app/property/[id]/index.tsx</code> — עמוד הנכס.</li>
+                <li><code>lib/api/properties.ts</code> — שכבת הגישה לנכסים; נקודת החיבור העתידית לשרת.</li>
+                <li><code>lib/api/mock/data.ts</code> — מקור נתוני הדמה.</li>
+                <li><code>lib/domain/</code> — טיפוסים, סינון ודירוגים משותפים; מנועי המשכנתא וההתאמה עוד לא קיימים.</li>
+              </ul>
+              <h3>החלטות שכבר תועדו</h3>
+              <p>רשימת הנכסים הנשלפת משתמשת ב־<code>@gorhom/bottom-sheet</code>. המסכים מקבלים נתונים דרך TanStack Query ושכבת גישה נפרדת. הלוגיקה המשותפת מיועדת ל־TypeScript טהור; לפי אפיון השרת, n8n יקלוט מידע וישלח הודעות, והשרת יחשב ציונים והתאמות.</p>
+            </div>
+          </details>
+        </section>
+
+        <section aria-labelledby="sources-title">
+          <div class="section-heading"><span class="section-number" aria-hidden="true">06</span><h2 id="sources-title">מסמכים להמשך</h2></div>
+          <div class="sources">
+            <a class="source" href="m02-summary.html"><strong>הסיכום המפורט של M2 ↗</strong><span>מ־5 באוקטובר · רכיבים, החלטות ופערים שתועדו</span></a>
+            <a class="source" href="spec.html"><strong>אפיון המוצר ↗</strong><span>מסכים, יכולות ואבני הדרך של האפליקציה</span></a>
+            <a class="source" href="backend-spec.html"><strong>אפיון השרת ↗</strong><span>Supabase, הרשאות ושלבי B0–B7</span></a>
+            <a class="source" href="data-architecture.html"><strong>ארכיטקטורת הנתונים ↗</strong><span>חלוקת האחריות בין האפליקציה, השרת ו־n8n</span></a>
+          </div>
+          <p class="fine">תמונת המצב מבוססת על הקוד המקומי, ה־README, קובצי האפיון וסיכום <bdi>M2</bdi> הקיים. המסמך עצמאי ונפתח גם ללא חיבור לרשת; קישורי ההרחבה דורשים את קובצי הפרויקט לצדו.</p>
+        </section>
+      </main>
+
+      <footer><span><bdi>Nadlan Score</bdi> · תמונת מצב ל־11.10.2026</span><a href="#main">חזרה להתחלה ↑</a></footer>
+    </div>
+    <script>
+      const printButton = document.getElementById('print-button');
+      printButton.hidden = false;
+      printButton.addEventListener('click', () => window.print());
+      let closedDetails = [];
+      window.addEventListener('beforeprint', () => {
+        closedDetails = Array.from(document.querySelectorAll('details:not([open])'));
+        closedDetails.forEach((details) => { details.open = true; });
+      });
+      window.addEventListener('afterprint', () => {
+        closedDetails.forEach((details) => { details.open = false; });
+        closedDetails = [];
+      });
+    </script>
+  </body>
+</html>
