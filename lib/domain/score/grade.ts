@@ -1,10 +1,11 @@
 import type { ScoreGrade } from '../types';
+import { DEFAULT_SCORE_CONFIG, type ScoreConfig } from './config';
 
 /** Grade thresholds from spec §5.2: ≥80, 65–79, 50–64, <50. */
-export function scoreGrade(total: number): ScoreGrade {
-  if (total >= 80) return 'excellent';
-  if (total >= 65) return 'good';
-  if (total >= 50) return 'fair';
+export function scoreGrade(total: number, thresholds: ScoreConfig['grades'] = DEFAULT_SCORE_CONFIG.grades): ScoreGrade {
+  if (total >= thresholds.excellent) return 'excellent';
+  if (total >= thresholds.good) return 'good';
+  if (total >= thresholds.fair) return 'fair';
   return 'low';
 }
 

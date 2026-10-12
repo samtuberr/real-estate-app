@@ -10,7 +10,7 @@ const bandClass = { high: 'bg-score-high', mid: 'bg-score-mid', low: 'bg-score-l
 
 type ScoreBadgeProps = { score: number | undefined; size?: 'sm' | 'md'; className?: string };
 
-/** Compact Potential Score chip colored by band. The full ring arrives with M3. */
+/** Compact Potential Score chip colored by band; the listing shows the full ring. */
 export function ScoreBadge({ score, size = 'sm', className }: ScoreBadgeProps) {
   const { t } = useTranslation();
   if (score == null) return null;

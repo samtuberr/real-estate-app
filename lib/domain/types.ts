@@ -73,7 +73,17 @@ export type Property = {
  */
 export type PropertySummary = Pick<
   Property,
-  'id' | 'status' | 'price' | 'location' | 'address' | 'rooms' | 'sizeSqm' | 'floor' | 'propertyType' | 'features' | 'createdAt'
+  | 'id'
+  | 'status'
+  | 'price'
+  | 'location'
+  | 'address'
+  | 'rooms'
+  | 'sizeSqm'
+  | 'floor'
+  | 'propertyType'
+  | 'features'
+  | 'createdAt'
 > & {
   scoreTotal?: number;
   thumbnail?: PropertyImage;
@@ -92,13 +102,58 @@ export type MarketStats = {
   neighborhoodMedianPricePerSqm: number;
   /** 5-year change in median price per sqm, e.g. 0.18 = +18%. */
   fiveYearChange: number;
+  priceHistory?: Array<{ year: number; pricePerSqm: number }>;
 };
 
-/** `GET /properties/:id` (`property-detail`): the listing plus its context. M3 adds plans, POIs and traffic. */
+export type CityPlan = {
+  id: string;
+  planNumber: string;
+  name: LocalizedText;
+  status: 'proposed' | 'deposited' | 'approved' | 'in_execution';
+  type: 'residential' | 'commercial' | 'transit' | 'urban_renewal' | 'public' | 'mixed';
+  distanceMeters: number;
+  impact: LocalizedText;
+  /** GeoJSON coordinates are [longitude, latitude], including the closing point. */
+  geometry: { type: 'Polygon'; coordinates: [number, number][][] };
+  approvedAt?: string;
+};
+
+export const AMENITY_CATEGORIES = [
+  'supermarket',
+  'shop',
+  'cafe',
+  'school',
+  'kindergarten',
+  'park',
+  'clinic',
+  'synagogue',
+] as const;
+export type AmenityCategory = (typeof AMENITY_CATEGORIES)[number];
+export type AmenityGroup = {
+  category: AmenityCategory;
+  count: number;
+  nearest?: { name: LocalizedText; distanceMeters: number };
+};
+export type TrafficContext = {
+  congestion: 'low' | 'moderate' | 'heavy';
+  noise: 'low' | 'moderate' | 'high';
+  highwayDistanceMeters: number;
+  stops: Array<{ kind: 'bus' | 'train' | 'light_rail'; name: LocalizedText; distanceMeters: number }>;
+};
+
+/** Undefined means unavailable; an empty array means a completed survey found none. */
+export type PropertyContext = {
+  plans?: CityPlan[];
+  amenities?: AmenityGroup[];
+  traffic?: TrafficContext;
+  renewalEligible?: boolean;
+};
+
+/** `GET /properties/:id` (`property-detail`): the listing plus its context. */
 export type PropertyDetail = Property & {
   comparableDeals: ComparableDeal[];
   market: MarketStats;
-};
+} & PropertyContext;
 
 export type FeatureKey = 'parking' | 'elevator' | 'mamad' | 'balcony';
 

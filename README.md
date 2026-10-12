@@ -8,6 +8,8 @@ Bilingual (Hebrew / English) Expo app for home buyers in Israel. `spec.md` is th
 
 **M2 — Map & Listings**: full-screen map (`react-native-maps`, `supercluster` clusters, score-colored price pills), glass search / filters / "Near me", listing sheet (`@gorhom/bottom-sheet` + FlashList), filters form sheet (`@expo/ui` controls), listing page + full-screen gallery, Saved tab. Data comes from a deterministic mock behind the `lib/api` repository (swapped for Supabase in backend B2).
 
+**M3 — Potential Score (app + shared engine)**: context-derived scores with versioned configuration, missing-data weight redistribution, coverage confidence and bilingual explanations. Native Skia ring with a first-view count-up and Reduce Motion support, score deep-dive, city plans with selectable native map polygons, amenity counts / nearest places, traffic / transport, and a Victory Native price-history chart with an accessible values view. All inputs are labeled fictional demo data. The model is uncalibrated; live ingest, database-backed configuration and `worker-score` deployment depend on B0–B3 and are **not implemented**. See [M3 implementation notes](docs/m3.md).
+
 ## Getting started
 
 ```bash
@@ -23,6 +25,9 @@ Native features (RTL `supportsRTL`, Liquid Glass, `@expo/ui`, later `react-nativ
 eas init                                      # once — links the EAS project
 eas build --profile development --platform ios|android
 ```
+
+M3 adds native Skia, so rebuild the development client before testing the ring and chart.
+Web previews use static SVG versions and show plan details without a native map.
 
 ### Android Maps setup
 
@@ -57,7 +62,7 @@ References: [Expo Maps setup](https://docs.expo.dev/versions/latest/sdk/map-view
 | `components/common/` | `Num`, `Money`, `Screen`, `NebulaGlow`, `SectionHeader`, `StatTile`, `EmptyState`, `Disclaimer` |
 | `components/navigation/` | `TabStack`: native stack + large-title header config shared by every tab |
 | `lib/i18n/` | i18next setup, `he.json` / `en.json`, RTL direction + locale switching |
-| `lib/domain/` | Pure-TS shared domain: types, filters/sort, score grades (no RN/Expo imports — also runs in Edge Functions) |
+| `lib/domain/` | Pure-TS shared domain: types, filters/sort, score engine / config / grades (no RN/Expo imports — suitable for Edge Functions) |
 | `lib/api/` | Repositories (`properties.ts`, mock data in `mock/`) and TanStack Query hooks (`queries.ts`) |
 | `lib/map/` | Region math, clustering, "Near me" permission flow |
 | `components/map/`, `components/property/` | Map markers, sheet, search; property card and listing-page sections |

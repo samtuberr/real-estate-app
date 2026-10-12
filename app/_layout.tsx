@@ -77,8 +77,30 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
+              name="property/[id]/score"
+              options={{
+                headerShown: true,
+                headerTintColor: palette.foreground,
+                headerBackButtonDisplayMode: 'minimal',
+                headerTitleStyle: { fontFamily: 'Rubik_600SemiBold' },
+              }}
+            />
+            <Stack.Screen
+              name="property/[id]/plans"
+              options={{
+                headerShown: true,
+                headerTintColor: palette.foreground,
+                headerBackButtonDisplayMode: 'minimal',
+                headerTitleStyle: { fontFamily: 'Rubik_600SemiBold' },
+              }}
+            />
+            <Stack.Screen
               name="property/[id]/gallery"
-              options={{ presentation: 'fullScreenModal', animation: 'fade', contentStyle: { backgroundColor: colors.dark.background } }}
+              options={{
+                presentation: 'fullScreenModal',
+                animation: 'fade',
+                contentStyle: { backgroundColor: colors.dark.background },
+              }}
             />
             <Stack.Screen
               name="filters"
