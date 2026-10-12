@@ -3,7 +3,7 @@ import { TextInput } from 'react-native';
 
 import { cn } from '@/lib/utils/cn';
 
-export type InputProps = React.ComponentProps<typeof TextInput>;
+export type InputProps = React.ComponentPropsWithRef<typeof TextInput>;
 
 export function Input({ className, ...props }: InputProps) {
   return (

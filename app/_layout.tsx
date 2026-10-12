@@ -103,6 +103,18 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
+              name="mortgage/calculator"
+              options={{ headerShown: true, headerTintColor: palette.foreground, headerTitleStyle: { fontFamily: 'Rubik_600SemiBold' } }}
+            />
+            <Stack.Screen
+              name="mortgage/[planId]"
+              options={{ headerShown: true, headerTintColor: palette.foreground, headerTitleStyle: { fontFamily: 'Rubik_600SemiBold' } }}
+            />
+            <Stack.Screen
+              name="mortgage/compare"
+              options={{ headerShown: true, headerTintColor: palette.foreground, headerTitleStyle: { fontFamily: 'Rubik_600SemiBold' } }}
+            />
+            <Stack.Screen
               name="filters"
               options={{
                 presentation: 'formSheet',
