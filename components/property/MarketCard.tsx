@@ -13,10 +13,11 @@ import type { PropertyDetail } from '@/lib/domain/types';
 import { useLocale } from '@/lib/i18n/useLocale';
 import { useLocalized } from '@/lib/i18n/useLocalized';
 import { formatDate, formatNumber } from '@/lib/utils/format';
+import { PriceTrend } from './PriceTrend';
 
 /**
  * Nearby houses & market (spec §4.3 item 8): how this listing compares to the
- * neighborhood and the latest comparable deals. The price-trend chart comes with M3.
+ * neighborhood, price history and the latest comparable deals.
  */
 export function MarketCard({ property }: { property: PropertyDetail }) {
   const { t } = useTranslation('property');
@@ -35,7 +36,11 @@ export function MarketCard({ property }: { property: PropertyDetail }) {
   return (
     <View className="gap-3">
       <View className="flex-row gap-3">
-        <StatTile tone="ion" label={t('market.thisHome')} value={<Money value={ppsqm} className="font-sans-bold text-h2" />} />
+        <StatTile
+          tone="ion"
+          label={t('market.thisHome')}
+          value={<Money value={ppsqm} className="font-sans-bold text-h2" />}
+        />
         <StatTile
           tone="ion"
           label={t('market.median')}
@@ -46,11 +51,17 @@ export function MarketCard({ property }: { property: PropertyDetail }) {
         <Text className={diff <= -2 ? 'font-sans-medium text-score-high' : 'font-sans-medium'}>{comparison}</Text>
         <View className="flex-row items-center justify-between">
           <Text variant="muted">{t('market.fiveYear')}</Text>
-          <Num className={market.fiveYearChange >= 0 ? "font-sans-semibold text-score-high" : "font-sans-semibold text-score-low"}>
+          <Num
+            className={
+              market.fiveYearChange >= 0 ? 'font-sans-semibold text-score-high' : 'font-sans-semibold text-score-low'
+            }
+          >
             {`${market.fiveYearChange >= 0 ? '+' : ''}${formatNumber(market.fiveYearChange, locale, { style: 'percent' })}`}
           </Num>
         </View>
       </Card>
+
+      <PriceTrend history={market.priceHistory} />
 
       <Card className="gap-3 py-4">
         <Text role="heading" variant="label">

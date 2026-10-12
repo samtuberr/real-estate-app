@@ -167,7 +167,19 @@
       "none": "Score not available yet",
       "noneBody": "We don't have enough data about this home yet.",
       "limitedData": "Limited data",
-      "deepDiveSoon": "Full breakdown coming soon"
+      "deepDive": "Explore the score",
+      "missing": "Not scored",
+      "missingBody": "Insufficient data. This category is excluded and its weight is shared by the available categories.",
+      "contribution": "{{weight}} weight · {{points}} points toward the total",
+      "how": "How this score works",
+      "method": "Each available category is scored from 0 to 100. The total is the rounded weighted average. Development, daily amenities, access, relative pricing and property features inform the estimate; it is not a forecast of returns.",
+      "coverage": "Confidence reflects coverage of the five categories, not investment certainty. Missing data reduces confidence. Displayed weights reflect redistribution; contributions may not add up exactly because of rounding.",
+      "metadata": "Model {{version}} · Calculated {{date}}",
+      "confidence": {
+        "high": "High data coverage",
+        "medium": "Partial data coverage",
+        "low": "Low data coverage"
+      }
     },
     "subScores": {
       "plans": "City plans",
@@ -198,7 +210,11 @@
       "atMedian": "In line with the neighborhood median",
       "fiveYear": "5-year price trend",
       "recentDeals": "Recent deals nearby",
-      "deal": "{{rooms}} rooms · {{size}} sqm"
+      "deal": "{{rooms}} rooms · {{size}} sqm",
+      "chartTitle": "Median price per sqm · ILS",
+      "noHistory": "Not enough price history to draw a trend.",
+      "showData": "Show chart values",
+      "hideData": "Hide chart values"
     },
     "mortgage": {
       "title": "Your mortgage for this home",
@@ -206,6 +222,76 @@
     },
     "cta": "Talk to an expert before you buy",
     "ctaSoon": "Consultation booking opens soon.",
-    "shareMessage": "{{address}} · {{price}} — on Nadlan Score"
+    "shareMessage": "{{address}} · {{price}} — on Nadlan Score",
+    "demo": {
+      "title": "Demo data",
+      "body": "Listings, plans, amenities, transport and price history are fictional. Scores use an uncalibrated preview model, not verified market data."
+    },
+    "context": {
+      "unavailable": "Data not available yet.",
+      "distance": "{{value}} m away",
+      "straightLine": "Distances are straight-line estimates, not walking or driving routes."
+    },
+    "plans": {
+      "title": "City plans nearby",
+      "radius": "Plans within 1 km; planned transit contributes to the score within 800 m.",
+      "viewAll": "View plans & map",
+      "empty": "No plans found in the surveyed area.",
+      "home": "This home",
+      "select": "Select a plan to highlight its boundary on the map.",
+      "selectPlan": "Show {{name}} on the map",
+      "approvedAt": "Approved {{date}}",
+      "mapNative": "Plan boundaries in the app",
+      "mapNativeBody": "Open on iOS or Android to explore plan polygons. Plan details are available below.",
+      "disclaimer": "Plan status and proximity do not establish building rights or guarantee completion. Check official planning records before making a decision.",
+      "status": {
+        "proposed": "Proposed",
+        "deposited": "Deposited",
+        "approved": "Approved",
+        "in_execution": "In execution"
+      },
+      "type": {
+        "residential": "Residential",
+        "commercial": "Commercial",
+        "transit": "Transit",
+        "urban_renewal": "Urban renewal",
+        "public": "Public space",
+        "mixed": "Mixed use"
+      }
+    },
+    "amenities": {
+      "title": "Daily life nearby",
+      "radius": "Counts within 800 m. Distances are measured in a straight line; walking routes may be longer.",
+      "nearest": "{{name}} · {{distance}} m away",
+      "none": "None found in this survey.",
+      "categories": {
+        "supermarket": "Supermarkets",
+        "shop": "Shops",
+        "cafe": "Cafés",
+        "school": "Schools",
+        "kindergarten": "Kindergartens",
+        "park": "Parks",
+        "clinic": "Health clinics",
+        "synagogue": "Synagogues"
+      }
+    },
+    "traffic": {
+      "title": "Traffic & transportation",
+      "congestion": "Peak-hour congestion",
+      "noise": "Road noise",
+      "highway": "Highway access: {{distance}} m",
+      "noStop": "No stop recorded in this survey.",
+      "level": {
+        "low": "Low",
+        "moderate": "Moderate",
+        "heavy": "Heavy",
+        "high": "High"
+      },
+      "stops": {
+        "bus": "Nearest bus stop",
+        "train": "Nearest train station",
+        "light_rail": "Nearest light rail stop"
+      }
+    }
   }
 }

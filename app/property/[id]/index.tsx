@@ -14,6 +14,8 @@ import { PropertyDetailsCard } from '@/components/property/PropertyDetailsCard';
 import { PropertySpecs } from '@/components/property/PropertySpecs';
 import { SaveButton } from '@/components/property/SaveButton';
 import { ScoreSummaryCard } from '@/components/property/ScoreSummaryCard';
+import { AmenitiesSection, PlansSection, TrafficSection } from '@/components/property/ContextSections';
+import { DataNotice } from '@/components/property/DataNotice';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -32,8 +34,8 @@ const GALLERY_HEIGHT = 340;
 const CTA_SPACE = 112;
 
 /**
- * Listing page (spec §4.3). M2 covers photos, header, score summary, details, market
- * and the CTA. M3 adds city plans, amenities and traffic; M4 fills the mortgage card;
+ * Listing page (spec §4.3). M3 covers scoring and neighborhood context.
+ * M4 fills the mortgage card;
  * M6 wires the consultation CTA. Reachable by deep link (`nadlanscore://property/<id>`).
  */
 export default function PropertyScreen() {
@@ -126,9 +128,20 @@ export default function PropertyScreen() {
             <Text variant="caption">{t('pricePerSqm', { value: formatCurrency(pricePerSqm(property), locale) })}</Text>
           </View>
 
+          <DataNotice source={property.source} />
+
           <View className="gap-3">
             <SectionHeader title={t('score.title')} />
-            <ScoreSummaryCard score={property.score} />
+            <ScoreSummaryCard score={property.score} propertyId={property.id} />
+          </View>
+
+          <PlansSection property={property} />
+          <AmenitiesSection property={property} />
+          <TrafficSection property={property} />
+
+          <View className="gap-3">
+            <SectionHeader title={t('market.title')} />
+            <MarketCard property={property} />
           </View>
 
           <View className="gap-3">
@@ -139,11 +152,6 @@ export default function PropertyScreen() {
           <View className="gap-3">
             <SectionHeader title={t('details.title')} />
             <PropertyDetailsCard property={property} />
-          </View>
-
-          <View className="gap-3">
-            <SectionHeader title={t('market.title')} />
-            <MarketCard property={property} />
           </View>
 
           <Card tone="solar" className="gap-2">

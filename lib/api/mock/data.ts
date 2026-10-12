@@ -3,16 +3,9 @@
  * (`GET /properties?bbox=`, `GET /properties/:id`, backend-spec §10) so B2 can swap the
  * repository for Supabase without touching screens. Same seed → same listings on every run.
  */
-import { scoreGrade } from '@/lib/domain/score/grade';
-import type {
-  ComparableDeal,
-  LocalizedText,
-  Place,
-  PotentialScore,
-  PropertyDetail,
-  PropertyType,
-  SubScoreKey,
-} from '@/lib/domain/types';
+import { computeScore } from '@/lib/domain/score/compute';
+import { buildMockContext } from './context';
+import type { ComparableDeal, LocalizedText, Place, PropertyDetail, PropertyType } from '@/lib/domain/types';
 
 function mulberry32(seed: number) {
   let a = seed;
@@ -166,37 +159,6 @@ const NEIGHBORHOODS: Neighborhood[] = [
   },
 ];
 
-const HIGHLIGHTS: Record<SubScoreKey, LocalizedText[]> = {
-  plans: [
-    { he: 'תחנת רכבת קלה מתוכננת 350 מ׳ מהבית', en: 'Light rail station planned 350m away' },
-    { he: 'הבניין בתחום תוכנית פינוי בינוי מאושרת', en: 'Building is inside an approved Pinui Binui plan' },
-    { he: 'פארק שכונתי חדש מאושר בקרבת מקום', en: 'New neighborhood park approved nearby' },
-    { he: 'הבניין זכאי לתמ"א 38', en: 'Building is eligible for TAMA 38' },
-  ],
-  amenities: [
-    { he: '3 סופרמרקטים במרחק הליכה של 5 דקות', en: '3 supermarkets within a 5-minute walk' },
-    { he: 'גן ילדים ובית ספר יסודי במרחק 300 מ׳', en: 'Kindergarten and primary school 300m away' },
-    { he: 'רחוב מסחרי תוסס במרחק דקות', en: 'Busy shopping street minutes away' },
-  ],
-  traffic: [
-    { he: 'גישה מהירה לאיילון', en: 'Quick access to the Ayalon highway' },
-    { he: 'עומס כבד בשעות השיא ברחוב הראשי', en: 'Heavy peak-hour traffic on the main street' },
-    { he: '6 קווי אוטובוס בטווח 200 מ׳', en: '6 bus lines within 200m' },
-  ],
-  market: [
-    { he: 'המחיר למ״ר נמוך מהחציון בשכונה', en: 'Price per sqm is below the neighborhood median' },
-    { he: 'עלייה של 18% במחיר למ״ר ב־5 שנים', en: 'Price per sqm up 18% in 5 years' },
-    { he: 'היצע חדש מועט בשכונה', en: 'Little new supply in the neighborhood' },
-  ],
-  property: [
-    { he: 'ממ"ד וחניה צמודה', en: 'Safe room and private parking' },
-    { he: 'קומה גבוהה עם מעלית', en: 'High floor with elevator' },
-    { he: 'בניין ישן — פוטנציאל להתחדשות', en: 'Older building — renewal upside' },
-  ],
-};
-
-const WEIGHTS: Record<SubScoreKey, number> = { plans: 0.3, amenities: 0.2, traffic: 0.15, market: 0.25, property: 0.1 };
-
 const TYPE_WEIGHTS: [PropertyType, number][] = [
   ['apartment', 0.55],
   ['garden', 0.1],
@@ -219,11 +181,11 @@ const COUNT = 220;
 
 function build(now: number) {
   const rand = mulberry32(20261005);
-  const pick = <T,>(items: readonly T[]) => items[Math.floor(rand() * items.length)];
+  const pick = <T>(items: readonly T[]) => items[Math.floor(rand() * items.length)];
   const between = (min: number, max: number) => min + rand() * (max - min);
   const int = (min: number, max: number) => Math.floor(between(min, max + 1));
   const chance = (p: number) => rand() < p;
-  const weighted = <T,>(items: [T, number][]) => {
+  const weighted = <T>(items: [T, number][]) => {
     let r = rand();
     for (const [item, w] of items) {
       if ((r -= w) <= 0) return item;
@@ -237,11 +199,20 @@ function build(now: number) {
     const hood = NEIGHBORHOODS[i % NEIGHBORHOODS.length];
     const id = `p-${String(i + 1).padStart(4, '0')}`;
     const propertyType = weighted(TYPE_WEIGHTS);
-    const rooms = propertyType === 'house' ? int(5, 7) : propertyType === 'penthouse' ? int(4, 6) : pick([2, 2.5, 3, 3.5, 4, 4.5, 5]);
+    const rooms =
+      propertyType === 'house'
+        ? int(5, 7)
+        : propertyType === 'penthouse'
+          ? int(4, 6)
+          : pick([2, 2.5, 3, 3.5, 4, 4.5, 5]);
     const sizeSqm = Math.round(rooms * between(22, 30) + (propertyType === 'house' ? 60 : 0));
     const totalFloors = propertyType === 'house' ? 2 : propertyType === 'new_project' ? int(8, 30) : int(3, 9);
     const floor =
-      propertyType === 'penthouse' ? totalFloors : propertyType === 'garden' || propertyType === 'house' ? 0 : int(1, totalFloors);
+      propertyType === 'penthouse'
+        ? totalFloors
+        : propertyType === 'garden' || propertyType === 'house'
+          ? 0
+          : int(1, totalFloors);
     const buildingYear = propertyType === 'new_project' ? int(2025, 2028) : int(1935, 2022);
     const isNew = propertyType === 'new_project' || buildingYear > 2010;
     const features = {
@@ -252,7 +223,9 @@ function build(now: number) {
       storage: chance(0.4),
     };
 
-    const typeFactor = { apartment: 1, garden: 1.12, penthouse: 1.25, duplex: 1.1, house: 1.3, new_project: 1.15 }[propertyType];
+    const typeFactor = { apartment: 1, garden: 1.12, penthouse: 1.25, duplex: 1.1, house: 1.3, new_project: 1.15 }[
+      propertyType
+    ];
     const ppsqm = hood.pricePerSqm * typeFactor * between(0.85, 1.15);
     const price = Math.round((sizeSqm * ppsqm) / 10000) * 10000;
 
@@ -261,26 +234,6 @@ function build(now: number) {
       lng: Number((hood.center.lng + between(-hood.spread, hood.spread)).toFixed(6)),
     };
     const street = pick(hood.streets);
-
-    // ~8% of listings have no score yet, to exercise the "no score" UI.
-    let score: PotentialScore | undefined;
-    if (!chance(0.08)) {
-      const subScores = (Object.keys(WEIGHTS) as SubScoreKey[]).map((key) => ({
-        key,
-        value: int(30, 98),
-        weight: WEIGHTS[key],
-        highlights: [pick(HIGHLIGHTS[key])],
-      }));
-      const total = Math.round(subScores.reduce((sum, s) => sum + s.value * s.weight, 0));
-      score = {
-        total,
-        grade: scoreGrade(total),
-        confidence: pick(['high', 'high', 'medium', 'low'] as const),
-        subScores,
-        algorithmVersion: '1.0.0-mock',
-        computedAt: new Date(now - int(1, 20) * DAY).toISOString(),
-      };
-    }
 
     // A handful of brand-new listings to exercise the "new for you" badge.
     const createdAt = new Date(now - (i % 9 === 0 ? between(0.1, 2.5) : between(3, 120)) * DAY).toISOString();
@@ -306,7 +259,18 @@ function build(now: number) {
     }).sort((a, b) => b.date.localeCompare(a.date));
 
     const roomsText = String(rooms);
-    properties.push({
+    const context = buildMockContext(i, location);
+    const fiveYearChange = Number(between(0.05, 0.32).toFixed(2));
+    const year = new Date(now).getUTCFullYear();
+    const market = {
+      neighborhoodMedianPricePerSqm: hood.pricePerSqm,
+      fiveYearChange,
+      priceHistory: Array.from({ length: 6 }, (_, n) => ({
+        year: year - 5 + n,
+        pricePerSqm: Math.round((hood.pricePerSqm / (1 + fiveYearChange)) * (1 + (fiveYearChange * n) / 5)),
+      })),
+    };
+    const property: PropertyDetail = {
       id,
       source: 'mock',
       status: chance(0.03) ? 'sold' : 'active',
@@ -326,14 +290,23 @@ function build(now: number) {
         he: `דירת ${roomsText} חדרים מוארת ב${hood.name.he}, ${sizeSqm} מ״ר${features.balcony ? ' עם מרפסת' : ''}. ${features.mamad ? 'ממ"ד בדירה. ' : ''}קרובה לתחבורה ציבורית, חנויות ובתי ספר.`,
         en: `Bright ${roomsText}-room home in ${hood.name.en}, ${sizeSqm} sqm${features.balcony ? ' with a balcony' : ''}. ${features.mamad ? 'In-apartment safe room. ' : ''}Close to public transport, shops and schools.`,
       },
-      score,
       createdAt,
       comparableDeals,
-      market: {
-        neighborhoodMedianPricePerSqm: hood.pricePerSqm,
-        fiveYearChange: Number(between(0.05, 0.32).toFixed(2)),
-      },
-    });
+      market,
+      ...context,
+    };
+    // A repeatable set of unscored and partially covered listings exercises the UI.
+    property.score =
+      i % 13 === 12
+        ? undefined
+        : computeScore({
+            ...context,
+            property,
+            market,
+            comparableCount: comparableDeals.length,
+            computedAt: new Date(now).toISOString(),
+          });
+    properties.push(property);
   }
 
   const places: Place[] = [
@@ -343,7 +316,13 @@ function build(now: number) {
       const lng = hoods.reduce((s, n) => s + n.center.lng, 0) / hoods.length;
       return { id: `city-${city.en}`, kind: 'city', name: city, center: { lat, lng } };
     }),
-    ...NEIGHBORHOODS.map((n): Place => ({ id: n.id, kind: 'neighborhood', name: n.name, city: n.city, center: n.center })),
+    ...NEIGHBORHOODS.map((n): Place => ({
+      id: n.id,
+      kind: 'neighborhood',
+      name: n.name,
+      city: n.city,
+      center: n.center,
+    })),
   ];
 
   return { properties, places };

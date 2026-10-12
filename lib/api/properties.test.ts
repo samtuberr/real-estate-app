@@ -3,6 +3,7 @@ import type { Bbox } from '@/lib/domain/types';
 import { DEFAULT_REGION, inBbox, regionToBbox } from '@/lib/map/region';
 
 import { mockData } from './mock/data';
+import { computeScore } from '@/lib/domain/score/compute';
 import { getPropertiesByIds, getPropertiesInBbox, getProperty, searchPlaces } from './properties';
 
 const ISRAEL: Bbox = [34.2, 29.4, 35.9, 33.4];
@@ -28,6 +29,32 @@ describe('mock dataset', () => {
     expect(properties.some((p) => !p.score)).toBe(true);
     expect(properties.some((p) => p.status === 'sold')).toBe(true);
     expect(properties.some((p) => Date.now() - Date.parse(p.createdAt) < 3 * 24 * 3600 * 1000)).toBe(true);
+  });
+
+  it('uses the displayed context to calculate scores and exercises partial coverage', () => {
+    const { properties } = mockData();
+    expect(properties.some((p) => p.score?.confidence === 'medium')).toBe(true);
+    expect(properties.some((p) => p.score?.confidence === 'low')).toBe(true);
+    expect(properties.some((p) => p.plans?.length === 0)).toBe(true);
+    for (const p of properties) {
+      if (p.score)
+        expect(p.score).toEqual(
+          computeScore({
+            ...p,
+            property: p,
+            comparableCount: p.comparableDeals.length,
+            computedAt: p.score.computedAt,
+          }),
+        );
+      const history = p.market.priceHistory!;
+      expect(history.at(-1)!.pricePerSqm).toBe(p.market.neighborhoodMedianPricePerSqm);
+      expect(history.at(-1)!.pricePerSqm / history[0].pricePerSqm - 1).toBeCloseTo(p.market.fiveYearChange, 3);
+      for (const plan of p.plans ?? []) {
+        const ring = plan.geometry.coordinates[0];
+        expect(ring[0]).toEqual(ring.at(-1));
+        expect(plan.planNumber).toMatch(/^DEMO-/);
+      }
+    }
   });
 });
 
